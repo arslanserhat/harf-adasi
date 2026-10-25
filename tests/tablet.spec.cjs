@@ -341,6 +341,99 @@ scenario('Turkish fallback: an English-only device never speaks nine as English'
   await fill(page, [...'nine']);
 });
 
+scenario('celebration: recorded congratulations, no automatic advance, Escape and explicit Continue', async ({ page, cdp }) => {
+  await letter(page, 'a');
+  const response = await page.request.get(new URL('audio/manifest.json', page.url()).href);
+  assert.equal(response.status(), 200);
+  const { phrases } = await response.json();
+  const recordings = ['tebrikler!', 'hazırsan devam edebilirsin.'].map(phrase => {
+    assert.equal(typeof phrases[phrase], 'string', `${phrase} has a bundled Turkish recording`);
+    return new URL(`audio/${phrases[phrase]}`, page.url()).href;
+  });
+  const responses = await Promise.all([
+    ...recordings.map(url => page.waitForResponse(res => res.url() === url && [200, 206].includes(res.status()), { timeout: 15000 })),
+    match(page, 'a'),
+  ]);
+  for (const audioResponse of responses.slice(0, recordings.length)) {
+    assert.match(audioResponse.headers()['content-type'], /^audio\//, 'congratulations play through bundled audio assets');
+  }
+  const dialog = page.locator('#celebrationDialog');
+  assert.equal(await dialog.evaluate(element => element.open), true);
+  assert.equal(await page.locator('#celebrationTitle').innerText(), 'Tebrikler!');
+  assert.match(await page.locator('#celebrationContinue').innerText(), /^Devam et(?:\s*→)?$/u);
+  const firstStep = await page.locator('.steps').getAttribute('aria-label');
+  await assertNoAdvance(page);
+  assert.equal(await dialog.evaluate(element => element.open), true, 'celebration waits for the child');
+  await page.keyboard.press('Escape');
+  await dialog.waitFor({ state: 'hidden' });
+  assert.equal(await page.locator('.steps').getAttribute('aria-label'), firstStep, 'Escape closes without advancing');
+  assert.equal(await page.locator('#next').isEnabled(), true, 'dismissal retains the completed work');
+  await next(page);
+  assert.equal(await page.locator('.steps').getAttribute('aria-label'), '2. adım, toplam 3 adım');
+  await traceAll(page, cdp);
+  assert.equal(await dialog.evaluate(element => element.open), true, 'the next successful activity celebrates too');
+  await next(page);
+  await page.locator('#freePrompt').waitFor();
+  assert.equal(await dialog.evaluate(element => element.open), false);
+  assert.equal(await page.locator('.steps').getAttribute('aria-label'), '3. adım, toplam 3 adım', 'one Continue advances exactly one step');
+  assert.equal(await page.locator('#next').isEnabled(), false, 'the next exercise still requires the child to do the work');
+  await assertNoAdvance(page);
+});
+
+scenario('first grade: guided three-step adventure uses selected letters, real syllables and saved rewards', async ({ page }) => {
+  const playAdventure = async (known, requireSyllables = false) => {
+    await tap(page, 'adventure');
+    await page.locator('.lesson.adventure').waitFor();
+    assert.ok((await page.locator('#adventureTitle').innerText()).trim(), 'adventure has a story goal');
+    const assertKnown = text => {
+      assert.ok(text.length > 0, 'a learning card is not empty');
+      assert.ok([...text.toLocaleLowerCase('tr-TR')].every(character => known.has(character)), `${text} only uses selected letters`);
+    };
+    for (let step = 0; step < 3; step++) {
+      assert.equal(await page.locator('.steps').getAttribute('aria-label'), `${step + 1}. adım, toplam 3 adım`);
+      if (await page.locator('.options [data-do="match"]').count()) {
+        const target = await page.locator('.target').innerText();
+        assertKnown(target);
+        for (const option of await page.locator('.options [data-do="match"]').allTextContents()) assertKnown(option);
+        await match(page, target);
+      } else {
+        const tokens = await page.locator('#buildPrompt > span').allTextContents();
+        assert.ok(tokens.length, 'visible examples let the child assemble the new reading skill');
+        assert.equal(tokens.length, await page.locator('#bank [data-do="tile"]').count(), 'each example part has its own card');
+        for (const token of tokens) assertKnown(token);
+        for (const token of await page.locator('#bank [data-do="tile"]').allTextContents()) assertKnown(token);
+        if (requireSyllables && step === 2) {
+          assert.ok(tokens.length >= 2 && tokens.some(token => token.length > 1), 'word activity combines real syllable cards');
+        }
+        await fill(page, tokens);
+      }
+      assert.equal(await page.locator('#celebrationDialog').evaluate(element => element.open), true);
+      await assertNoAdvance(page);
+      await next(page);
+    }
+    await page.locator('.party').waitFor();
+  };
+  await home(page);
+  const initialBadges = Number(await page.locator('#badge').innerText());
+  await playAdventure(new Set(['a', 'n', 'e', 't', 'i', 'l']), true);
+  assert.equal(Number(await page.locator('#badge').innerText()), initialBadges + 1, 'completed guided adventure earns a reward');
+  await home(page);
+  assert.equal(await page.locator('.games .card').count(), 6, 'the six original games remain available');
+  await page.reload();
+  await page.locator('#ready').filter({ hasText: 'Oyun hazır' }).waitFor();
+  assert.equal(Number(await page.locator('#badge').innerText()), initialBadges + 1, 'adventure reward survives reload');
+  await tap(page, 'settings');
+  const selected = await page.locator('.settings [data-do="select-letter"][aria-pressed="true"]').evaluateAll(buttons => buttons.map(button => button.dataset.letter));
+  assert.deepEqual(new Set(selected), new Set(['a', 'n', 'e', 't', 'i', 'l']));
+  for (const selectedLetter of selected.filter(value => value !== 'a')) {
+    await tap(page, 'select-letter', `[data-letter="${selectedLetter}"]`);
+  }
+  await page.getByRole('button', { name: 'Kapat', exact: true }).tap();
+  await page.locator('.mini [data-letter="n"]').waitFor({ state: 'detached' });
+  assert.equal(await page.locator('.mini [data-letter]').count(), 1);
+  await playAdventure(new Set(['a']));
+});
+
 (async () => {
   const { chromium } = getPlaywright();
   const { server, url: localUrl } = await startServer();

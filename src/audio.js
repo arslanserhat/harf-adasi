@@ -271,6 +271,10 @@ function playEffect(name) {
   effect?.play();
 }
 
+function stopEffect(name) {
+  effects.get(name)?.stop();
+}
+
 function setMuted(value) {
   muted = Boolean(value);
   if (muted) {
@@ -303,4 +307,4 @@ export function configureAudio(options = {}) {
   if (options.volume !== undefined) setVolume(options.volume);
 }
 
-export const audio = { unlock, speak, stopSpeech, setMuted, setVolume, playEffect, preload, voiceStatus };
+export const audio = { unlock, speak, stopSpeech, setMuted, setVolume, playEffect, stopEffect, preload, voiceStatus };

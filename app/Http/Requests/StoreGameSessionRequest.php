@@ -17,7 +17,7 @@ class StoreGameSessionRequest extends FormRequest
         return [
             'completion_id' => ['required', 'uuid'],
             'mode' => ['required', Rule::in([
-                'letters', 'syllables', 'words', 'reading', 'sentences', 'numbers',
+                'letters', 'syllables', 'words', 'reading', 'sentences', 'numbers', 'adventures',
             ])],
             'item_key' => ['required', 'string', 'max:120'],
             'duration_seconds' => ['required', 'integer', 'min:0', 'max:3600'],

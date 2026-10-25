@@ -2,9 +2,9 @@
 
 Bu kurulum yalnızca Harf Adası içindir. Ayrı Compose proje adı, ayrı `harf-storage` volume'u ve yalnızca `127.0.0.1:8086` üzerinde açılan port kullanılır. Mevcut etahlil veya başka bir uygulamanın dosyaları, veritabanı, volume'ları ve Nginx vhost'u değiştirilmez.
 
-## Bu oturumda doğrulanan erişim durumu
+## Erişim durumu
 
-Hedef VPS erişim notlarında belirtilmiş olsa da bu çalışma ortamından SSH için kullanılan TCP proxy'sine bağlantı reddedildi; ayrıca kullanılabilir SSH agent anahtarı yok. Bu nedenle bu oturumda VPS'ye bağlanılmadı veya Laravel yayını yapılmadı. Dockerfile ve betiklerin bulunması, container build'i veya canlı yayın kanıtı değildir. Sunucuya ait erişim bilgileri depoda tutulmaz.
+Önceki bulut ortamındaki SSH kısıtı kullanıcının mevcut bilgisayarında geçerli değildir. Bu bilgisayardan ayrı Harf Adası Laravel yayını yapılmış ve canlı etkileşimli tur doğrulanmıştır. Sunucuya özgü adres, port, sertifika yenilemesi ve yedekleme ayrıntıları özel operasyon notlarında tutulur. Dockerfile ve betiklerin bulunması tek başına yeni bir yayın kanıtı değildir; aşağıdaki canlı doğrulamalar her güncellemede tekrarlanır. Sunucuya ait özel erişim bilgileri depoda tutulmaz.
 
 ## Gereksinimler ve ilk kurulum
 

@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 class GameProgressController extends Controller
 {
     public const MODES = [
-        'letters', 'syllables', 'words', 'reading', 'sentences', 'numbers', 'adventures',
+        'letters', 'syllables', 'words', 'reading', 'sentences', 'numbers', 'adventures', 'island',
     ];
 
     public static function browserId(Request $request): string
@@ -27,11 +27,18 @@ class GameProgressController extends Controller
         $sessions = GameSession::query()
             ->where('browser_id', self::browserId($request))
             ->orderBy('id')
-            ->get(['mode', 'item_key', 'duration_seconds', 'writing_reviewed']);
+            ->get(['id', 'mode', 'item_key', 'duration_seconds', 'writing_reviewed']);
 
         // Repeating an exercise is useful practice, but never grants a second
         // distinct completion. A reviewed writing attempt is kept if present.
-        $items = $sessions->groupBy(fn (GameSession $session) => $session->mode.'\0'.$session->item_key)
+        $items = $sessions->groupBy(function (GameSession $session): string {
+            $key = $session->mode === 'island'
+                ? preg_replace('/:(beach|garden|station|cat|dog|bird)$/', '', $session->item_key)
+                : $session->item_key;
+
+            return $session->mode.'\0'.$key;
+        })
+            ->sortBy(fn ($attempts) => $attempts->last()->id)
             ->map(function ($attempts): array {
                 $latest = $attempts->last();
 

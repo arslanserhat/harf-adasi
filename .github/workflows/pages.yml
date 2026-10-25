@@ -32,6 +32,7 @@ jobs:
         run: |
           node tests/audio-unit.cjs
           node tests/adventures-unit.cjs
+          node tests/island-unit.cjs
           npm run build
           test ! -f dist/index.php
       - uses: actions/configure-pages@v5

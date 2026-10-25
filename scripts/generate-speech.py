@@ -74,6 +74,14 @@ PROMPTS = [
     "Adım adım, birlikte.",
     "Hazırsan devam edebilirsin.",
     "Birlikte kontrol edelim.",
+    "Bir dost seç.",
+    "Paketi dinle ve bul.",
+    "Şimdi paketi mama kabına koy.",
+    "Dostunla top oyna.",
+    "Vagonlar hazır. Treni gönder.",
+    "Doğru taşa basarak ilerle.",
+    "Sandığı aç.",
+    "Hazineni koyacağın yeri seç.",
 ]
 
 # Edge's Turkish standard voices do not expose an expressive/cheerful style.
@@ -81,6 +89,14 @@ PROMPTS = [
 # applying faster delivery to letters, syllables and words being learned.
 # Values are (spoken wording, synthesis rate); no browser pitch manipulation.
 WARM_PROMPTS = {
+    "Bir dost seç.": ("Hadi! Bir dost seç.", "+3%"),
+    "Paketi dinle ve bul.": ("Paketi dinle. Hadi, birlikte bulalım!", "+2%"),
+    "Şimdi paketi mama kabına koy.": ("Buldun! Şimdi paketi mama kabına koy.", "+3%"),
+    "Dostunla top oyna.": ("Şimdi, dostunla top oynayalım!", "+4%"),
+    "Vagonlar hazır. Treni gönder.": ("Vagonlar hazır! Hadi, treni gönder!", "+4%"),
+    "Doğru taşa basarak ilerle.": ("Dinle, doğru taşı bul. Hadi, ilerleyelim!", "+2%"),
+    "Sandığı aç.": ("Şifre tamam! Hadi, sandığı aç!", "+4%"),
+    "Hazineni koyacağın yeri seç.": ("Hazineni buldun! Şimdi, koyacağın yeri seç.", "+4%"),
     "Merhaba! Birlikte oynayalım.": ("Merhaba! Hadi, birlikte oynayalım!", "+4%"),
     "Merhaba! Harf Adası'na hoş geldin.": ("Merhaba! Harf Adası'na hoş geldin! Hadi, birlikte oynayalım.", "+4%"),
     "Alparslan ile adım adım öğrenelim.": ("Hadi! Alparslan ile adım adım öğrenelim.", "+3%"),

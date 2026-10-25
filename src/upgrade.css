@@ -1,4 +1,10 @@
 /* Shared Laravel / Pages interface. Illustrations are local, licensed 3D PNGs. */
+.island-continuation{margin:24px 0;padding:24px;background:#e6f3ed;border:3px solid white;border-radius:28px;text-align:center}
+.island-continuation h2{color:#326959;margin:0 0 8px}.island-continuation p{margin:0 0 20px}
+.island-continuation-games{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.island-continuation-games button{min-height:174px;min-width:0;padding:18px 10px;border:2px solid #c4decf;border-radius:24px;background:#fffdf3;box-shadow:0 5px #b6cfbe;flex-direction:column}
+.island-continuation-games span{font-size:50px}.island-continuation-games .illustration{width:72px;height:72px}.island-continuation-games b{font-size:19px}.island-continuation-games small{font-size:12px}
+@media(max-width:600px){.island-continuation{padding:18px 12px}.island-continuation-games{grid-template-columns:1fr}.island-continuation-games button{min-height:125px}}
 :root{--ink:#39435f;--blue:#7967cc;--line:#dedbf0}
 body{background-color:#f5f6fc;background-image:radial-gradient(#dedaee 1.4px,transparent 1.6px);background-size:32px 32px;color:var(--ink)}
 button{display:inline-flex;align-items:center;justify-content:center;gap:8px}

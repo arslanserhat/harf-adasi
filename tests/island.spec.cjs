@@ -347,7 +347,8 @@ scenario('Laravel restore race: a delayed old snapshot cannot move a freshly pla
     assert.equal(await page.locator('[data-world-placement="garden"]').count(), 1);
     assert.equal(await page.locator('[data-world-placement="beach"]').count(), 0);
     await start(app, 'treasure');
-    assert.equal(await showTarget(app), 'el', 'the next mission still follows the completed local trip');
+    assert.equal(await page.locator('.island-mission-heading .island-kicker').innerText(), 'Renkli bahçe sandığı', 'the next mission still follows the completed local trip');
+    assert.equal(await showTarget(app), 'e', 'the new el path begins with its first sound');
   } finally {
     release();
   }
@@ -381,6 +382,9 @@ scenario('Laravel reset failure: an unsuccessful DELETE preserves the completed 
   assert.equal(deleteRequests, 1, 'the failed reset is attempted once');
   if (await page.locator('#dialog[open]').count()) await press(app, page.getByRole('button', { name: 'Kapat', exact: true }));
   await page.locator('.games').waitFor();
+  // Native dialog close queues the home refresh; let that refresh paint before
+  // targeting its hero so the real touch is not sent to a replaced element.
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   await enter(app);
   assert.deepEqual(await world(page), before, 'failed deletion retains the current world');
   await reloadMap(app);
@@ -404,12 +408,14 @@ scenario('Laravel reset failure: an unsuccessful DELETE preserves the completed 
       for (const item of cases.filter(value => !process.env.TEST_FILTER || value.name.includes(process.env.TEST_FILTER))) {
         const app = await open(browser, process.env.TEST_BASE_URL || localUrl, viewport);
         app.page.setDefaultTimeout(10000);
-        if (item.backendOnly && !await app.page.evaluate(() => document.querySelector('meta[name="harf-backend"]')?.content === 'laravel')) {
+        const backend = await app.page.evaluate(() => document.querySelector('meta[name="harf-backend"]')?.content === 'laravel');
+        if (item.backendOnly && !backend) {
           skipped++;
           console.log(`SKIP ${viewport.width}x${viewport.height} ${item.name}: Laravel backend required`);
           await app.context.close();
           continue;
         }
+        if (backend) await app.page.waitForLoadState('networkidle');
         runs++;
         try {
           await item.run(app);

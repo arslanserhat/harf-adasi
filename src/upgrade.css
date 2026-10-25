@@ -23,6 +23,17 @@ button svg.lucide{width:19px;height:19px;flex-shrink:0;stroke-width:2.25}
 .journey-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0 8px}
 .journey-summary div{display:flex;align-items:center;gap:12px;background:#fff;border:2px solid #ebe9f4;border-radius:20px;padding:15px 18px;box-shadow:0 4px #e4e3ee}
 .journey-summary b{font-size:25px;color:#7761b4}.journey-summary span{font-size:12px;font-weight:700;color:#68758d}.journey-summary .illustration{width:38px;height:38px}
+.adventure-preview,.adventure-story{display:flex;align-items:center;gap:20px;margin:24px 0;padding:22px;background:linear-gradient(120deg,#fff5d8,#eef7ed);border:3px solid white;border-radius:24px;box-shadow:0 5px #d7dfc9}
+.adventure-preview h2,.adventure-story h2{margin:0 0 6px;font-size:23px;color:#647449;line-height:1.25}
+.adventure-preview p,.adventure-story p{margin:0 0 7px;font-size:15px;color:#5e6d5c}
+.adventure-preview small{display:block;font-size:12px;color:#687253;overflow-wrap:anywhere}
+.adventure-preview-picture,.adventure-scene{flex-shrink:0;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;width:100px;min-height:100px;gap:5px;border-radius:25px;background:#ffffffa8;font-size:42px}
+.adventure-preview-picture .illustration,.adventure-scene>.illustration{width:67px;height:67px}
+.adventure-scene span{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#e9e3cf;color:#ad9c76;font-size:20px}
+.adventure-scene span.built{background:#d7eccd}.adventure-scene span .illustration{width:19px;height:19px}
+.adventure-story{margin:0 0 20px;padding:16px}.adventure-story h2{font-size:21px}.adventure-story p{font-size:14px;margin:0}
+.adventure .bank .tile{min-width:72px}.adventure .slots .slot{min-width:72px}
+@media(max-width:600px){.adventure-preview,.adventure-story{gap:12px;padding:15px}.adventure-preview h2,.adventure-story h2{font-size:19px}.adventure-preview p,.adventure-story p{font-size:13px}.adventure-preview-picture,.adventure-scene{width:72px;min-height:85px}.adventure-preview-picture .illustration,.adventure-scene>.illustration{width:52px;height:52px}}
 .writing-focus #main{background:#f3f4fb}.writing-focus .teacher .face .illustration{width:40px;height:40px}
 .writing-focus .pad{background:#fffefa}.writing-focus .exercise{box-shadow:0 4px #d2d2e5}.writing-focus .tool{box-shadow:0 3px #c6c8df}
 .writing-focus .next-row .btn{display:inline-flex}.writing-focus .feedback{overflow:hidden;text-overflow:ellipsis}

@@ -22,12 +22,12 @@ class GameProgressTest extends TestCase
         ], $overrides);
     }
 
-    public function test_empty_progress_has_all_six_modes_and_no_child_identity(): void
+    public function test_empty_progress_has_all_modes_and_no_child_identity(): void
     {
         $this->getJson('/api/progress')->assertOk()
             ->assertJsonPath('totals.sessions', 0)
             ->assertJsonPath('totals.completed_items', 0)
-            ->assertJsonCount(6, 'by_mode')
+            ->assertJsonCount(7, 'by_mode')
             ->assertJsonMissingPath('browser_id');
     }
 
@@ -45,6 +45,20 @@ class GameProgressTest extends TestCase
             ->assertJsonPath('totals.completed_items', 1)
             ->assertJsonPath('totals.practice_seconds', 42)
             ->assertJsonPath('completed_items.0.writing_reviewed', true);
+    }
+
+    public function test_guided_adventure_progress_is_saved_without_a_writing_claim(): void
+    {
+        $this->postJson('/api/sessions', $this->completion([
+            'mode' => 'adventures',
+            'item_key' => 'adventure:nane-bahcesi',
+            'writing_reviewed' => null,
+        ]))->assertCreated();
+
+        $this->getJson('/api/progress')->assertOk()
+            ->assertJsonPath('by_mode.adventures.completed_items', 1)
+            ->assertJsonPath('completed_items.0.item_key', 'adventure:nane-bahcesi')
+            ->assertJsonPath('completed_items.0.writing_reviewed', null);
     }
 
     public function test_repeating_a_word_counts_practice_but_one_distinct_item(): void

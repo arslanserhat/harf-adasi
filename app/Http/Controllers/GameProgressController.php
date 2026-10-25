@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 class GameProgressController extends Controller
 {
     public const MODES = [
-        'letters', 'syllables', 'words', 'reading', 'sentences', 'numbers',
+        'letters', 'syllables', 'words', 'reading', 'sentences', 'numbers', 'adventures',
     ];
 
     public static function browserId(Request $request): string

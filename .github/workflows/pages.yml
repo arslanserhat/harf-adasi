@@ -31,6 +31,7 @@ jobs:
       - name: Ses mantığını ve üretim derlemesini denetle
         run: |
           node tests/audio-unit.cjs
+          node tests/adventures-unit.cjs
           npm run build
           test ! -f dist/index.php
       - uses: actions/configure-pages@v5

@@ -107,10 +107,17 @@ async function open(browser, url, viewport = { width: 768, height: 1024 }, optio
   return { context, page, cdp, errors };
 }
 
+async function dismissCelebration(page) {
+  if (await page.locator('#celebrationDialog[open]').count()) {
+    await page.locator('#celebrationReturn').tap();
+  }
+}
 async function tap(page, action, attrs = '') {
+  await dismissCelebration(page);
   await page.locator(`[data-do="${action}"]${attrs}`).first().tap();
 }
 async function home(page) {
+  await dismissCelebration(page);
   const headerLogo = page.getByRole('button', { name: 'Harf Adası ana sayfa', exact: true });
   const writing = await page.locator('body').evaluate(body => body.classList.contains('writing-focus'));
   const logo = !writing && await headerLogo.isVisible() ? headerLogo : page.locator('#main .bar [data-do="home"]').first();
@@ -145,7 +152,8 @@ async function match(page, value) {
 }
 async function next(page) {
   assert.equal(await page.locator('#next').isEnabled(), true);
-  await page.locator('#next').tap();
+  const celebration = await page.locator('#celebrationDialog[open]').count();
+  await page.locator(celebration ? '#celebrationContinue' : '#next').tap();
 }
 async function assertNoAdvance(page) {
   const label = await page.locator('.steps').getAttribute('aria-label');

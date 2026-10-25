@@ -372,7 +372,7 @@ scenario('celebration: recorded congratulations, no automatic advance, Escape an
   assert.equal(await page.locator('.steps').getAttribute('aria-label'), '2. adım, toplam 3 adım');
   await traceAll(page, cdp);
   assert.equal(await dialog.evaluate(element => element.open), true, 'the next successful activity celebrates too');
-  await page.locator('#celebrationContinue').tap();
+  await next(page);
   await page.locator('#freePrompt').waitFor();
   assert.equal(await dialog.evaluate(element => element.open), false);
   assert.equal(await page.locator('.steps').getAttribute('aria-label'), '3. adım, toplam 3 adım', 'one Continue advances exactly one step');

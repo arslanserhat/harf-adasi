@@ -107,9 +107,23 @@ async function open(browser, url, viewport = { width: 768, height: 1024 }, optio
   return { context, page, cdp, errors };
 }
 
+async function tapCelebrationControl(page, selector) {
+  const control = page.locator(selector);
+  await control.waitFor({ state: 'visible' });
+  const box = await control.boundingBox();
+  assert.ok(box, 'celebration control is visible');
+  // A human contact phase emulates a real tap and verifies pointer-release
+  // activation when Chromium omits the compatibility click after drawing.
+  const cdp = await page.context().newCDPSession(page);
+  await touch(cdp, 'touchStart', [{ x: box.x + box.width / 2, y: box.y + box.height / 2, id: 1 }]);
+  await page.waitForTimeout(80);
+  await touch(cdp, 'touchEnd', []);
+  await cdp.detach();
+  await page.locator('#celebrationDialog').waitFor({ state: 'hidden' });
+}
 async function dismissCelebration(page) {
   if (await page.locator('#celebrationDialog[open]').count()) {
-    await page.locator('#celebrationReturn').tap();
+    await tapCelebrationControl(page, '#celebrationReturn');
   }
 }
 async function tap(page, action, attrs = '') {
@@ -153,7 +167,8 @@ async function match(page, value) {
 async function next(page) {
   assert.equal(await page.locator('#next').isEnabled(), true);
   const celebration = await page.locator('#celebrationDialog[open]').count();
-  await page.locator(celebration ? '#celebrationContinue' : '#next').tap();
+  if (celebration) await tapCelebrationControl(page, '#celebrationContinue');
+  else await page.locator('#next').tap();
 }
 async function assertNoAdvance(page) {
   const label = await page.locator('.steps').getAttribute('aria-label');

@@ -4,6 +4,98 @@ import './celebration.css';
 
 let dialog;
 let activeCelebration = null;
+let trailingPointerClick = null;
+const clearControlGestures = [];
+
+function rememberPointerEnd(event) {
+  trailingPointerClick = {
+    pointerId: event.pointerId,
+    x: event.clientX,
+    y: event.clientY,
+    expires: Date.now() + 900,
+  };
+}
+
+function bindActivation(control, activate) {
+  let gesture = null;
+  const clearGesture = () => {
+    const previous = gesture;
+    gesture = null;
+    if (previous) {
+      try { control.releasePointerCapture(previous.pointerId); } catch { /* Touch Events have no pointer capture. */ }
+    }
+  };
+  clearControlGestures.push(clearGesture);
+  const start = event => {
+    if (!dialog.open || !activeCelebration || event.isPrimary === false) return;
+    event.preventDefault();
+    clearGesture();
+    gesture = {
+      pointerId: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+      moved: false,
+      celebration: activeCelebration,
+    };
+    try { control.setPointerCapture(event.pointerId); } catch { /* Older Safari uses the Touch Events branch below. */ }
+    control.focus({ preventScroll: true });
+  };
+  const move = event => {
+    if (!gesture || event.pointerId !== gesture.pointerId) return;
+    if (Math.hypot(event.clientX - gesture.x, event.clientY - gesture.y) > 12) gesture.moved = true;
+  };
+  const finish = (event, cancelled = false) => {
+    if (!gesture || event.pointerId !== gesture.pointerId) return;
+    const completed = gesture;
+    clearGesture();
+    event.preventDefault();
+    rememberPointerEnd(event);
+    const bounds = control.getBoundingClientRect();
+    const inside = event.clientX >= bounds.left && event.clientX <= bounds.right
+      && event.clientY >= bounds.top && event.clientY <= bounds.bottom;
+    const moved = completed.moved || Math.hypot(event.clientX - completed.x, event.clientY - completed.y) > 12;
+    if (!cancelled && !moved && inside && stillOpen(completed.celebration)) activate();
+  };
+
+  if ('PointerEvent' in window) {
+    control.addEventListener('pointerdown', event => {
+      if (event.pointerType === 'touch' || event.pointerType === 'pen') start(event);
+    });
+    control.addEventListener('pointermove', move);
+    control.addEventListener('pointerup', event => finish(event));
+    control.addEventListener('pointercancel', event => finish(event, true));
+    control.addEventListener('lostpointercapture', clearGesture);
+  } else {
+    const touchEvent = (event, touch) => ({
+      pointerId: touch.identifier,
+      clientX: touch.clientX,
+      clientY: touch.clientY,
+      preventDefault: () => event.preventDefault(),
+    });
+    control.addEventListener('touchstart', event => {
+      if (event.touches.length === 1) start(touchEvent(event, event.changedTouches[0]));
+      else clearGesture();
+    }, { passive: false });
+    control.addEventListener('touchmove', event => {
+      for (const touch of Array.from(event.changedTouches)) move(touchEvent(event, touch));
+    }, { passive: true });
+    for (const type of ['touchend', 'touchcancel']) {
+      control.addEventListener(type, event => {
+        for (const touch of Array.from(event.changedTouches)) finish(touchEvent(event, touch), type === 'touchcancel');
+      }, { passive: false });
+    }
+  }
+
+  control.addEventListener('click', event => {
+    // Touch/pen activates on release: Safari may omit its compatibility click
+    // immediately after drawing. Keyboard and mouse keep native click behavior.
+    if (event.pointerType === 'touch' || event.pointerType === 'pen' || event.sourceCapabilities?.firesTouchEvents) {
+      event.preventDefault();
+      return;
+    }
+    activate();
+  });
+}
 
 function ensureDialog() {
   if (dialog) return dialog;
@@ -34,8 +126,23 @@ function ensureDialog() {
     </div>`;
   document.body.appendChild(dialog);
 
-  dialog.querySelector('#celebrationReturn').addEventListener('click', hideCelebration);
-  dialog.querySelector('#celebrationContinue').addEventListener('click', () => {
+  // A fresh gesture or keyboard activation is always allowed. Only the one
+  // trailing click from our handled release is blocked, even after navigation.
+  document.addEventListener('pointerdown', () => { trailingPointerClick = null; }, true);
+  if (!('PointerEvent' in window)) document.addEventListener('touchstart', () => { trailingPointerClick = null; }, { capture: true, passive: true });
+  document.addEventListener('click', event => {
+    const previous = trailingPointerClick;
+    if (!previous || event.detail === 0) return;
+    if (Date.now() > previous.expires) { trailingPointerClick = null; return; }
+    const samePointer = event.pointerId === previous.pointerId;
+    const samePlace = Math.hypot(event.clientX - previous.x, event.clientY - previous.y) <= 30;
+    if (!samePointer && !samePlace) return;
+    trailingPointerClick = null;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }, true);
+  bindActivation(dialog.querySelector('#celebrationReturn'), hideCelebration);
+  bindActivation(dialog.querySelector('#celebrationContinue'), () => {
     const celebration = activeCelebration;
     if (!dialog.open || !celebration || celebration.continued) return;
     celebration.continued = true;
@@ -128,6 +235,7 @@ export function showCelebration({ message, itemText, final = false, effects = tr
 export function hideCelebration() {
   const celebration = activeCelebration;
   activeCelebration = null;
+  for (const clearGesture of clearControlGestures) clearGesture();
   if (celebration) {
     for (const timer of celebration.timers) clearTimeout(timer);
     celebration.timers.clear();

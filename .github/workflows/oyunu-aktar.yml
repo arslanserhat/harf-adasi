@@ -1,0 +1,50 @@
+name: Harf Adasi dosyalarini aktar
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/oyunu-aktar.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  aktar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dogrulanmis oyun dosyasini al
+        run: |
+          python3 - <<'PY'
+          import hashlib, pathlib, urllib.request, re, json
+          source = 'https://raw.githubusercontent.com/arslanserhat/pytest/256623d4373b541cfd06b2dcdf516114a512c4c1/index.html'
+          data = urllib.request.urlopen(source, timeout=30).read()
+          blob = hashlib.sha1(b'blob ' + str(len(data)).encode() + b'\0' + data).hexdigest()
+          assert blob == '5f5b9ec70643fe89aabaf8c021e415db87e6b3a1', 'Kaynak dosyanin surumu beklenenden farkli'
+          html = data.decode('utf-8')
+          assert len(data) > 30000 and '<script' in html and '</html>' in html, 'Oyun dosyasi eksik'
+          pathlib.Path('index.html').write_bytes(data)
+          pathlib.Path('.nojekyll').write_text('')
+          scripts = re.findall(r'<script\b[^>]*>([\s\S]*?)</script>', html, re.I)
+          assert scripts, 'JavaScript bulunamadi'
+          pathlib.Path('/tmp/game-scripts.json').write_text(json.dumps(scripts))
+          print('Oyun aktarildi:', len(data), 'bayt; git blob:', blob)
+          PY
+      - name: JavaScript sozdizimini kontrol et
+        run: |
+          node - <<'JS'
+          const fs = require('fs');
+          const vm = require('vm');
+          const scripts = JSON.parse(fs.readFileSync('/tmp/game-scripts.json', 'utf8'));
+          scripts.forEach((script, i) => new vm.Script(script, {filename: 'game-' + i + '.js'}));
+          console.log(scripts.length + ' JavaScript blogu sozdizimi kontrolunden gecti.');
+          JS
+      - name: Oyunu ana dala kaydet
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html .nojekyll
+          if ! git diff --cached --quiet; then
+            git commit -m 'Harf Adasi: tam oyun HTML ve statik yayin dosyasi'
+            git push origin HEAD:main
+          fi
+          echo 'Oyun dosyasi main dalina aktarildi.' >> "$GITHUB_STEP_SUMMARY"

@@ -23,24 +23,20 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - name: Gömülü JavaScript sözdizimini denetle
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Ses mantığını ve üretim derlemesini denetle
         run: |
-          node - <<'JS'
-          const fs = require('node:fs');
-          const vm = require('node:vm');
-          const html = fs.readFileSync('index.html', 'utf8');
-          const scripts = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)];
-          if (!scripts.length) throw new Error('Oyun JavaScript içermiyor.');
-          for (const [, script] of scripts) new vm.Script(script);
-          JS
+          node tests/audio-unit.cjs
+          npm run build
+          test ! -f dist/index.php
       - uses: actions/configure-pages@v5
-      - name: Yalnızca oyun dosyalarını hazırla
-        run: |
-          mkdir _site
-          cp index.html .nojekyll _site/
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: _site
+          path: dist
       - name: GitHub Pages'e yayımla
         id: deployment
         uses: actions/deploy-pages@v4

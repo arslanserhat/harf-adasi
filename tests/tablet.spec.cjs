@@ -61,6 +61,47 @@ scenario('pointer cancellation rejects guide then permits a new valid attempt', 
   await traceAll(page, cdp);
 });
 
+scenario('writing studio: native touch gestures cannot scroll; controls fit and navigation releases the lock', async ({ page, cdp }) => {
+  await letter(page, 'ı');
+  await match(page);
+  await next(page);
+  assert.equal(await page.locator('body').evaluate(body => body.classList.contains('writing-focus')), true);
+  assert.equal(await page.locator('body').evaluate(body => getComputedStyle(body).position), 'fixed');
+  for (const selector of ['#pad', '#next', '.lesson .bar [data-do="home"]', '.tools [data-do="clear"]']) {
+    const visible = await page.locator(selector).first().evaluate(element => {
+      const rect = element.getBoundingClientRect();
+      return rect.top >= -1 && rect.left >= -1 && rect.bottom <= innerHeight + 1 && rect.right <= innerWidth + 1;
+    });
+    assert.equal(visible, true, `${selector} stays reachable without scrolling`);
+  }
+  const guard = await page.locator('#pad').evaluate(svg => {
+    const point = svg.createSVGPoint(); point.x = 200; point.y = 150;
+    const screen = point.matrixTransform(svg.getScreenCTM());
+    const makeTouch = (x, y) => new Touch({ identifier: 901, target: svg, clientX: x, clientY: y, pageX: x + scrollX, pageY: y + scrollY });
+    const start = makeTouch(screen.x, screen.y);
+    svg.dispatchEvent(new TouchEvent('touchstart', { bubbles: true, cancelable: true, touches: [start], targetTouches: [start], changedTouches: [start] }));
+    const moved = makeTouch(screen.x, screen.y - 80);
+    const move = new TouchEvent('touchmove', { bubbles: true, cancelable: true, touches: [moved], targetTouches: [moved], changedTouches: [moved] });
+    svg.dispatchEvent(move);
+    svg.dispatchEvent(new TouchEvent('touchend', { bubbles: true, cancelable: true, touches: [], targetTouches: [], changedTouches: [moved] }));
+    return { prevented: move.defaultPrevented, scroll: scrollY };
+  });
+  assert.equal(guard.prevented, true, 'non-passive Touch Events guard prevents Safari-style page panning');
+  const viewport = page.viewportSize();
+  await page.setViewportSize({ width: viewport.height, height: viewport.width });
+  await page.waitForTimeout(250);
+  await traceAll(page, cdp);
+  assert.equal(await page.evaluate(() => scrollY), guard.scroll, 'rotation and drawing do not move the document');
+  await next(page);
+  assert.equal(await page.locator('body').evaluate(body => body.classList.contains('writing-focus')), true, 'free writing keeps the same drawing lock');
+  await ink(page, cdp);
+  assert.equal(await page.locator('#next').isEnabled(), false, 'free ink still needs parent review');
+  await home(page);
+  assert.equal(await page.locator('body').evaluate(body => body.classList.contains('writing-focus')), false);
+  assert.notEqual(await page.locator('body').evaluate(body => getComputedStyle(body).position), 'fixed');
+  assert.equal(await page.locator('.card').count(), 6);
+});
+
 scenario('regression slots: empty taps preserve work, filled taps undo from the tapped position', async ({ page }) => {
   await catalog(page, 'words');
   await tap(page, 'word', '[data-text="anne"]');
@@ -245,7 +286,8 @@ scenario('numbers: count 0/10, trace 0–9, build 100 with two distinct zero car
 scenario('blocked storage and unavailable speech keep all game controls usable', async ({ page, cdp }) => {
   await letter(page, 'i');
   await tap(page, 'speak');
-  assert.match(await page.locator('#toast').innerText(), /desteklenmiyor/);
+  // Bundled Turkish recordings remain available when browser speech APIs do not.
+  assert.equal(await page.locator('#error').isVisible(), false);
   await match(page, 'i');
   await next(page);
   await traceAll(page, cdp);
@@ -254,6 +296,49 @@ scenario('blocked storage and unavailable speech keep all game controls usable',
   await next(page);
   assert.equal(await page.locator('.party').isVisible(), true);
   assert.match(await page.locator('#toast').innerText(), /kaydedilemiyor/);
+});
+
+scenario('Turkish audio: nine and every word have bundled recordings; celebration and sound effects resolve', async ({ page }) => {
+  await catalog(page, 'words');
+  const words = await page.locator('.grid [data-do="word"]').evaluateAll(cards => cards.map(card => card.dataset.text));
+  assert.ok(words.length >= 80, 'the complete word catalog is retained');
+  const result = await page.evaluate(async () => {
+    const response = await fetch(new URL('audio/manifest.json', location.href));
+    return { status: response.status, manifest: await response.json() };
+  });
+  assert.equal(result.status, 200);
+  const phrases = result.manifest.phrases;
+  assert.ok(phrases && typeof phrases === 'object', 'audio manifest declares the Turkish phrase library');
+  const normalize = text => text.normalize('NFC').toLocaleLowerCase('tr-TR').replace(/["'“”‘’]/g, '').replace(/\s+/g, ' ').trim();
+  for (const word of words) {
+    assert.equal(typeof phrases[normalize(word)], 'string', `recorded Turkish pronunciation: ${word}`);
+  }
+  assert.ok(phrases.nine, 'nine does not depend on an English default browser voice');
+  const celebration = Object.keys(phrases).find(text => /tebrikler.*başardın/.test(text));
+  assert.ok(celebration, 'spoken congratulation is included');
+  const filenames = [phrases.nine, phrases[celebration], 'fx-tap.wav', 'fx-correct.wav', 'fx-retry.wav', 'fx-complete.wav'];
+  for (const filename of filenames) {
+    assert.equal(/^(https?:|\/\/|\.\.)/.test(filename), false, 'sound assets are bundled with the game');
+  }
+  const files = await page.evaluate(async filenames => Promise.all(filenames.map(async filename => {
+    const response = await fetch(new URL(`audio/${filename}`, location.href));
+    return { filename, status: response.status, type: response.headers.get('content-type'), bytes: (await response.arrayBuffer()).byteLength };
+  })), filenames);
+  for (const file of files) {
+    assert.equal(file.status, 200, `${file.filename} exists`);
+    assert.match(file.type, /^audio\//, `${file.filename} has an audio MIME type`);
+    assert.ok(file.bytes > 100, `${file.filename} is not empty or an HTML fallback`);
+  }
+});
+
+scenario('Turkish fallback: an English-only device never speaks nine as English', async ({ page }) => {
+  await catalog(page, 'words');
+  await tap(page, 'word', '[data-text="nine"]');
+  await tap(page, 'speak');
+  await page.waitForTimeout(1500);
+  assert.deepEqual(await page.evaluate(() => window.__testSpeechCalls), [], 'English voice is never used as a fallback');
+  assert.equal(await page.locator('#next').isEnabled(), false, 'audio cannot bypass the task');
+  await fill(page, [...'nine']);
 });
 
 (async () => {
@@ -271,10 +356,13 @@ scenario('blocked storage and unavailable speech keep all game controls usable',
       args: ['--no-sandbox', '--disable-dev-shm-usage'],
       ...(process.env.TEST_PROXY_SERVER ? { proxy: { server: process.env.TEST_PROXY_SERVER } } : {}),
     });
-    for (const viewport of [{ width: 768, height: 1024 }, { width: 1024, height: 768 }]) {
+    for (const viewport of [{ width: 768, height: 1024 }, { width: 1024, height: 768 }].filter(v => !process.env.TEST_VIEWPORT || process.env.TEST_VIEWPORT === `${v.width}x${v.height}`)) {
       for (const item of cases) {
         if (process.env.TEST_FILTER && !item.name.includes(process.env.TEST_FILTER)) continue;
-        const app = await open(browser, url, viewport, { unavailableApis: item.name.startsWith('blocked storage') });
+        const app = await open(browser, url, viewport, {
+          unavailableApis: item.name.startsWith('blocked storage'),
+          englishOnlyVoice: item.name.startsWith('Turkish fallback'),
+        });
         app.page.setDefaultTimeout(10000);
         runs++;
         try {

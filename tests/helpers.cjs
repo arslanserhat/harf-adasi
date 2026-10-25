@@ -14,14 +14,56 @@ function getPlaywright() {
 }
 
 async function startServer() {
-  const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'));
+  const buildDirectory = path.resolve(__dirname, '..', 'dist');
+  if (!fs.existsSync(path.join(buildDirectory, 'index.html'))) {
+    throw new Error('Built app is missing. Run npm run build before the tablet tests.');
+  }
+  const directory = fs.realpathSync(buildDirectory);
+  const types = {
+    '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
+    '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8',
+    '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp',
+    '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.mp3': 'audio/mpeg',
+    '.wav': 'audio/wav', '.ogg': 'audio/ogg', '.woff2': 'font/woff2',
+    '.woff': 'font/woff', '.avif': 'image/avif', '.ico': 'image/x-icon',
+    '.webmanifest': 'application/manifest+json', '.txt': 'text/plain; charset=utf-8',
+  };
   const server = http.createServer((req, res) => {
-    if (!['/harf-adasi/', '/harf-adasi/index.html'].includes(req.url?.split('?')[0])) {
+    if (!['GET', 'HEAD'].includes(req.method)) {
+      res.writeHead(405, { Allow: 'GET, HEAD' }).end();
+      return;
+    }
+    let pathname;
+    try { pathname = decodeURIComponent(new URL(req.url, 'http://127.0.0.1').pathname); }
+    catch { res.writeHead(400).end('Bad URL'); return; }
+    const prefix = '/harf-adasi/';
+    if (!pathname.startsWith(prefix) || pathname.includes('\\') || pathname.includes('\0')) {
       res.writeHead(404).end('Not found');
       return;
     }
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
-    res.end(html);
+    const relative = pathname.slice(prefix.length) || 'index.html';
+    const filename = path.resolve(directory, relative);
+    if (!filename.startsWith(directory + path.sep)) {
+      res.writeHead(404).end('Not found');
+      return;
+    }
+    let stat;
+    try {
+      if (!fs.realpathSync(filename).startsWith(directory + path.sep)) {
+        res.writeHead(404).end('Not found'); return;
+      }
+      stat = fs.statSync(filename);
+    }
+    catch { res.writeHead(404).end('Not found'); return; }
+    if (!stat.isFile()) { res.writeHead(404).end('Not found'); return; }
+    res.writeHead(200, {
+      'Content-Type': types[path.extname(filename)] || 'application/octet-stream',
+      'Content-Length': stat.size,
+      'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff',
+    });
+    if (req.method === 'HEAD') res.end();
+    else fs.createReadStream(filename).pipe(res);
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   return { server, url: `http://127.0.0.1:${server.address().port}/harf-adasi/` };
@@ -36,11 +78,29 @@ async function open(browser, url, viewport = { width: 768, height: 1024 }, optio
       Object.defineProperty(window, 'SpeechSynthesisUtterance', { configurable: true, value: undefined });
     });
   }
+  if (options.englishOnlyVoice) {
+    await context.route(/\/audio\/manifest\.json(?:\?.*)?$/, route => route.fulfill({
+      status: 200, contentType: 'application/json', body: JSON.stringify({ phrases: {} }),
+    }));
+    await context.addInitScript(() => {
+      window.__testSpeechCalls = [];
+      const synthesis = {
+        getVoices: () => [{ lang: 'en-US', name: 'English voice', default: true, localService: true, voiceURI: 'english-test' }],
+        speak: utterance => window.__testSpeechCalls.push({ text: utterance.text, lang: utterance.voice?.lang ?? utterance.lang }),
+        cancel() {}, pause() {}, resume() {}, addEventListener() {}, removeEventListener() {},
+      };
+      Object.defineProperty(window, 'speechSynthesis', { configurable: true, value: synthesis });
+      Object.defineProperty(window, 'SpeechSynthesisUtterance', { configurable: true, value: class {
+        constructor(text) { this.text = text; }
+      } });
+    });
+  }
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
   await page.goto(url);
+  assert.equal(page.url(), new URL(url).href, 'test loads the requested origin/path without a local fallback');
   await page.locator('#ready').filter({ hasText: 'Oyun hazır' }).waitFor();
   assert.equal(await page.locator('#error').isVisible(), false);
   const cdp = await context.newCDPSession(page);
@@ -51,11 +111,22 @@ async function tap(page, action, attrs = '') {
   await page.locator(`[data-do="${action}"]${attrs}`).first().tap();
 }
 async function home(page) {
-  const logo = page.getByRole('button', { name: 'Harf Adası ana sayfa', exact: true });
+  const headerLogo = page.getByRole('button', { name: 'Harf Adası ana sayfa', exact: true });
+  const writing = await page.locator('body').evaluate(body => body.classList.contains('writing-focus'));
+  const logo = !writing && await headerLogo.isVisible() ? headerLogo : page.locator('#main .bar [data-do="home"]').first();
   await logo.scrollIntoViewIfNeeded();
   // Let the mobile compositor settle a programmatic scroll after a drawn gesture.
   await page.waitForTimeout(350);
-  await logo.tap();
+  // A human tap has a short contact phase; zero-duration taps immediately
+  // after a long injected stroke can be suppressed by Chromium's gesture queue.
+  const box = await logo.boundingBox();
+  assert.ok(box, 'home control is visible');
+  const cdp = await page.context().newCDPSession(page);
+  const point = { x: box.x + box.width / 2, y: box.y + box.height / 2, id: 1 };
+  await touch(cdp, 'touchStart', [point]);
+  await page.waitForTimeout(80);
+  await touch(cdp, 'touchEnd', []);
+  await cdp.detach();
   await page.locator('.games').waitFor();
 }
 async function catalog(page, view) {
@@ -96,13 +167,14 @@ async function stroke(cdp, points, { cancel = false } = {}) {
 async function paths(page) {
   await page.locator('#pad').scrollIntoViewIfNeeded();
   return page.locator('#pad').evaluate(svg => {
-    const rect = svg.getBoundingClientRect();
     return [...svg.querySelectorAll('[data-target]')].map(path => {
+      const matrix = path.getScreenCTM();
+      if (!matrix) throw new Error('Drawing guide has no screen transform');
       const length = path.getTotalLength();
       const count = Math.max(1, Math.ceil(length / 10));
       return Array.from({ length: count + 1 }, (_, i) => {
-        const point = path.getPointAtLength(length * i / count);
-        return { x: rect.left + point.x / 400 * rect.width, y: rect.top + point.y / 340 * rect.height };
+        const point = path.getPointAtLength(length * i / count).matrixTransform(matrix);
+        return { x: point.x, y: point.y };
       });
     });
   });
@@ -118,12 +190,16 @@ async function traceAll(page, cdp) {
 }
 async function ink(page, cdp) {
   await page.locator('#pad').scrollIntoViewIfNeeded();
-  const rect = await page.locator('#pad').boundingBox();
-  await stroke(cdp, [
-    { x: rect.x + rect.width * .3, y: rect.y + rect.height * .3 },
-    { x: rect.x + rect.width * .5, y: rect.y + rect.height * .6 },
-    { x: rect.x + rect.width * .65, y: rect.y + rect.height * .3 },
-  ]);
+  const points = await page.locator('#pad').evaluate(svg => {
+    const matrix = svg.getScreenCTM();
+    if (!matrix) throw new Error('Writing pad has no screen transform');
+    return [[120, 102], [200, 204], [260, 102]].map(([x, y]) => {
+      const point = svg.createSVGPoint(); point.x = x; point.y = y;
+      const screen = point.matrixTransform(matrix);
+      return { x: screen.x, y: screen.y };
+    });
+  });
+  await stroke(cdp, points);
 }
 async function review(page, cdp) {
   await ink(page, cdp);

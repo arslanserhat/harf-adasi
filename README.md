@@ -1,41 +1,59 @@
 # Harf Adası
 
-Alparslan ile Türkçe okuma, yazma ve sayı alıştırmaları. Mevcut oyun tek `index.html` içinde çalışır; üretimde framework, paket kurulumu, hesap veya sunucu gerektirmez.
+Türkçe okuma, yazma ve sayı alıştırmaları için Laravel 13 uygulaması. Altı mevcut oyun bölümü korunur; aynı oyun arayüzü hem Laravel sunucusunda hem GitHub Pages için üretilen statik sürümde çalışır.
 
-## Oyunun bölümleri
+## Bu sürüm
 
-- 29 Türkçe harfin büyük/küçük biçimleri: eşleştirme, iz sürme, serbest yazma.
-- 48 hece ve 80 kelime: sıralı harf kartları ve birlikte yazma.
-- Kelimeyi okuyup resmini bulma; 17 kısa cümlede kelime sıralama.
-- 0–9 rakam çizimi, 0–10 nesne sayma ve 0–100 sayı oluşturma.
-- Mola, ebeveynin harf seçimi, çıkartmalar ve tarayıcıda ilerleme kaydı.
+- **Yazı stüdyosu:** tablet ekranına sığan defter, yazarken sayfa kaydırma kilidi, Safari için pasif olmayan dokunma koruması, çoklu parmak ayrımı ve yön değişimine uyum.
+- **Türkçe anlatım:** EmelNeural ile üretilmiş 362 yerel MP3, 491 metin eşleştirmesi. `nine` dahil kelimeler cihazın İngilizce sesine bırakılmaz; yedek ses yalnızca gerçekten Türkçe bir ses varsa kullanılır.
+- **Geri bildirim:** dört yumuşak oyun efekti, ses düzeyi/efekt ayarları, sesli “Tebrikler, başardın!” ve azaltılmış hareket tercihine uyan kutlama.
+- **Görseller:** platform emojileri yerine yerel 3D çizimler, Lucide arayüz ikonları, çıkartmalar ve öğrenme özeti.
+- **Laravel ilerlemesi:** tarayıcı oturumuna ayrılmış kayıtlar, doğrulanan JSON API, CSRF, tekrar gönderimde çift kayıt oluşturmayan tamamlama ve mevcut tarayıcıya ait sıfırlama.
 
-Sonraki adıma çocuk **Devam** ile geçer. Serbest el yazısı otomatik olarak doğru sayılmaz; ebeveynin birlikte kontrol etmesi gerekir. Türkçe seslendirme cihazın konuşma motoruna bağlıdır. İlerleme yalnızca aynı tarayıcıda saklanır; depolama veya ses kullanılamasa da oyun devam eder.
+29 harfin büyük/küçük biçimi, 48 hece, 80 kelime, okuma-resim eşleştirme, 17 kısa cümle, 0–9 çizimi, 0–10 nesne sayma ve 0–100 sayı oluşturma içerir. Çocuk **Devam** demeden sonraki adıma geçilmez. Serbest yazı otomatik doğru sayılmaz; ebeveyn birlikte kontrol eder.
 
-## Yerel açılış
+## Geliştirme
 
-```sh
-python3 -m http.server 4173
-```
-
-Tarayıcıda `http://localhost:4173/` adresini açın.
-
-## Tablet regresyon testleri
-
-Node.js 20+ gerekir. Paketler yalnızca geliştirme/test içindir:
+Node.js 22+, Composer ve kilitli PHP paketleri için PHP 8.4.1+ gerekir. Docker kurulumunda PHP 8.5 kullanılır.
 
 ```sh
+composer install
+cp .env.example .env
+php artisan key:generate
+touch database/database.sqlite
+php artisan migrate
 npm ci
-npx playwright install --with-deps chromium
-npm test
+npm run build:laravel
+php artisan serve
 ```
 
-Sistem Chromium'u varsa testler onu kullanır; `CHROMIUM_EXECUTABLE_PATH` ile değiştirilebilir. Testler kendi yerel HTTP sunucusunu açar ve `/harf-adasi/` alt yolunda 768×1024 ve 1024×768 görünümünde Chromium'un gerçek dokunma girdisini taklit eder. `TEST_BASE_URL` ile aynı testler canlı siteye yönlendirilebilir; `TEST_FILTER` senaryo adına göre sınırlar. Başarısızlık görüntüleri `test-results/` içine yazılır.
+`http://localhost:8000/` adresini açın. Ön yüz geliştirme sunucusu için ayrı terminalde `npm run dev` kullanılabilir.
 
-Bu emülasyon fiziksel iPad testi veya sesin duyulduğu anlamına gelmez. WebKit için gereken sistem kütüphaneleri bu çalışma ortamında eksik olduğundan WebKit testi yapılamadı.
+## Kontroller
 
-## GitHub Pages
+```sh
+php artisan test
+npm run build
+node tests/audio-unit.cjs
+node tests/tablet.spec.cjs
+```
 
-Depo ayarlarında **Settings → Pages → Build and deployment → Source: GitHub Actions** seçilir. `main` güncellenince `pages.yml` yalnızca `index.html` ve `.nojekyll` dosyalarını yayımlar. Testler ve devir notu yayın artefaktına dahil edilmez. Eski tek seferlik aktarım workflow'u kaldırılmıştır; oyun başka bir depodan yeniden alınmaz.
+PHP testleri SQLite `:memory:` kullanır. Tarayıcı testleri `dist/` çıktısını `/harf-adasi/` altında 768×1024 ve 1024×768 dokunmatik Chromium görünümünde çalıştırır. `CHROMIUM_EXECUTABLE_PATH` ile tarayıcı seçilir; `TEST_FILTER` senaryoları sınırlar. `TEST_BASE_URL` canlı adresi hedefler ve yerel adrese geri dönmez. Fiziksel iPad, WebKit ve insan tarafından dinlenmiş ses kalitesi bu otomasyonla kanıtlanmaz.
 
-Başarılı workflow tek başına oynanabilirlik kanıtı değildir. Teslim için deployment kaydına ek olarak gerçek HTTPS sayfası açılmalı, oyun içeriği ve en az bir etkileşimli turun tamamlanması doğrulanmalıdır.
+## Yayın
+
+`npm run build` statik Pages çıktısını `dist/` içine, `npm run build:laravel` PHP sunucusunun Vite varlıklarını `public/build/` içine hazırlar. Pages artefaktında PHP giriş dosyası veya Laravel sunucu kodu bulunmaz. PHP API ve sunucu veritabanı GitHub Pages'te çalışmaz; statik sürüm tarayıcı kaydını kullanır.
+
+VPS kurulumu, kalıcı SQLite volume'u ve ayrı uygulama portu için [yayın belgesi](docs/deploy.md); API için [backend belgesi](docs/backend-api.md) kullanılır. Mevcut e-Tahlil uygulaması üzerinde değişiklik yapılmaz. HTTPS yayınını tamamlandı saymak için deployment kaydına ek olarak gerçek adreste etkileşimli bir oyun turu doğrulanmalıdır.
+
+## Ses ve görsel kaynakları
+
+Çalışan oyunun ses üretim servisine ihtiyacı yoktur; MP3 ve WAV dosyaları yerel olarak sunulur. Geliştirmede ses paketini yenilemek için:
+
+```sh
+python -m pip install -r scripts/requirements-audio.txt
+python scripts/generate-speech.py
+python scripts/download-illustrations.py
+```
+
+Ses üreteci kayıtları önbelleğe alır ve TLS doğrulamasını açık tutar. Dört efekt bu proje için dalga senteziyle üretildi. 112 görsel, [Microsoft Fluent Emoji 3D](https://github.com/microsoft/fluentui-emoji) koleksiyonundan MIT lisansıyla gelir; lisans kopyası `public/illustrations/LICENSE.microsoft.txt` içindedir. Howler, canvas-confetti, Lucide, Vite ve Laravel paket sürümleri kilit dosyalarındadır.

@@ -1,0 +1,22 @@
+name: harf-adasi
+
+services:
+  app:
+    image: harf-adasi:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env.production
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${HARF_PORT:-8086}:80"
+    volumes:
+      - harf-storage:/app/storage
+    # The application runs as www-data; this changes only its network namespace.
+    sysctls:
+      net.ipv4.ip_unprivileged_port_start: "0"
+    stop_grace_period: 30s
+
+volumes:
+  harf-storage:

@@ -1,0 +1,14 @@
+# Optional managed-build override. Session CA files are BuildKit secret mounts,
+# never part of the image. Ordinary VPS builds do not need this override.
+services:
+  app:
+    build:
+      secrets:
+        - proxy_ca
+        - ca_bundle
+
+secrets:
+  proxy_ca:
+    file: ${HARF_PROXY_CA_FILE:?Set HARF_PROXY_CA_FILE to the supplied proxy CA path}
+  ca_bundle:
+    file: ${HARF_CA_BUNDLE_FILE:?Set HARF_CA_BUNDLE_FILE to the system CA bundle path}

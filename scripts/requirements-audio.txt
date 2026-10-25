@@ -1,0 +1,2 @@
+# Development-time asset generation only; the deployed static game needs no Python.
+edge-tts==7.3.1

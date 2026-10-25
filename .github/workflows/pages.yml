@@ -1,0 +1,46 @@
+name: Harf Adası · GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Gömülü JavaScript sözdizimini denetle
+        run: |
+          node - <<'JS'
+          const fs = require('node:fs');
+          const vm = require('node:vm');
+          const html = fs.readFileSync('index.html', 'utf8');
+          const scripts = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)];
+          if (!scripts.length) throw new Error('Oyun JavaScript içermiyor.');
+          for (const [, script] of scripts) new vm.Script(script);
+          JS
+      - uses: actions/configure-pages@v5
+      - name: Yalnızca oyun dosyalarını hazırla
+        run: |
+          mkdir _site
+          cp index.html .nojekyll _site/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: GitHub Pages'e yayımla
+        id: deployment
+        uses: actions/deploy-pages@v4

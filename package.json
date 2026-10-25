@@ -1,0 +1,9 @@
+{
+  "name": "harf-adasi",
+  "version": "3.0.0",
+  "private": true,
+  "description": "Harf Adası statik oyun ve tablet tarayıcı regresyon testleri",
+  "scripts": { "test": "node tests/tablet.spec.cjs" },
+  "devDependencies": { "playwright": "1.57.0" },
+  "engines": { "node": ">=20" }
+}

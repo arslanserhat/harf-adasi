@@ -27,7 +27,7 @@ class GameProgressTest extends TestCase
         $this->getJson('/api/progress')->assertOk()
             ->assertJsonPath('totals.sessions', 0)
             ->assertJsonPath('totals.completed_items', 0)
-            ->assertJsonCount(7, 'by_mode')
+            ->assertJsonCount(8, 'by_mode')
             ->assertJsonMissingPath('browser_id');
     }
 
@@ -59,6 +59,81 @@ class GameProgressTest extends TestCase
             ->assertJsonPath('by_mode.adventures.completed_items', 1)
             ->assertJsonPath('completed_items.0.item_key', 'adventure:nane-bahcesi')
             ->assertJsonPath('completed_items.0.writing_reviewed', null);
+    }
+
+    public function test_island_world_survives_repeated_attempts_and_stays_in_its_browser(): void
+    {
+        $payload = $this->completion([
+            'mode' => 'island',
+            'item_key' => 'island:care-a',
+            'writing_reviewed' => null,
+        ]);
+        $this->postJson('/api/sessions', $payload)->assertCreated();
+        $this->postJson('/api/sessions', $payload)->assertOk()
+            ->assertJsonPath('duplicate', true);
+        $this->postJson('/api/sessions', array_replace($payload, [
+            'completion_id' => (string) Str::uuid(),
+        ]))->assertCreated();
+
+        $this->getJson('/api/progress')->assertOk()
+            ->assertJsonPath('by_mode.island.sessions', 2)
+            ->assertJsonPath('by_mode.island.completed_items', 1)
+            ->assertJsonPath('completed_items.0.item_key', 'island:care-a')
+            ->assertJsonPath('completed_items.0.writing_reviewed', null);
+
+        $this->deleteJson('/api/progress')->assertOk();
+        $this->getJson('/api/progress')->assertOk()
+            ->assertJsonPath('by_mode.island.completed_items', 0);
+    }
+
+    public function test_moving_a_treasure_keeps_one_reward_and_restores_latest_placement(): void
+    {
+        foreach (['beach', 'garden'] as $place) {
+            $this->postJson('/api/sessions', $this->completion([
+                'mode' => 'island',
+                'item_key' => 'island:treasure-an:'.$place,
+                'writing_reviewed' => null,
+            ]))->assertCreated();
+        }
+
+        $this->getJson('/api/progress')->assertOk()
+            ->assertJsonPath('by_mode.island.sessions', 2)
+            ->assertJsonPath('by_mode.island.completed_items', 1)
+            ->assertJsonPath('completed_items.0.item_key', 'island:treasure-an:garden')
+            ->assertJsonPath('completed_items.0.writing_reviewed', null);
+    }
+
+    public function test_server_restore_orders_world_missions_by_the_latest_attempt(): void
+    {
+        foreach (['island:train-anne', 'island:train-nane', 'island:train-anne'] as $key) {
+            $this->postJson('/api/sessions', $this->completion([
+                'mode' => 'island',
+                'item_key' => $key,
+                'writing_reviewed' => null,
+            ]))->assertCreated();
+        }
+
+        $this->getJson('/api/progress')->assertOk()
+            ->assertJsonPath('by_mode.island.completed_items', 2)
+            ->assertJsonPath('completed_items.0.item_key', 'island:train-nane')
+            ->assertJsonPath('completed_items.1.item_key', 'island:train-anne')
+            ->assertJsonMissingPath('completed_items.0.id');
+    }
+
+    public function test_care_companion_choice_survives_restore_without_an_extra_reward(): void
+    {
+        foreach (['dog', 'cat'] as $companion) {
+            $this->postJson('/api/sessions', $this->completion([
+                'mode' => 'island',
+                'item_key' => 'island:care-a:'.$companion,
+                'writing_reviewed' => null,
+            ]))->assertCreated();
+        }
+
+        $this->getJson('/api/progress')->assertOk()
+            ->assertJsonPath('by_mode.island.sessions', 2)
+            ->assertJsonPath('by_mode.island.completed_items', 1)
+            ->assertJsonPath('completed_items.0.item_key', 'island:care-a:cat');
     }
 
     public function test_repeating_a_word_counts_practice_but_one_distinct_item(): void

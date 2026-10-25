@@ -10,7 +10,7 @@ export async function resetServerProgress() {
 
 export async function syncCompletion(game) {
   if (!enabled || !csrf) return;
-  const modes = { letter: 'letters', digit: 'numbers', count: 'numbers', number: 'numbers', syllable: 'syllables', word: 'words', sentence: 'sentences', reading: 'reading', adventure: 'adventures' };
+  const modes = { letter: 'letters', digit: 'numbers', count: 'numbers', number: 'numbers', syllable: 'syllables', word: 'words', sentence: 'sentences', reading: 'reading', adventure: 'adventures', island: 'island' };
   game.completionId ||= crypto.randomUUID();
   try {
     const response = await fetch('/api/sessions', {

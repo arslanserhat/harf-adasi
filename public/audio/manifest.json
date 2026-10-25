@@ -89,6 +89,11 @@
       "rate": "-1%",
       "spoken": "Olur böyle! Bir daha deneyelim. Acelemiz yok."
     },
+    "bir dost seç.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+3%",
+      "spoken": "Hadi! Bir dost seç."
+    },
     "birlikte kontrol edelim.": {
       "voice": "tr-TR-EmelNeural",
       "rate": "+2%",
@@ -108,6 +113,16 @@
       "voice": "tr-TR-EmelNeural",
       "rate": "+1%",
       "spoken": "Bir bakalım! Bu kelime hangi resmi anlatıyor?"
+    },
+    "dostunla top oyna.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+4%",
+      "spoken": "Şimdi, dostunla top oynayalım!"
+    },
+    "doğru taşa basarak ilerle.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+2%",
+      "spoken": "Dinle, doğru taşı bul. Hadi, ilerleyelim!"
     },
     "ellerini dinlendir. hazır olunca devam edelim.": {
       "voice": "tr-TR-EmelNeural",
@@ -143,6 +158,11 @@
       "voice": "tr-TR-EmelNeural",
       "rate": "+6%",
       "spoken": "Harika! Doğru cevabı buldun!"
+    },
+    "hazineni koyacağın yeri seç.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+4%",
+      "spoken": "Hazineni buldun! Şimdi, koyacağın yeri seç."
     },
     "hazır olduğunda başlayabilirsin.": {
       "voice": "tr-TR-EmelNeural",
@@ -189,6 +209,16 @@
       "rate": "+4%",
       "spoken": "Merhaba! Harf Adası'na hoş geldin! Hadi, birlikte oynayalım."
     },
+    "paketi dinle ve bul.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+2%",
+      "spoken": "Paketi dinle. Hadi, birlikte bulalım!"
+    },
+    "sandığı aç.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+4%",
+      "spoken": "Şifre tamam! Hadi, sandığı aç!"
+    },
     "sarı noktadan başla, çizginin izini sür.": {
       "voice": "tr-TR-EmelNeural",
       "rate": "-1%",
@@ -229,6 +259,11 @@
       "rate": "+6%",
       "spoken": "Tebrikler! Birlikte başardık! Adım adım ilerliyorsun."
     },
+    "vagonlar hazır. treni gönder.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+4%",
+      "spoken": "Vagonlar hazır! Hadi, treni gönder!"
+    },
     "yeni bir çıkartma kazandın!": {
       "voice": "tr-TR-EmelNeural",
       "rate": "+6%",
@@ -248,6 +283,11 @@
       "voice": "tr-TR-EmelNeural",
       "rate": "+5%",
       "spoken": "Çıkartman seni bekliyor! Hadi bakalım!"
+    },
+    "şimdi paketi mama kabına koy.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+3%",
+      "spoken": "Buldun! Şimdi paketi mama kabına koy."
     },
     "şimdi sıra sende.": {
       "voice": "tr-TR-EmelNeural",
@@ -425,6 +465,7 @@
     "bir daha bakalım. yukarıdaki işarete dikkat et.": "voice-daec7cf63b3334ed7a44.mp3",
     "bir daha deneyelim.": "voice-f8640826477397f94d08.mp3",
     "bir daha deneyelim. acelemiz yok.": "voice-2141f47f74d8eedd71ea.mp3",
+    "bir dost seç.": "voice-64001485844ff1393905.mp3",
     "birlikte kontrol edelim.": "voice-d1bcb711a8e20f5d2d24.mp3",
     "birlikte kontrol ettiniz. hazırsan devam edebilirsin.": "voice-6cac7456f3be8627dd71.mp3",
     "bisiklet": "voice-8ddb39e76c645b7cb1d0.mp3",
@@ -453,6 +494,8 @@
     "doksan yedi": "voice-2b5e09c043ba4dab9fbc.mp3",
     "doksan üç": "voice-e8cce81018df30d0987f.mp3",
     "dokuz": "voice-cd9d04ee56b620f10e7a.mp3",
+    "dostunla top oyna.": "voice-907fbff2ff1aafdfb5f7.mp3",
+    "doğru taşa basarak ilerle.": "voice-40adb5549ff8ddc9fa74.mp3",
     "dört": "voice-4097894dc1a91afdb2d0.mp3",
     "e": "voice-b55adce42908c3a1af20.mp3",
     "e harfi": "voice-079ad42963a0a04e2aa4.mp3",
@@ -503,6 +546,7 @@
     "harika! doğru cevap.": "voice-ff08a693896cbe02383f.mp3",
     "harika, doğru cevap!": "voice-ff08a693896cbe02383f.mp3",
     "havuç": "voice-a858cc797835537f517d.mp3",
+    "hazineni koyacağın yeri seç.": "voice-84c91931b9584e2b5f2b.mp3",
     "hazır olduğunda başlayabilirsin.": "voice-d3e26eaf057d065e430f.mp3",
     "hazırsan devam edebilirsin.": "voice-7978922d6500f6a38ba3.mp3",
     "he harfini bul.": "voice-8ee81e4e022d0da68bbf.mp3",
@@ -631,6 +675,7 @@
     "p": "voice-8726d679c37d362eef74.mp3",
     "p harfi": "voice-30cc297090366afa880a.mp3",
     "p harfini bul.": "voice-7a767e384834a1f43bc4.mp3",
+    "paketi dinle ve bul.": "voice-67c4685fc2996d7f2bbe.mp3",
     "pe harfini bul.": "voice-7a767e384834a1f43bc4.mp3",
     "peynir": "voice-a93661ece5f6fb4ab256.mp3",
     "r": "voice-2bf1b4dd374a31daa0bb.mp3",
@@ -647,6 +692,7 @@
     "sa": "voice-e329de91f1f838d9f6cb.mp3",
     "saat": "voice-d23fffcdc40f7161995f.mp3",
     "sandalye": "voice-e0ce4b7df9ce569450a2.mp3",
+    "sandığı aç.": "voice-babd8bafd0776ba86efd.mp3",
     "sarı noktadan başla, çizginin izini sür.": "voice-dc9d1c8cae4d8a880aab.mp3",
     "sarı noktadan başlayalım.": "voice-5f3ce21b4d2f06b1bc16.mp3",
     "sarı noktadan başlayıp çizginin izini yeniden deneyelim.": "voice-d883eea2c0bf0bb37bb2.mp3",
@@ -692,6 +738,7 @@
     "v": "voice-e8a41bcef1c2d4679c51.mp3",
     "v harfi": "voice-850037dba6ffab93d462.mp3",
     "v harfini bul.": "voice-35cde2740af29a7769e0.mp3",
+    "vagonlar hazır. treni gönder.": "voice-22f5938b51b2c48e6c86.mp3",
     "ve harfini bul.": "voice-35cde2740af29a7769e0.mp3",
     "y": "voice-6343bd67bf65dfc4ebf8.mp3",
     "y harfi": "voice-e10597c3bba25d269bdc.mp3",
@@ -763,6 +810,7 @@
     "şapka": "voice-19bb0562b62d1477920c.mp3",
     "şe harfini bul.": "voice-02e27553b59d58eb8fae.mp3",
     "şemsiye": "voice-e64357c6678ad9114b93.mp3",
+    "şimdi paketi mama kabına koy.": "voice-594f297e69eb3435fd22.mp3",
     "şimdi sıra sende.": "voice-154a823584623179d70e.mp3"
   }
 }

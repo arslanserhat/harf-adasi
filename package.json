@@ -7,7 +7,7 @@
     "dev": "vite --mode laravel --host 0.0.0.0",
     "build": "vite build",
     "build:laravel": "vite build --mode laravel",
-    "test": "npm run build && node tests/audio-unit.cjs && node tests/adventures-unit.cjs && node tests/tablet.spec.cjs",
+    "test": "npm run build && node tests/audio-unit.cjs && node tests/adventures-unit.cjs && node tests/island-unit.cjs && node tests/island.spec.cjs && node tests/tablet.spec.cjs",
     "dev:static": "vite --host 0.0.0.0"
   },
   "devDependencies": {

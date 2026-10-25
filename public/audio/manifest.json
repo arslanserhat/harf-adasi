@@ -2,11 +2,265 @@
   "voice": "tr-TR-EmelNeural",
   "locale": "tr-TR",
   "rate": "-5%",
+  "delivery_profile": "warm-prompts",
+  "delivery_overrides": {
+    "adım adım, birlikte.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+2%",
+      "spoken": "Adım adım. Birlikte!"
+    },
+    "aferin! çok güzel çalıştın.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+6%",
+      "spoken": "Aferin! Çok güzel çalıştın!"
+    },
+    "alparslan annesine küçük bir kart hazırlıyor. kartın üstüne anne yazmak için üç küçük görevimiz var.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Alparslan annesine küçük bir kart hazırlıyor. Kartın üstüne anne yazmak için üç küçük görevimiz var."
+    },
+    "alparslan bahçedeki saksı için bir nane etiketi arıyor. harfi bul, heceyi yap, etiketi tamamla.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Alparslan bahçedeki saksı için bir nane etiketi arıyor. Harfi bul, heceyi yap, etiketi tamamla."
+    },
+    "alparslan el resmini tamamladı. resmin altına el yazan kartı birlikte yerleştirelim.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Alparslan el resmini tamamladı. Resmin altına el yazan kartı birlikte yerleştirelim."
+    },
+    "alparslan ile adım adım öğrenelim.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+3%",
+      "spoken": "Hadi! Alparslan ile adım adım öğrenelim."
+    },
+    "alparslan meyve sepetine bir elma etiketi hazırlıyor. önce harfi bulalım, sonra kartları birleştirelim.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Alparslan meyve sepetine bir elma etiketi hazırlıyor. Önce harfi bulalım, sonra kartları birleştirelim."
+    },
+    "alparslan ninesine bir resim götürecek. resmin isim kartını harf ve hece kartlarıyla birlikte hazırlayalım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Alparslan ninesine bir resim götürecek. Resmin isim kartını harf ve hece kartlarıyla birlikte hazırlayalım."
+    },
+    "alparslan çiftlikteki atın resmine bir isim kartı koyacak. harfi bulup at kartını hazırlayalım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Alparslan çiftlikteki atın resmine bir isim kartı koyacak. Harfi bulup at kartını hazırlayalım."
+    },
+    "alparslan üç küçük kart hazırlıyor. bildiğin harfleri bulup kendi kartını tamamlayalım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Alparslan üç küçük kart hazırlıyor. Bildiğin harfleri bulup kendi kartını tamamlayalım."
+    },
+    "aynısını buldun! hazırsan devam edebilirsin.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+5%",
+      "spoken": "Buldun! Harika! Hazırsan, devam edelim."
+    },
+    "aşağıya yaz. bitirince birlikte kontrol edin.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+0%",
+      "spoken": "Şimdi sen yaz. Bitirince, birlikte bakalım."
+    },
+    "bahçedeki arının isim kartı kaybolmuş. alparslan ile yeni kartın harflerini ve hecelerini bulalım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Bahçedeki arının isim kartı kaybolmuş. Alparslan ile yeni kartın harflerini ve hecelerini bulalım."
+    },
+    "bahçedeki lalenin isim kartı eksik. alparslan ile harfleri ve heceleri birleştirip kartı hazırlayalım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Bahçedeki lalenin isim kartı eksik. Alparslan ile harfleri ve heceleri birleştirip kartı hazırlayalım."
+    },
+    "bir daha bakalım. yukarıdaki işarete dikkat et.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-1%",
+      "spoken": "Bir daha bakalım. Acelemiz yok. Aynısı hangisi?"
+    },
+    "bir daha deneyelim.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+0%",
+      "spoken": "Hadi, bir daha deneyelim."
+    },
+    "bir daha deneyelim. acelemiz yok.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-1%",
+      "spoken": "Olur böyle! Bir daha deneyelim. Acelemiz yok."
+    },
+    "birlikte kontrol edelim.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+2%",
+      "spoken": "Hadi, birlikte bakalım!"
+    },
+    "birlikte kontrol ettiniz. hazırsan devam edebilirsin.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+3%",
+      "spoken": "Birlikte kontrol ettiniz! Hazırsan, devam edelim."
+    },
+    "bitirdiğinde yazdım, birlikte bakalım düğmesine dokun.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+0%",
+      "spoken": "Bitirdiğinde, Yazdım, birlikte bakalım düğmesine dokun."
+    },
+    "bu kelime hangi resmi anlatıyor?": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Bir bakalım! Bu kelime hangi resmi anlatıyor?"
+    },
+    "ellerini dinlendir. hazır olunca devam edelim.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-2%",
+      "spoken": "Ellerini dinlendir. Hazır olduğunda, yine birlikte oynarız."
+    },
+    "elmaları say. kaç tane var?": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+2%",
+      "spoken": "Hadi, elmaları sayalım! Kaç tane var?"
+    },
+    "emek verdin, tamamladın!": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+6%",
+      "spoken": "Emek verdin, tamamladın! Harika!"
+    },
+    "güzel, şimdi sıradaki parçayı seç.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+2%",
+      "spoken": "Güzel! Şimdi sıradaki parçayı seç."
+    },
+    "harika! başardın.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+6%",
+      "spoken": "Harika! Başardın!"
+    },
+    "harika! doğru cevap.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+6%",
+      "spoken": "Harika! Doğru cevabı buldun!"
+    },
+    "harika, doğru cevap!": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+6%",
+      "spoken": "Harika! Doğru cevabı buldun!"
+    },
+    "hazır olduğunda başlayabilirsin.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+2%",
+      "spoken": "Hazır olduğunda, birlikte başlayalım!"
+    },
+    "hazırsan devam edebilirsin.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+3%",
+      "spoken": "Hazırsan, birlikte devam edelim!"
+    },
+    "kartlara sırayla dokun, boşlukları doldur.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+2%",
+      "spoken": "Hadi, kartları birleştirelim! Sırayla dokun, boşlukları doldur."
+    },
+    "kaç tane elma var?": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+0%",
+      "spoken": "Birlikte bakalım. Kaç tane elma var?"
+    },
+    "kedinin mama kabına bir etiket gerekiyor. alparslan ile iki ma hecesini yan yana getirelim.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Kedinin mama kabına bir etiket gerekiyor. Alparslan ile iki ma hecesini yan yana getirelim."
+    },
+    "kelime ve resim eşleşti!": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+5%",
+      "spoken": "Buldun! Kelimeyle resim eşleşti!"
+    },
+    "küçük bir mola verelim.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-2%",
+      "spoken": "Biraz dinlenelim mi? Küçük bir mola verelim."
+    },
+    "merhaba! birlikte oynayalım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+4%",
+      "spoken": "Merhaba! Hadi, birlikte oynayalım!"
+    },
+    "merhaba! harf adası'na hoş geldin.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+4%",
+      "spoken": "Merhaba! Harf Adası'na hoş geldin! Hadi, birlikte oynayalım."
+    },
+    "sarı noktadan başla, çizginin izini sür.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-1%",
+      "spoken": "Sarı noktadan başla. Şimdi, çizginin izinden gidelim."
+    },
+    "sarı noktadan başlayalım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-1%",
+      "spoken": "Sarı noktayı bulalım. Buradan başlayalım."
+    },
+    "sarı noktadan başlayıp çizginin izini yeniden deneyelim.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-1%",
+      "spoken": "Bir daha deneyelim. Sarı noktadan başlayıp çizginin izinden gidelim."
+    },
+    "sarı noktayı izle. sonra sen deneyebilirsin.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-1%",
+      "spoken": "Önce sarı noktayı izle. Sonra, sıra sende!"
+    },
+    "saydın ve buldun!": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+5%",
+      "spoken": "Saydın, buldun! Harika!"
+    },
+    "tebrikler!": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+6%",
+      "spoken": "Tebrikler! Harika gidiyorsun!"
+    },
+    "tebrikler, başardın!": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+6%",
+      "spoken": "Tebrikler! Başardın!"
+    },
+    "tebrikler, başardın! adım adım öğrendin.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+6%",
+      "spoken": "Tebrikler! Birlikte başardık! Adım adım ilerliyorsun."
+    },
+    "yeni bir çıkartma kazandın!": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+6%",
+      "spoken": "Yeni bir çıkartma kazandın! Harika!"
+    },
+    "yukarıdaki işaretin aynısını bul.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+0%",
+      "spoken": "Bir bakalım. Aynısı hangisi?"
+    },
+    "çizgiyi tamamladın! hazır olunca devam et.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+5%",
+      "spoken": "Çizgiyi tamamladın! Çok güzel! Hazırsan, devam edelim."
+    },
+    "çıkartman seni bekliyor.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+5%",
+      "spoken": "Çıkartman seni bekliyor! Hadi bakalım!"
+    },
+    "şimdi sıra sende.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+3%",
+      "spoken": "Şimdi, sıra sende! Hadi deneyelim."
+    }
+  },
   "counts": {
     "alphabet": 29,
     "syllables": 48,
     "words": 80,
-    "sentences": 17
+    "sentences": 17,
+    "stories": 10
   },
   "phrases": {
     "0": "voice-17fab18009548a628b57.mp3",
@@ -114,13 +368,20 @@
     "a harfi": "voice-d3a5f4bd91379c902ab8.mp3",
     "a harfini bul.": "voice-fec7a9ddc03c243ca7ca.mp3",
     "ada balon al.": "voice-9b08af86ebe7259df2f3.mp3",
-    "adım adım, birlikte.": "voice-c45c35dd8ff43ef6c72c.mp3",
-    "aferin! çok güzel çalıştın.": "voice-26f277cacd2a14f8b27a.mp3",
+    "adım adım, birlikte.": "voice-211e9af115be24ddd67e.mp3",
+    "aferin! çok güzel çalıştın.": "voice-5840f0545936c904ac0b.mp3",
     "ak": "voice-a583ce9114a5d772b8b1.mp3",
     "al": "voice-19f04789276c51061130.mp3",
     "ali gel.": "voice-61b4a283733580899a11.mp3",
     "ali ve ela oynadı.": "voice-6d177ff5730d790b5a81.mp3",
-    "alparslan ile adım adım öğrenelim.": "voice-f799595ae575742db284.mp3",
+    "alparslan annesine küçük bir kart hazırlıyor. kartın üstüne anne yazmak için üç küçük görevimiz var.": "voice-451e8acaa262a883ddf0.mp3",
+    "alparslan bahçedeki saksı için bir nane etiketi arıyor. harfi bul, heceyi yap, etiketi tamamla.": "voice-e67c79d1d1aec2db169e.mp3",
+    "alparslan el resmini tamamladı. resmin altına el yazan kartı birlikte yerleştirelim.": "voice-443a4ec777efe1801f38.mp3",
+    "alparslan ile adım adım öğrenelim.": "voice-231f750649cffd08f8ca.mp3",
+    "alparslan meyve sepetine bir elma etiketi hazırlıyor. önce harfi bulalım, sonra kartları birleştirelim.": "voice-e1e42b774ccea997a6c3.mp3",
+    "alparslan ninesine bir resim götürecek. resmin isim kartını harf ve hece kartlarıyla birlikte hazırlayalım.": "voice-ab84803865da6ac6de28.mp3",
+    "alparslan çiftlikteki atın resmine bir isim kartı koyacak. harfi bulup at kartını hazırlayalım.": "voice-9b951f106f9fd588ad8b.mp3",
+    "alparslan üç küçük kart hazırlıyor. bildiğin harfleri bulup kendi kartını tamamlayalım.": "voice-0bd9b1fefbc383107a05.mp3",
     "altmış": "voice-0fab91affec700d0256a.mp3",
     "altmış altı": "voice-c847e151b6ce4fde77f0.mp3",
     "altmış beş": "voice-0f424bd1b7298543eae0.mp3",
@@ -144,29 +405,31 @@
     "at": "voice-083aa6f6f44760c9fb36.mp3",
     "ay": "voice-0bca09aa74829ecdcd51.mp3",
     "ayak": "voice-31278b7253137e80ded7.mp3",
-    "aynısını buldun! hazırsan devam edebilirsin.": "voice-6b02e215a489bdf312e2.mp3",
+    "aynısını buldun! hazırsan devam edebilirsin.": "voice-a1fdd3ba11feeda48477.mp3",
     "ayı": "voice-9a91cae484392a574942.mp3",
     "ağaç": "voice-2d143eb88a0009a374e1.mp3",
     "ağız": "voice-2bb8c9d97d1c0b733018.mp3",
-    "aşağıya yaz. bitirince birlikte kontrol edin.": "voice-3c33187ff13e3b45e82b.mp3",
+    "aşağıya yaz. bitirince birlikte kontrol edin.": "voice-a14a5bb4f4d36b9e11cd.mp3",
     "b": "voice-74df777f75e4542a71d1.mp3",
     "b harfi": "voice-9be3093e7114ac887f43.mp3",
     "b harfini bul.": "voice-1549654385c620a8db44.mp3",
     "baba su iç.": "voice-e282e68615d1e99173da.mp3",
+    "bahçedeki arının isim kartı kaybolmuş. alparslan ile yeni kartın harflerini ve hecelerini bulalım.": "voice-4852ff6f42ee27614b1a.mp3",
+    "bahçedeki lalenin isim kartı eksik. alparslan ile harfleri ve heceleri birleştirip kartı hazırlayalım.": "voice-9c882d875a30b861f166.mp3",
     "balon": "voice-96c5e56323754871139d.mp3",
     "balık": "voice-f3b025e495a1019c2b0a.mp3",
     "be harfini bul.": "voice-1549654385c620a8db44.mp3",
     "beş": "voice-b980f2d2418055c47c38.mp3",
     "biber": "voice-c3c97f8b14f854b4a13d.mp3",
     "bir": "voice-c9da47f8254d969512ac.mp3",
-    "bir daha bakalım. yukarıdaki işarete dikkat et.": "voice-23f9b5b1cd1ca55f05ff.mp3",
-    "bir daha deneyelim.": "voice-bc9ef640e8dfc40753cd.mp3",
-    "bir daha deneyelim. acelemiz yok.": "voice-ea61933985b6137ead16.mp3",
-    "birlikte kontrol edelim.": "voice-ccd849b159fe5db39174.mp3",
-    "birlikte kontrol ettiniz. hazırsan devam edebilirsin.": "voice-b5ccbe8f2816409bb1b7.mp3",
+    "bir daha bakalım. yukarıdaki işarete dikkat et.": "voice-daec7cf63b3334ed7a44.mp3",
+    "bir daha deneyelim.": "voice-f8640826477397f94d08.mp3",
+    "bir daha deneyelim. acelemiz yok.": "voice-2141f47f74d8eedd71ea.mp3",
+    "birlikte kontrol edelim.": "voice-d1bcb711a8e20f5d2d24.mp3",
+    "birlikte kontrol ettiniz. hazırsan devam edebilirsin.": "voice-6cac7456f3be8627dd71.mp3",
     "bisiklet": "voice-8ddb39e76c645b7cb1d0.mp3",
-    "bitirdiğinde yazdım, birlikte bakalım düğmesine dokun.": "voice-b8efe0a1936722d35fb5.mp3",
-    "bu kelime hangi resmi anlatıyor?": "voice-be7a4fa6ee40da0b9b92.mp3",
+    "bitirdiğinde yazdım, birlikte bakalım düğmesine dokun.": "voice-13726aedac4bcc5cbe94.mp3",
+    "bu kelime hangi resmi anlatıyor?": "voice-904a9f0f3aa81cad72cf.mp3",
     "bulut": "voice-6d82f3bbae42738eedc4.mp3",
     "burun": "voice-b4561a6477a77fa648e2.mp3",
     "c": "voice-96f452f5289dee227ecf.mp3",
@@ -199,7 +462,7 @@
     "ekmek": "voice-6f6d13f556bf4c4fbdf6.mp3",
     "el": "voice-9a9020260c364f2c53b6.mp3",
     "ela elma al.": "voice-9bae9baacdeb74d51d08.mp3",
-    "ellerini dinlendir. hazır olunca devam edelim.": "voice-21c9831b27050ebb8ffd.mp3",
+    "ellerini dinlendir. hazır olunca devam edelim.": "voice-324a05202759ca9e0f8f.mp3",
     "elli": "voice-9b1c9695ad2fae3604fa.mp3",
     "elli altı": "voice-af10e41b6bd79d10458f.mp3",
     "elli beş": "voice-6370243ead727910119e.mp3",
@@ -211,8 +474,8 @@
     "elli yedi": "voice-7c83721bb06f916106b6.mp3",
     "elli üç": "voice-db9b53951ae873978f10.mp3",
     "elma": "voice-56fb01e3f245fca0dc6a.mp3",
-    "elmaları say. kaç tane var?": "voice-d80ef5c3d742e5c3f6bc.mp3",
-    "emek verdin, tamamladın!": "voice-a957cf6bcc964207dfc7.mp3",
+    "elmaları say. kaç tane var?": "voice-1b782a35bc3b00856891.mp3",
+    "emek verdin, tamamladın!": "voice-7b1c6ffe4c629effba35.mp3",
     "en": "voice-477a21e7ed396ff999ca.mp3",
     "er": "voice-ccc156bc6c80c8363879.mp3",
     "et": "voice-96642de11cd5636ff8f0.mp3",
@@ -232,16 +495,16 @@
     "göz": "voice-a1ea222d6f9b5aff7b9b.mp3",
     "güneş": "voice-41ff38c13c47059f4e56.mp3",
     "güneş doğdu.": "voice-0d9a906997aef6c126b8.mp3",
-    "güzel, şimdi sıradaki parçayı seç.": "voice-3817e146eb9a89cd9bd0.mp3",
+    "güzel, şimdi sıradaki parçayı seç.": "voice-68363117a1a0a1b9796b.mp3",
     "h": "voice-a3ec8873e489edd4fd55.mp3",
     "h harfi": "voice-385bbb06412b606b0083.mp3",
     "h harfini bul.": "voice-8ee81e4e022d0da68bbf.mp3",
-    "harika! başardın.": "voice-462a0b345a48273de5d4.mp3",
-    "harika! doğru cevap.": "voice-5de43b46c79afd59dd91.mp3",
-    "harika, doğru cevap!": "voice-0bf940419ad2993b6776.mp3",
+    "harika! başardın.": "voice-4cdbf580a387d7b605bc.mp3",
+    "harika! doğru cevap.": "voice-ff08a693896cbe02383f.mp3",
+    "harika, doğru cevap!": "voice-ff08a693896cbe02383f.mp3",
     "havuç": "voice-a858cc797835537f517d.mp3",
-    "hazır olduğunda başlayabilirsin.": "voice-c4af477072fe5ae3adf5.mp3",
-    "hazırsan devam edebilirsin.": "voice-8b44a3626385bfa8af79.mp3",
+    "hazır olduğunda başlayabilirsin.": "voice-d3e26eaf057d065e430f.mp3",
+    "hazırsan devam edebilirsin.": "voice-7978922d6500f6a38ba3.mp3",
     "he harfini bul.": "voice-8ee81e4e022d0da68bbf.mp3",
     "i": "voice-5f119e67b0b4564751cc.mp3",
     "i harfi": "voice-56f362e66f01916b2649.mp3",
@@ -270,14 +533,15 @@
     "kapı": "voice-b1ecb8f73a0f9e548ed0.mp3",
     "kar": "voice-697f917547122f4545d4.mp3",
     "karpuz": "voice-33369d131e49cda90d11.mp3",
-    "kartlara sırayla dokun, boşlukları doldur.": "voice-9a40da2f756c3c80d404.mp3",
+    "kartlara sırayla dokun, boşlukları doldur.": "voice-f380ee156f76a6e8b7b7.mp3",
     "kavun": "voice-295c9d22df30d04f8c81.mp3",
-    "kaç tane elma var?": "voice-78c1611c9120f06b9b0e.mp3",
+    "kaç tane elma var?": "voice-1200de0e1f17b3b846bf.mp3",
     "ke": "voice-008a92f45e40f27eef9a.mp3",
     "ke harfini bul.": "voice-323c6c796459cec880f6.mp3",
     "kedi": "voice-e6b6b9024acb48f3f8a1.mp3",
     "kedi süt içer.": "voice-2cdd4a746f916f515165.mp3",
-    "kelime ve resim eşleşti!": "voice-590da0656c0f07786fa1.mp3",
+    "kedinin mama kabına bir etiket gerekiyor. alparslan ile iki ma hecesini yan yana getirelim.": "voice-e79f65ae0133ca880179.mp3",
+    "kelime ve resim eşleşti!": "voice-d1f9211f6f5b4713757e.mp3",
     "keçi": "voice-ab00363e6416a94a065c.mp3",
     "ki": "voice-fc4fae44fd6334fbe974.mp3",
     "kiraz": "voice-39342c0ec46e7f9b1c7b.mp3",
@@ -289,7 +553,7 @@
     "kuş": "voice-03dad3fc74c6be0ed679.mp3",
     "kuş uçtu.": "voice-b4ec4266e0ea4bd37602.mp3",
     "köpek": "voice-ccfc3418f11cb43bc322.mp3",
-    "küçük bir mola verelim.": "voice-39971e8f8ec6c4e45c99.mp3",
+    "küçük bir mola verelim.": "voice-caf708eb7d9e900bdfa3.mp3",
     "kırk": "voice-297d74bd624dd8e6792f.mp3",
     "kırk altı": "voice-c387fd7f25d4e66cea82.mp3",
     "kırk beş": "voice-6cb9cac7dcb72abd687b.mp3",
@@ -318,8 +582,8 @@
     "ma": "voice-7fa18652afb4a8b2fb86.mp3",
     "me": "voice-16cf0c0044e8e491fd73.mp3",
     "me harfini bul.": "voice-6e5a0c7b070e793d7819.mp3",
-    "merhaba! birlikte oynayalım.": "voice-c80271994347d3c48abb.mp3",
-    "merhaba! harf adası'na hoş geldin.": "voice-3d973f66883c5570d28f.mp3",
+    "merhaba! birlikte oynayalım.": "voice-e2f260a5ac37c5affad1.mp3",
+    "merhaba! harf adası'na hoş geldin.": "voice-7542c2b1e6e4cddf29fa.mp3",
     "mete kalem al.": "voice-d65864eff25d89e2b9e6.mp3",
     "mi": "voice-376ebce6ecfd4499daac.mp3",
     "mu": "voice-5b9b4ccbd370a280fb56.mp3",
@@ -383,11 +647,11 @@
     "sa": "voice-e329de91f1f838d9f6cb.mp3",
     "saat": "voice-d23fffcdc40f7161995f.mp3",
     "sandalye": "voice-e0ce4b7df9ce569450a2.mp3",
-    "sarı noktadan başla, çizginin izini sür.": "voice-24b325640fec835d6d39.mp3",
-    "sarı noktadan başlayalım.": "voice-8a986733c0177988dc9b.mp3",
-    "sarı noktadan başlayıp çizginin izini yeniden deneyelim.": "voice-f987a930e7fb297e9ca0.mp3",
-    "sarı noktayı izle. sonra sen deneyebilirsin.": "voice-c9446b0f215fca776d16.mp3",
-    "saydın ve buldun!": "voice-d09699de2882c0140a71.mp3",
+    "sarı noktadan başla, çizginin izini sür.": "voice-dc9d1c8cae4d8a880aab.mp3",
+    "sarı noktadan başlayalım.": "voice-5f3ce21b4d2f06b1bc16.mp3",
+    "sarı noktadan başlayıp çizginin izini yeniden deneyelim.": "voice-d883eea2c0bf0bb37bb2.mp3",
+    "sarı noktayı izle. sonra sen deneyebilirsin.": "voice-8dd972ed92fbec74b42c.mp3",
+    "saydın ve buldun!": "voice-51e04f1be1822ba2091c.mp3",
     "se": "voice-34ef0f6a96d90773e527.mp3",
     "se harfini bul.": "voice-6db5eded7829b101f3d6.mp3",
     "sekiz": "voice-7197ff1f4728f275e428.mp3",
@@ -412,9 +676,9 @@
     "tavuk": "voice-6a76117faba4e6f07c09.mp3",
     "te": "voice-3bad2002d5b4b26ff17a.mp3",
     "te harfini bul.": "voice-1afb5448db971fae446a.mp3",
-    "tebrikler!": "voice-abb011481c81d7c73731.mp3",
-    "tebrikler, başardın!": "voice-5555d27871c7dbcf15ee.mp3",
-    "tebrikler, başardın! adım adım öğrendin.": "voice-6a270a37594a4285566f.mp3",
+    "tebrikler!": "voice-c7d17597a7c04bb0f20d.mp3",
+    "tebrikler, başardın!": "voice-8f2a537f677ad25145fd.mp3",
+    "tebrikler, başardın! adım adım öğrendin.": "voice-b8e923a0554186a58041.mp3",
     "ti": "voice-42b898e9c82f49062aac.mp3",
     "tilki": "voice-5e776a0c564091564b89.mp3",
     "to": "voice-c64f88abeece4c25773f.mp3",
@@ -436,7 +700,7 @@
     "yağmur": "voice-b066987af1d09a8d4bec.mp3",
     "ye harfini bul.": "voice-cac0fb29fbb42199110b.mp3",
     "yedi": "voice-bbf5ddb6e8e10ab7c420.mp3",
-    "yeni bir çıkartma kazandın!": "voice-d8e588c6ef48b76ac60e.mp3",
+    "yeni bir çıkartma kazandın!": "voice-85e348af58865943d105.mp3",
     "yetmiş": "voice-36a7f81cf6f8d764cc84.mp3",
     "yetmiş altı": "voice-c622763e65dd60515fd5.mp3",
     "yetmiş beş": "voice-615e4f7e9044db4a4300.mp3",
@@ -457,7 +721,7 @@
     "yirmi sekiz": "voice-eb26d406d2bd57b8ef36.mp3",
     "yirmi yedi": "voice-f1b21dc864b9a648de11.mp3",
     "yirmi üç": "voice-569777f95fdd9a5a52e9.mp3",
-    "yukarıdaki işaretin aynısını bul.": "voice-ff5c9040b65b59b2ebf7.mp3",
+    "yukarıdaki işaretin aynısını bul.": "voice-01c857377678be4987e5.mp3",
     "yumurta": "voice-d21dad7b259a185c1e55.mp3",
     "yumuşak ge harfini bul.": "voice-15e0a315d95f6e76a9ac.mp3",
     "yüz": "voice-9fa14bc3f560f36c9496.mp3",
@@ -474,10 +738,10 @@
     "çanta": "voice-b2379a0ffae4881a013e.mp3",
     "çe harfini bul.": "voice-84911b96b95039b3f7db.mp3",
     "çilek": "voice-5c1749e2a715bbea83f5.mp3",
-    "çizgiyi tamamladın! hazır olunca devam et.": "voice-bc601167c29e7f7bc077.mp3",
+    "çizgiyi tamamladın! hazır olunca devam et.": "voice-44b3a02b5c0fa4838a21.mp3",
     "çiçek": "voice-5c562ad4456198920755.mp3",
     "çorap": "voice-9cef8bc46d1e17553ed3.mp3",
-    "çıkartman seni bekliyor.": "voice-fc96fdadb2dc9622495b.mp3",
+    "çıkartman seni bekliyor.": "voice-564220ac81849d15a89e.mp3",
     "ö": "voice-1238755a1c1eb009ed15.mp3",
     "ö harfi": "voice-41b29b10dc390959a18e.mp3",
     "ö harfini bul.": "voice-547b101e8a2b08f1810a.mp3",
@@ -499,6 +763,6 @@
     "şapka": "voice-19bb0562b62d1477920c.mp3",
     "şe harfini bul.": "voice-02e27553b59d58eb8fae.mp3",
     "şemsiye": "voice-e64357c6678ad9114b93.mp3",
-    "şimdi sıra sende.": "voice-3a0f3631e06e33437c34.mp3"
+    "şimdi sıra sende.": "voice-154a823584623179d70e.mp3"
   }
 }

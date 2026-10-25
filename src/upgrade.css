@@ -33,6 +33,7 @@ button svg.lucide{width:19px;height:19px;flex-shrink:0;stroke-width:2.25}
 .adventure-scene span.built{background:#d7eccd}.adventure-scene span .illustration{width:19px;height:19px}
 .adventure-story{margin:0 0 20px;padding:16px}.adventure-story h2{font-size:21px}.adventure-story p{font-size:14px;margin:0}
 .adventure .bank .tile{min-width:72px}.adventure .slots .slot{min-width:72px}
+.adventure-listen{margin-top:10px}.adventure-listen .tool{font-size:13px;min-height:44px;padding:7px 12px}
 @media(max-width:600px){.adventure-preview,.adventure-story{gap:12px;padding:15px}.adventure-preview h2,.adventure-story h2{font-size:19px}.adventure-preview p,.adventure-story p{font-size:13px}.adventure-preview-picture,.adventure-scene{width:72px;min-height:85px}.adventure-preview-picture .illustration,.adventure-scene>.illustration{width:52px;height:52px}}
 .writing-focus #main{background:#f3f4fb}.writing-focus .teacher .face .illustration{width:40px;height:40px}
 .writing-focus .pad{background:#fffefa}.writing-focus .exercise{box-shadow:0 4px #d2d2e5}.writing-focus .tool{box-shadow:0 3px #c6c8df}

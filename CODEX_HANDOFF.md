@@ -16,7 +16,7 @@ Yalnızca `arslanserhat/harf-adasi` üzerinde çalış. Başlangıç dalı `main
 - `src/adventures.js`: 1. sınıf için seçilen harflerle sınırlı, üç görevli dokuz kısa hikâye; gerçek hece kartları ve uygun hikâyeler arasında sıra ile ilerleme. Ana sayfadaki macera düğmesi bu akışı başlatır.
 - `src/celebration.js` / `celebration.css`: başarılı adımda Türkçe kayıtlı “Tebrikler!” ve “Hazırsan devam edebilirsin.”, modal içinde konfeti ve yalnızca “Devam et” ile ilerleme. Çalışmaya dönmek veya Escape adımı ilerletmez. Sessiz ve azaltılmış hareket tercihleri korunur.
 - `resources/views/game.blade.php`, `routes/web.php`, `app/`, `database/`: gerçek Laravel 13 backend.
-- `public/audio`: 362 Türkçe kayıt / 491 metin eşleştirmesi, dört özgün efekt.
+- `public/audio`: 371 aktif Türkçe kayıt / 501 metin eşleştirmesi, dört özgün efekt. Eski kayıtlar da korunur. Kullanıcının seçtiği Emel sesiyle 40 yönerge/kutlama ve 10 hikâye girişi daha canlı konuşma dili ve okuma ritmiyle yeniden hazırlandı; harf/hece/kelime/sayı telaffuz kayıtları aynı kaldı. `scripts/generate-speech.py --profile warm-prompts` bu ayrımı korur.
 - `public/illustrations`: 112 Microsoft Fluent 3D çizimi ve MIT lisansı.
 
 PHP kilitli paketleri PHP 8.4.1+ ister; üretim Docker imajı FrankenPHP/PHP 8.5 kullanır. Node 22, Vite, Howler, canvas-confetti ve Lucide kullanılır. `.env`, gerçek anahtarlar, veritabanı ve vendor/build çıktıları Git'e eklenmez.

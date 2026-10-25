@@ -76,6 +76,53 @@ PROMPTS = [
     "Birlikte kontrol edelim.",
 ]
 
+# Edge's Turkish standard voices do not expose an expressive/cheerful style.
+# Use short conversational wording and separate narration pacing, rather than
+# applying faster delivery to letters, syllables and words being learned.
+# Values are (spoken wording, synthesis rate); no browser pitch manipulation.
+WARM_PROMPTS = {
+    "Merhaba! Birlikte oynayalım.": ("Merhaba! Hadi, birlikte oynayalım!", "+4%"),
+    "Merhaba! Harf Adası'na hoş geldin.": ("Merhaba! Harf Adası'na hoş geldin! Hadi, birlikte oynayalım.", "+4%"),
+    "Alparslan ile adım adım öğrenelim.": ("Hadi! Alparslan ile adım adım öğrenelim.", "+3%"),
+    "Yukarıdaki işaretin aynısını bul.": ("Bir bakalım. Aynısı hangisi?", "+0%"),
+    "Sarı noktadan başla, çizginin izini sür.": ("Sarı noktadan başla. Şimdi, çizginin izinden gidelim.", "-1%"),
+    "Elmaları say. Kaç tane var?": ("Hadi, elmaları sayalım! Kaç tane var?", "+2%"),
+    "Kaç tane elma var?": ("Birlikte bakalım. Kaç tane elma var?", "+0%"),
+    "Hazır olduğunda başlayabilirsin.": ("Hazır olduğunda, birlikte başlayalım!", "+2%"),
+    "Şimdi sıra sende.": ("Şimdi, sıra sende! Hadi deneyelim.", "+3%"),
+    "Aşağıya yaz. Bitirince birlikte kontrol edin.": ("Şimdi sen yaz. Bitirince, birlikte bakalım.", "+0%"),
+    "Kartlara sırayla dokun, boşlukları doldur.": ("Hadi, kartları birleştirelim! Sırayla dokun, boşlukları doldur.", "+2%"),
+    "Bu kelime hangi resmi anlatıyor?": ("Bir bakalım! Bu kelime hangi resmi anlatıyor?", "+1%"),
+    "Sarı noktayı izle. Sonra sen deneyebilirsin.": ("Önce sarı noktayı izle. Sonra, sıra sende!", "-1%"),
+    "Sarı noktadan başlayalım.": ("Sarı noktayı bulalım. Buradan başlayalım.", "-1%"),
+    "Sarı noktadan başlayıp çizginin izini yeniden deneyelim.": ("Bir daha deneyelim. Sarı noktadan başlayıp çizginin izinden gidelim.", "-1%"),
+    "Bir daha bakalım. Yukarıdaki işarete dikkat et.": ("Bir daha bakalım. Acelemiz yok. Aynısı hangisi?", "-1%"),
+    "Bir daha deneyelim. Acelemiz yok.": ("Olur böyle! Bir daha deneyelim. Acelemiz yok.", "-1%"),
+    "Bir daha deneyelim.": ("Hadi, bir daha deneyelim.", "+0%"),
+    "Güzel, şimdi sıradaki parçayı seç.": ("Güzel! Şimdi sıradaki parçayı seç.", "+2%"),
+    "Aynısını buldun! Hazırsan devam edebilirsin.": ("Buldun! Harika! Hazırsan, devam edelim.", "+5%"),
+    "Çizgiyi tamamladın! Hazır olunca devam et.": ("Çizgiyi tamamladın! Çok güzel! Hazırsan, devam edelim.", "+5%"),
+    "Kelime ve resim eşleşti!": ("Buldun! Kelimeyle resim eşleşti!", "+5%"),
+    "Saydın ve buldun!": ("Saydın, buldun! Harika!", "+5%"),
+    "Birlikte kontrol ettiniz. Hazırsan devam edebilirsin.": ("Birlikte kontrol ettiniz! Hazırsan, devam edelim.", "+3%"),
+    "Bitirdiğinde Yazdım, birlikte bakalım düğmesine dokun.": ("Bitirdiğinde, Yazdım, birlikte bakalım düğmesine dokun.", "+0%"),
+    "Harika! Doğru cevap.": ("Harika! Doğru cevabı buldun!", "+6%"),
+    "Harika, doğru cevap!": ("Harika! Doğru cevabı buldun!", "+6%"),
+    "Harika! Başardın.": ("Harika! Başardın!", "+6%"),
+    "Aferin! Çok güzel çalıştın.": ("Aferin! Çok güzel çalıştın!", "+6%"),
+    "Tebrikler!": ("Tebrikler! Harika gidiyorsun!", "+6%"),
+    "Tebrikler, başardın!": ("Tebrikler! Başardın!", "+6%"),
+    "Tebrikler, başardın! Adım adım öğrendin.": ("Tebrikler! Birlikte başardık! Adım adım ilerliyorsun.", "+6%"),
+    "Emek verdin, tamamladın!": ("Emek verdin, tamamladın! Harika!", "+6%"),
+    "Çıkartman seni bekliyor.": ("Çıkartman seni bekliyor! Hadi bakalım!", "+5%"),
+    "Yeni bir çıkartma kazandın!": ("Yeni bir çıkartma kazandın! Harika!", "+6%"),
+    "Küçük bir mola verelim.": ("Biraz dinlenelim mi? Küçük bir mola verelim.", "-2%"),
+    "Ellerini dinlendir. Hazır olunca devam edelim.": ("Ellerini dinlendir. Hazır olduğunda, yine birlikte oynarız.", "-2%"),
+    "Adım adım, birlikte.": ("Adım adım. Birlikte!", "+2%"),
+    "Hazırsan devam edebilirsin.": ("Hazırsan, birlikte devam edelim!", "+3%"),
+    "Birlikte kontrol edelim.": ("Hadi, birlikte bakalım!", "+2%"),
+}
+
 
 def normalize_text(value: str) -> str:
     """Match src/audio.js normalizeSpeechText, including dotted/dotless I."""
@@ -111,7 +158,15 @@ def extract_content(source: Path) -> dict[str, list[str]]:
     sentences = ast.literal_eval(required(r"const\s+sentences\s*=\s*(\[[^\n]+?\]);", "sentences"))
     if len(alphabet) != 29 or not {"nine", "anne", "etti", "inat"}.issubset(words):
         raise ValueError("Unexpected content: 29 Turkish letters and the core practice words are required.")
-    return {"alphabet": alphabet, "syllables": syllables, "words": words, "sentences": sentences}
+    adventures = source.with_name("adventures.js")
+    stories = []
+    if adventures.is_file():
+        # Preserve each exact JS string as the runtime key of Hikâyeyi dinle.
+        story_source = adventures.read_text(encoding="utf-8")
+        stories = [ast.literal_eval(match.group(1)) for match in
+                   re.finditer(r"\bstory:\s*('(?:\\.|[^'\\])*')", story_source)]
+    return {"alphabet": alphabet, "syllables": syllables, "words": words,
+            "sentences": sentences, "stories": stories}
 
 
 def build_phrases(content: dict[str, list[str]]) -> dict[str, str]:
@@ -130,8 +185,8 @@ def build_phrases(content: dict[str, list[str]]) -> dict[str, str]:
         add(f"{letter} harfi", f"{name} harfi")
         add(f"{letter} harfini bul.", f"{name} harfini bul.")
         add(f"{name} harfini bul.")
-    for category in ("syllables", "words", "sentences"):
-        for phrase in content[category]:
+    for category in ("syllables", "words", "sentences", "stories"):
+        for phrase in content.get(category, []):
             add(phrase)
     for number in range(101):
         name = number_name(number)
@@ -194,7 +249,8 @@ def valid_clip(path: Path) -> bool:
     return header.startswith(b"ID3") or (len(header) >= 2 and header[0] == 0xFF and header[1] & 0xE0 == 0xE0)
 
 
-async def generate_voice(args: argparse.Namespace, phrases: dict[str, str], counts: dict[str, int]) -> None:
+async def generate_voice(args: argparse.Namespace, phrases: dict[str, str], counts: dict[str, int],
+                         narration_keys: set[str] | None = None) -> None:
     try:
         import edge_tts
         import edge_tts.communicate
@@ -203,18 +259,27 @@ async def generate_voice(args: argparse.Namespace, phrases: dict[str, str], coun
 
     # Use the supplied environment CA with verification intact. The Edge client
     # otherwise creates a certifi-only context that misses managed proxy roots.
-    ca_file = os.environ.get("SSL_CERT_FILE") or "/etc/ssl/certs/ca-certificates.crt"
+    ca_file = os.environ.get("SSL_CERT_FILE")
     edge_tts.communicate._SSL_CTX = ssl.create_default_context(cafile=ca_file)
     proxy = os.environ.get("HTTPS_PROXY") or os.environ.get("HTTP_PROXY")
     output = args.output
     output.mkdir(parents=True, exist_ok=True)
-    recordings: dict[str, str] = {}
+    recordings: dict[str, tuple[str, str]] = {}
     manifest_phrases: dict[str, str] = {}
+    overrides = {normalize_text(key): value for key, value in WARM_PROMPTS.items()} if args.profile == "warm-prompts" else {}
+    if args.profile == "warm-prompts":
+        overrides.update({key: (phrases[key], "+1%") for key in narration_keys or set()})
+    deliveries: dict[str, dict[str, str]] = {}
     for key, spoken in phrases.items():
-        digest = hashlib.sha256(f"{args.voice}\n{args.rate}\n{spoken}".encode()).hexdigest()[:20]
+        spoken, rate = overrides.get(key, (spoken, args.rate))
+        # Keep the original hash format. Untouched learning targets therefore
+        # retain their exact existing file references; new delivery gets new files.
+        digest = hashlib.sha256(f"{args.voice}\n{rate}\n{spoken}".encode()).hexdigest()[:20]
         filename = f"voice-{digest}.mp3"
         manifest_phrases[key] = filename
-        recordings[filename] = spoken
+        recordings[filename] = (spoken, rate)
+        if key in overrides:
+            deliveries[key] = {"voice": args.voice, "rate": rate, "spoken": spoken}
 
     cached = sum(valid_clip(output / filename) for filename in recordings)
     done = 0
@@ -222,7 +287,7 @@ async def generate_voice(args: argparse.Namespace, phrases: dict[str, str], coun
     semaphore = asyncio.Semaphore(args.concurrency)
     print(f"Voice: {args.voice}; {len(phrases)} phrase keys, {len(recordings)} recordings, {cached} cached.", flush=True)
 
-    async def record(filename: str, text: str) -> None:
+    async def record(filename: str, text: str, rate: str) -> None:
         nonlocal done
         target = output / filename
         async with semaphore:
@@ -230,7 +295,7 @@ async def generate_voice(args: argparse.Namespace, phrases: dict[str, str], coun
                 temporary = target.with_suffix(".part.mp3")
                 for attempt in range(1, 4):
                     try:
-                        communicate = edge_tts.Communicate(text, args.voice, rate=args.rate, proxy=proxy,
+                        communicate = edge_tts.Communicate(text, args.voice, rate=rate, proxy=proxy,
                                                           connect_timeout=15, receive_timeout=35)
                         await asyncio.wait_for(communicate.save(str(temporary)), timeout=70)
                         if not valid_clip(temporary):
@@ -249,10 +314,12 @@ async def generate_voice(args: argparse.Namespace, phrases: dict[str, str], coun
             if done % 20 == 0 or done == len(recordings):
                 print(f"Speech progress: {done}/{len(recordings)}; failures: {len(failed)}", flush=True)
 
-    await asyncio.gather(*(record(filename, text) for filename, text in recordings.items()))
+    await asyncio.gather(*(record(filename, text, rate) for filename, (text, rate) in recordings.items()))
     if failed:
         raise SystemExit(f"{len(failed)} recordings failed. The manifest was not replaced; rerun to resume cached work.")
     manifest = {"voice": args.voice, "locale": "tr-TR", "rate": args.rate,
+                "delivery_profile": args.profile,
+                "delivery_overrides": dict(sorted(deliveries.items())),
                 "counts": counts, "phrases": dict(sorted(manifest_phrases.items()))}
     temporary_manifest = output / "manifest.json.tmp"
     temporary_manifest.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -266,6 +333,8 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=ROOT / "public" / "audio")
     parser.add_argument("--voice", default=DEFAULT_VOICE, choices=["tr-TR-EmelNeural", "tr-TR-AhmetNeural"])
     parser.add_argument("--rate", default="-5%")
+    parser.add_argument("--profile", choices=["warm-prompts", "original"], default="warm-prompts",
+                        help="Warm conversational prompts; learning targets keep --voice and --rate")
     parser.add_argument("--concurrency", type=int, default=3, choices=range(1, 7))
     parser.add_argument("--dry-run", action="store_true", help="Report parsed coverage without network or writes")
     parser.add_argument("--fx-only", action="store_true", help="Create the four effects without network")
@@ -278,13 +347,19 @@ def main() -> None:
     phrases = build_phrases(content)
     counts = {category: len(items) for category, items in content.items()}
     if args.dry_run:
-        print(json.dumps({"voice": args.voice, "counts": counts, "phrase_keys": len(phrases),
-                          "unique_recordings": len(set(phrases.values())),
+        overrides = {normalize_text(key): value for key, value in WARM_PROMPTS.items()} if args.profile == "warm-prompts" else {}
+        if args.profile == "warm-prompts":
+            overrides.update({normalize_text(story): (story, "+1%") for story in content["stories"]})
+        recordings = {overrides.get(key, (spoken, args.rate)) for key, spoken in phrases.items()}
+        print(json.dumps({"voice": args.voice, "delivery_profile": args.profile,
+                          "warm_prompt_keys": len(WARM_PROMPTS) if args.profile == "warm-prompts" else 0,
+                          "counts": counts, "phrase_keys": len(phrases),
+                          "unique_recordings": len(recordings),
                           "nine_recording_text": phrases["nine"], "uppercase_I_key": normalize_text("I"),
                           "uppercase_dotted_I_key": normalize_text("İ")}, ensure_ascii=False, indent=2))
         return
     generate_effects(args.output)
-    asyncio.run(generate_voice(args, phrases, counts))
+    asyncio.run(generate_voice(args, phrases, counts, {normalize_text(story) for story in content["stories"]}))
 
 
 if __name__ == "__main__":

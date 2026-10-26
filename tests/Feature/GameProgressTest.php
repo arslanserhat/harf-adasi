@@ -195,7 +195,7 @@ class GameProgressTest extends TestCase
         $this->postJson('/api/sessions', $this->completion())->assertCreated();
 
         $this->deleteJson('/api/progress?browser_id='.$otherBrowser)
-            ->assertOk()->assertExactJson(['reset' => true]);
+            ->assertOk()->assertExactJson(['reset' => true, 'learning_revision' => 1]);
         $this->assertDatabaseCount('game_sessions', 1);
         $this->assertDatabaseHas('game_sessions', ['browser_id' => $otherBrowser]);
         $this->getJson('/api/progress')->assertOk()

@@ -2,10 +2,20 @@
 
 Türkçe okuma, yazma ve sayı alıştırmaları için Laravel 13 uygulaması. Altı mevcut oyun bölümü korunur; aynı oyun arayüzü hem Laravel sunucusunda hem GitHub Pages için üretilen statik sürümde çalışır.
 
-## Bu sürüm
+## Sürüm 5: hikâyeli öğrenme yolculuğu
+
+- **Özgün animasyonlu hikâye:** Alparslan ve Kayıp Bahçe Mektubu; tamamlanan görevlerle değişen beş sahne, karakterler, açıkça başlatılan Türkçe anlatım ve azaltılmış hareket desteği.
+- **Öğretmenin kelimeleri:** birden fazla kelime listesi, toplu giriş, düzenlenebilir heceler, isteğe bağlı anlam ve cümle. İşlenmemiş harf içeren kelimeler açıkça gösterilir.
+- **Bağlı ve uyarlanan çalışmalar:** dinleme, heceleme, kelime kurma, örneksiz hatırlama, yetişkinle yazı kontrolü ve uygun anlam/cümle görevleri. Yardım ve hata kayıtları sonraki desteği etkiler.
+- **Hatırlama takibi:** aynı kelime farklı görevlerde geri gelir; sonraki günlere yayılan bağımsız hatırlama, ilk günkü tamamlamadan ayrı izlenir. Çalışılan harflerin yazma ve kart sıralama gözlemleri de ayrıca izlenir.
+- **Kaldığın yerden devam:** görev sırası, ipucu kayıtları ve sınırlı yazı taslağı bu tarayıcıda; Laravel'de ayrıca oturuma ayrılmış şifreli kayıt içinde korunur.
+
+[Araştırma ve tasarım kararları](docs/learning-design.md), kullanılan kaynakları, uyarlama kurallarını ve sınırlarını açıklar. Bu kurallar kendini yeniden yazan yapay zekâ veya öğrenme güçlüğü tanısı değildir. Yeni öğretmen kelimelerinde kayıt yoksa gerçek Türkçe cihaz sesi ya da yetişkin okuması kullanılır; her yeni kelime için sunucuda otomatik ses üretimi yoktur.
+
+## Korunan oyunlar ve araçlar
 
 - **Yazı stüdyosu:** tablet ekranına sığan defter, yazarken sayfa kaydırma kilidi, Safari için pasif olmayan dokunma koruması, çoklu parmak ayrımı ve yön değişimine uyum.
-- **Türkçe anlatım:** EmelNeural ile üretilmiş 362 yerel MP3, 491 metin eşleştirmesi. `nine` dahil kelimeler cihazın İngilizce sesine bırakılmaz; yedek ses yalnızca gerçekten Türkçe bir ses varsa kullanılır.
+- **Türkçe anlatım:** EmelNeural ile üretilmiş yerel MP3 kayıtları. `nine` dahil hazır kelimeler cihazın İngilizce sesine bırakılmaz; yedek ses yalnızca gerçekten Türkçe bir ses varsa kullanılır.
 - **Geri bildirim:** dört yumuşak oyun efekti, ses düzeyi/efekt ayarları, sesli “Tebrikler, başardın!” ve azaltılmış hareket tercihine uyan kutlama.
 - **Görseller:** platform emojileri yerine yerel 3D çizimler, Lucide arayüz ikonları, çıkartmalar ve öğrenme özeti.
 - **Laravel ilerlemesi:** tarayıcı oturumuna ayrılmış kayıtlar, doğrulanan JSON API, CSRF, tekrar gönderimde çift kayıt oluşturmayan tamamlama ve mevcut tarayıcıya ait sıfırlama.
@@ -34,7 +44,9 @@ php artisan serve
 ```sh
 php artisan test
 npm run build
-node tests/audio-unit.cjs
+npm run test:unit
+node tests/learning.spec.cjs
+node tests/island.spec.cjs
 node tests/tablet.spec.cjs
 ```
 

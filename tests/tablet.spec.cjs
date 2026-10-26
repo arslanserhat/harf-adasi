@@ -372,6 +372,7 @@ scenario('celebration: recorded congratulations, no automatic advance, Escape an
   assert.equal(await page.locator('.steps').getAttribute('aria-label'), '2. adım, toplam 3 adım');
   await traceAll(page, cdp);
   assert.equal(await dialog.evaluate(element => element.open), true, 'the next successful activity celebrates too');
+  assert.equal(await page.locator('body').evaluate(body => body.classList.contains('writing-focus')), true, 'a celebration keeps the current writing surface locked until explicit continuation');
   await next(page);
   await page.locator('#freePrompt').waitFor();
   assert.equal(await dialog.evaluate(element => element.open), false);

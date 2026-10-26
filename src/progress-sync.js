@@ -4,7 +4,8 @@ const enabled = document.querySelector('meta[name="harf-backend"]')?.content ===
 export async function resetServerProgress() {
   if (!enabled || !csrf) return;
   try {
-    return (await fetch('/api/progress', { method: 'DELETE', credentials: 'same-origin', headers: { Accept: 'application/json', 'X-CSRF-TOKEN': csrf } })).ok;
+    const response = await fetch('/api/progress', { method: 'DELETE', credentials: 'same-origin', headers: { Accept: 'application/json', 'X-CSRF-TOKEN': csrf } });
+    return response.ok ? await response.json() : false;
   } catch { return false; }
 }
 

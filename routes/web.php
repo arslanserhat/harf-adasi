@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\GameProgressController;
 use App\Http\Controllers\GameSessionController;
+use App\Http\Controllers\LearningStateController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'game')->name('game');
@@ -24,3 +25,15 @@ Route::delete('/api/progress', [GameProgressController::class, 'destroy'])
 Route::post('/api/sessions', [GameSessionController::class, 'store'])
     ->middleware('throttle:60,1')
     ->name('game.sessions.store');
+
+Route::get('/api/learning', [LearningStateController::class, 'show'])
+    ->middleware('throttle:120,1')
+    ->name('learning.show');
+
+Route::put('/api/learning', [LearningStateController::class, 'store'])
+    ->middleware('throttle:60,1')
+    ->name('learning.store');
+
+Route::delete('/api/learning', [LearningStateController::class, 'destroy'])
+    ->middleware('throttle:10,1')
+    ->name('learning.destroy');

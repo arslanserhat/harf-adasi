@@ -8,6 +8,11 @@ Yalnızca `arslanserhat/harf-adasi` üzerinde çalış. Başlangıç dalı `main
 
 ## Kaynak ve mimari
 
+- Sürüm 5, mevcut `main` üzerindeki ada/hikâye çalışmalarını korur. Kullanıcının Morpa Kampüs 1. sınıf/Tomba örneği incelenerek özgün bir animasyonlu bölüm ve çocuğun gözlemlerine göre değişen öğrenme akışı eklendi; Morpa varlıkları kopyalanmadı. Dayanaklar ve sınırlar `docs/learning-design.md` içindedir.
+- `src/learning-model.js`: Türkçe özel listeler, hece önerisi, işlenen harf filtresi, bağlı görev planı, beceri/harf gözlemleri ve aralıklı tekrar. Aynı gün tekrarları sonraki güne yayılan hatırlama sayılmaz; ipucu/hata ve yetişkin onayı dikkate alınır.
+- `src/learning.js` / `learning.css`: öğretmen listeleri ve gelişim ekranı, farklı görev biçimleri, bağımsız hatırlama, yetişkinle yazı kontrolü, duraklatma ve yarım kalan yazıya dönüş. Ana giriş “Hikâyeli yolculuğum”. Altı serbest bölüm ayrıca korunur.
+- `src/story-scene.js` / `story-scene.css`: Alparslan ve Kayıp Bahçe Mektubu; gerçek görev tamamlamalarına bağlı beş özgün SVG sahnesi. Hikâye dinlemek veya hareketi duraklatmak yanıt/ilerleme üretmez.
+- `src/learning-sync.js`: `harf-adasi-learning-v1` yerel kaydı; Laravel'de revizyonlu `/api/learning` eşitlemesi. Sıfırlama revizyonunu koru; eski bir istek silinen gözlemleri geri getirmemeli. Tam sıfırlama öğretmen listelerini korur.
 - `src/game.js`: mevcut altı bölümün oyun kuralları, manuel Devam ve ebeveyn onayı.
 - `src/writing.js` / `writing.css`: tam ekrana sığan yazı alanı, Safari Touch Events koruması, kaydırma kilidi ve çıkışta eski kaydırmanın geri gelmesi. Çizim koordinatları SVG ekran matrisiyle dönüştürülür.
 - `src/audio.js`: Howler, yerel Türkçe kayıtlar, yalnızca Türkçe cihaz sesi yedeği, ses/efekt ayarları.
@@ -27,6 +32,8 @@ PHP kilitli paketleri PHP 8.4.1+ ister; üretim Docker imajı FrankenPHP/PHP 8.5
 
 `npm run build` Pages için `dist/` üretir; `npm run build:laravel` Laravel için `public/build/` üretir. PHP giriş dosyası Pages artefaktından çıkarılır. `npm run dev` Laravel Vite entegrasyonunu, `npm run dev:static` statik arayüz geliştirmesini açar.
 
+Yeni akış için `npm run test:unit`, derlemeden sonra `node tests/learning.spec.cjs` ve PHP `LearningStateTest` kullanılır. Kelime girişini, geçersiz satırları, hece düzenlemeyi, öğretilmemiş harfleri, çift `n` kartlarını, gerçek ses yokken yetişkin desteğini, ipucunun bağımsızlık puanı vermemesini, gerçek dokunmayla yazı/rotasyon/yenileme ve beş sahnenin ilerlemesini doğrula. Test başarısını insan tarafından ses dinleme, fiziksel iPad veya uzun dönem öğrenme pilotu olarak sunma.
+
 `php artisan test`, `node tests/audio-unit.cjs`, `node tests/adventures-unit.cjs`, `npm run build && node tests/tablet.spec.cjs` komutlarını kullan. `TEST_VIEWPORT=768x1024`, `TEST_FILTER` ve `TEST_BASE_URL` incelemeyi sınırlayabilir. Gerçek dokunma testleri CDP girdi kullanır; uygulamaya doğru cevap/başarı durumu enjekte edilmez.
 
 Ada için ayrıca `node tests/island-unit.cjs` ve derlemeden sonra `node tests/island.spec.cjs` çalıştır. Üç dünyada gerçek bir turu tamamla; yanlış seçim, çift `n` vagonu, `na` + `ne`, devam modalı, hazine konumu, yenileme, tek harfle oynama, sıfırlama ve çıkışta gecikmiş efektlerin durmasını denetle. Windows yerel PHP testinde uygulama anahtarı yoksa yalnız test işlemi için geçici rastgele `APP_KEY` kullan; üretim anahtarını değiştirme.
@@ -36,6 +43,14 @@ Ada için ayrıca `node tests/island-unit.cjs` ve derlemeden sonra `node tests/i
 29 harfin büyük/küçük biçimleri, hece/kelime/cümle sırası, `anne/etti/inat`, okuma-resim, 0/10 sayma, `100` için ayrı sıfır kartları, çizim iptal/yeniden çizme, boş-yanlış çizim reddi, mola, ayarlar ve kayıt sınanmalı. `ı/i`, `I/İ`, `ç/ş/ğ/ö/ü` korunmalı. Serbest yazı otomatik tanınmaz; ebeveyn onayı açık kalmalı.
 
 ## Yayın ve doğruluk
+
+Sürüm 5'in bu bulut oturumunda GitHub erişimi doğrulandı. Güncel ağ durumu yeniden
+okundu ve SSH denemesi tekrar `Connection refused` verdi; önceki başka cihazdan
+yapılmış VPS yayını bu yeni kodun orada yayımlandığı anlamına gelmez. Aynı SSH
+ayarlarını kullanıcıya yeniden yaptırma. Yeni sürümün Pages ve VPS durumlarını
+ayrı raporla. Kontroller `docs/QA.md`; doğal ses isteğinin envanteri ve erişim
+gereksinimleri `docs/voice-plan.md` içindedir. Bu oturumda ücretli ses hizmeti veya
+ChatGPT ses aktarımı başlatılmadı; eksik yeni kayıtları varmış gibi sunma.
 
 Pages workflow'u yalnızca Vite'nin statik çıktısını yayımlar. PHP ve sunucu veritabanı GitHub Pages'te çalışmaz. Laravel VPS yayını için `docs/deploy.md` ve ayrı uygulama Compose servisini kullan; mevcut uygulamanın portlarını, veritabanını veya vhost'unu ezme.
 

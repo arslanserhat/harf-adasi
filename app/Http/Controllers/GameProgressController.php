@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\GameSession;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class GameProgressController extends Controller
@@ -68,11 +69,14 @@ class GameProgressController extends Controller
 
     public function destroy(Request $request): JsonResponse
     {
-        GameSession::query()
-            ->where('browser_id', self::browserId($request))
-            ->delete();
+        $browserId = self::browserId($request);
+        $revision = DB::transaction(function () use ($browserId): int {
+            GameSession::query()->where('browser_id', $browserId)->delete();
 
-        return response()->json(['reset' => true])
+            return LearningStateController::clearForBrowser($browserId);
+        });
+
+        return response()->json(['reset' => true, 'learning_revision' => $revision])
             ->header('Cache-Control', 'private, no-store');
     }
 }

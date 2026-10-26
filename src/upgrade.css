@@ -47,3 +47,5 @@ button svg.lucide{width:19px;height:19px;flex-shrink:0;stroke-width:2.25}
 @media(max-width:950px){.grid.words{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:600px){.grid.words{grid-template-columns:repeat(3,minmax(0,1fr))}.card{min-height:198px}.card .pic{min-height:97px}.card .pic .illustration{width:92px;height:92px}.journey-summary{gap:7px}.journey-summary div{padding:11px 8px;gap:6px;flex-direction:column;text-align:center}.journey-summary b{font-size:23px}.journey-summary span{font-size:10px}.journey-summary .illustration{width:30px;height:30px}.item .emoji .illustration{width:52px;height:52px}.read-options .choice .illustration{width:65px;height:65px}.face .illustration{width:48px;height:48px}.setting input[type=range]{width:130px}}
 @media(prefers-reduced-motion:reduce){.card{transition:none}}
+/* Live status messages have no controls and must never intercept tablet taps. */
+#toast{pointer-events:none}

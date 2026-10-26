@@ -1,0 +1,72 @@
+/* One world, one mission: all choices and pieces are physical objects within
+   the scene. The notebook keeps its dedicated touch-safe writing layout. */
+.learning.learn-world-frame{max-width:1224px}
+.learning.learning-task.learn-world-frame{display:block}
+.learn-world-frame .learn-nav{margin:0 0 10px;min-height:44px}
+.learn-world-frame .learn-nav>span{font-size:11px}
+.learn-world-frame .learn-task-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 3px 7px;text-align:left}
+.learn-world-frame .learn-task-header .learn-eyebrow{display:none}
+.learn-world-frame .learn-task-header h1{font-size:19px;margin:0;line-height:1.3;flex-shrink:0;max-width:49%;letter-spacing:-.3px}
+.learn-world-frame .learn-task-header p{font-size:11px;line-height:1.5;margin:0;text-align:right;max-width:48%}
+.learn-world-frame .learn-session-track{margin:0 0 13px;justify-content:flex-start;gap:7px;padding-left:4px}
+.learn-world-frame .learn-session-track>span{height:7px;width:21px;border-radius:6px;background:#e4e8d8}
+.learn-world-frame .learn-session-track>span.past{background:#6b9f7b}
+.learn-world-frame .learn-session-track>span.current{outline:none;background:#ed9d56;box-shadow:0 0 0 2px #f8e4c7}
+.learn-world-frame .learn-session-track small{font-size:10px;color:#6d8169}
+.learn-world-frame .story-scene.story-scene-world .story-scene-stage{height:min(630px,65vh);min-height:510px;aspect-ratio:auto}
+.learn-world-frame .story-scene-world .story-interaction-dock.has-interaction{position:absolute;left:auto;right:3%;bottom:5%;z-index:9;width:min(58%,650px);padding:0;transform:none;background:transparent;border:0;box-shadow:none}
+.learn-world-frame .story-scene.story-scene-world .story-scene-dialogue{width:42%;max-width:440px;left:2.5%;top:55px;padding:12px 14px;gap:9px}
+.learn-world-frame .story-scene.story-scene-world .story-scene-dialogue h2{font-size:14px!important}
+.learn-world-frame .story-scene.story-scene-world .story-scene-caption{font-size:12px!important;line-height:1.45!important}
+.learn-world-frame .story-speaker-mark{display:none}
+.learn-world-frame .story-scene-world .story-scene-tools{left:auto;bottom:auto;top:59px;right:3%;z-index:10;justify-content:flex-end}
+.learn-world-frame .story-scene-world .story-scene-tools button{min-height:40px;background:#fffdf1f5;color:#6c624c}
+.learn-world-frame .story-scene-world .story-scene-tools button span{font-size:11px}
+.learn-scene-task{position:relative;isolation:isolate;padding:15px 18px 10px;background:transparent;border:0;box-shadow:none}
+.learn-mission-title{margin:0 0 13px;text-align:left;border:1px solid #fce7b8;padding:10px 13px;background:#fff8e6f0;border-radius:16px;box-shadow:0 4px 0 #9f7c4255}
+.learn-mission-title>span{display:block;font-size:18px;font-weight:900;color:#65482b;letter-spacing:-.3px;line-height:1.25}
+.learn-mission-title>small{display:block;margin:5px 0 0;font-size:11px;line-height:1.5;font-weight:650;color:#7c6b50}
+.learn-world-frame .learn-task-controls{margin:6px 0 8px;gap:7px;justify-content:center}
+.learn-world-frame .learn-task-controls .learn-button{min-height:43px;padding:8px 11px;font-size:12px;border:1px solid #d6c6a0;background:#fffdf5;box-shadow:0 3px 0 #d8c7a0;color:#6a5838;border-radius:12px}
+.learn-world-frame .learn-task-controls .listen-primary{background:#357f73;color:#fff9e6;border-color:#2d6e63;box-shadow:0 3px 0 #245d51}
+.learn-world-frame .learn-adult-audio{margin:3px 0 9px;text-align:center}
+.learn-world-frame .learn-adult-audio .learn-button{min-height:30px;padding:3px 9px;font-size:10px;background:#fff7e2ed;border:0;box-shadow:0 2px #b5986655;color:#71552f;text-decoration:underline;text-underline-offset:3px}
+.learn-world-frame .learn-choices{margin:12px 0;display:flex;align-items:stretch;justify-content:center;gap:12px}
+.learn-world-frame .learn-choices .learn-button.word-choice{position:relative;min-width:88px;min-height:82px;padding:12px 15px;border:2px solid #f9e0a8;border-bottom-width:4px;border-radius:13px;background:linear-gradient(160deg,#fffcdf,#f3d6a0);box-shadow:0 5px 0 #b3915f,0 8px 12px #8d704529;color:#654525;font-size:29px;line-height:1.2;font-weight:850;transform:rotate(-2deg);transition:transform .16s,box-shadow .16s}
+.learn-world-frame .learn-choices .learn-button.word-choice:nth-child(2n){transform:rotate(2deg);background:linear-gradient(160deg,#fff6d7,#efcd90)}
+.learn-world-frame .learn-choices .learn-button.word-choice:after{content:'';position:absolute;width:18px;top:-3px;left:calc(50% - 9px);height:13px;background:#efac6066;mix-blend-mode:multiply;border-radius:0 0 3px 3px;pointer-events:none}
+.learn-world-frame .learn-choices .learn-button.word-choice:hover{transform:translateY(-3px) rotate(0)}
+.learn-world-frame .learn-choices .learn-button.correct{background:#d9e9b8;border-color:#b9d693;box-shadow:0 4px 0 #829e5b;color:#355831;opacity:1}
+.learn-world-frame .learn-choices .learn-button.tried{animation:world-object-retry .3s ease}
+.learn-world-frame .learn-choices .meaning-choice{min-height:90px;min-width:100px;background:#fff3c9;border:2px solid #e7d0a1;box-shadow:0 5px #b29560;border-radius:18px;font-size:24px;color:#695634}
+.learn-world-frame .learn-whole-word{margin:4px auto 9px;font-size:29px;line-height:1.15;color:#684c2e;background:#fff7dfed;padding:5px 14px;min-height:0;width:fit-content;border-radius:12px}
+.learn-world-frame .learn-slots{display:flex;justify-content:center;flex-wrap:wrap;gap:5px;margin:10px 0 12px;padding:8px;background:#caaf7d29;border:1px solid #c8af7b55;border-radius:13px;min-height:58px}
+.learn-world-frame .learn-slot{display:grid;place-items:center;min-width:37px;width:auto;height:42px;padding:4px 9px;border:1px dashed #c8ad7c;background:#fff9e8;color:#62482b;border-radius:8px;font-size:23px;line-height:1;font-weight:800}
+.learn-world-frame .learn-slot.filled{border-style:solid;border-color:#d7b17b;background:#eac28a;box-shadow:0 2px 0 #b28b57;animation:world-piece-place .25s ease-out}
+.learn-world-frame .learn-bank{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin:0 0 7px}
+.learn-world-frame .learn-bank .learn-tile{min-width:47px;width:auto;height:51px;min-height:44px;padding:4px 12px;background:linear-gradient(#fff5d0,#ecc58c);border:1px solid #dfbc80;border-top:2px solid #fff9df;box-shadow:0 4px 0 #a98451,0 6px 9px #a984511c;border-radius:10px;font-size:27px;line-height:1;color:#604424;font-weight:850}
+.learn-world-frame .learn-bank .learn-tile:disabled{opacity:.25;box-shadow:none;transform:translateY(4px)}
+.learn-world-frame .learn-feedback{margin:8px 0 2px;padding:5px 9px;min-height:26px;border:1px solid #f2e4bf;background:#fff9e8ef;color:#5e6743;font-size:11px;line-height:1.4;border-radius:10px}
+.learn-world-frame .learn-feedback[data-tone=success]{background:#dbe8c4;color:#426141}
+.learn-world-frame .learn-feedback[data-tone=help]{background:#f1dfb1;color:#7b5a30}
+.learn-world-frame .learn-next-row{display:flex;justify-content:flex-end;margin:9px 0 0;min-height:43px}
+.learn-world-frame .learn-next-row .learn-button{min-height:43px;padding:8px 16px;font-size:13px;border-radius:12px}
+.learn-world-frame .learn-next-row .learn-button:disabled{background:#e6ddc8;border-color:#d8ceb6;box-shadow:0 2px #c9c1ab;color:#8a826d;opacity:.7}
+.learn-world-frame .learn-letter-help{display:flex;justify-content:flex-end;margin:12px 0 0}
+.learn-world-frame .learn-letter-help .learn-button{min-height:35px;padding:5px 10px;font-size:11px;border:0;box-shadow:none;background:transparent;text-decoration:underline;text-underline-offset:3px}
+.learn-travel{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;gap:16px;background:#ffefd3e8;backdrop-filter:blur(6px);color:#47705b;font-weight:900;font-size:23px;animation:world-travel .28s ease both;pointer-events:auto}
+.learn-travel-compass{font-size:43px;color:#d68c4b;animation:world-compass .8s linear infinite}
+.learn-object-flight{position:fixed;z-index:900;display:grid;place-items:center;pointer-events:none;background:linear-gradient(#fff5d0,#ecc58c);border:2px solid #fff4d8;border-radius:12px;box-shadow:0 5px 0 #a98451,0 10px 18px #65482333;font-size:27px;font-weight:850;color:#604424}
+.learning-writing .learn-scene-task{display:contents}
+.learning-writing .learn-mission-title{display:none}
+.learning-writing .learn-next-row{margin:6px 0 0;justify-content:flex-end}
+.learning-writing .learn-workspace{background:#fffdf4;border-color:#eee4cf}
+.learning-writing .learn-notebook{background:#fffef9}
+@keyframes world-piece-place{from{transform:translateY(-13px) rotate(-5deg);opacity:.4}to{transform:none;opacity:1}}
+@keyframes world-object-retry{25%{transform:translateX(-5px) rotate(-2deg)}75%{transform:translateX(5px) rotate(2deg)}}
+@keyframes world-travel{from{opacity:0}to{opacity:1}}
+@keyframes world-compass{to{transform:rotate(360deg)}}
+@media(min-width:700px) and (max-height:800px){.learn-world-frame .learn-nav{margin-bottom:7px}.learn-world-frame .learn-task-header{margin-bottom:6px}.learn-world-frame .learn-task-header h1{font-size:17px}.learn-world-frame .learn-session-track{margin-bottom:9px}.learn-world-frame .story-scene.story-scene-world .story-scene-stage{height:calc(100dvh - 245px);min-height:455px}.learn-world-frame .story-scene.story-scene-world .story-scene-dialogue{width:39%;top:49px;padding:10px 12px}.learn-world-frame .story-scene.story-scene-world .story-scene-caption{font-size:11px!important}.learn-world-frame .story-scene-world .story-interaction-dock.has-interaction{width:56%;right:3%;bottom:5%}.learn-scene-task{padding:14px 18px 12px;border-radius:22px}.learn-mission-title{margin-bottom:9px;padding-bottom:8px}.learn-mission-title>span{font-size:16px}.learn-mission-title>small{font-size:10px}.learn-world-frame .learn-choices .learn-button.word-choice{min-height:73px;min-width:77px;font-size:27px;padding:10px 13px}.learn-world-frame .learn-feedback{font-size:10px}.learn-world-frame .story-scene-world .story-scene-tools{top:51px}.learn-world-frame .learn-task-controls .learn-button{font-size:11px;min-height:40px}.learn-world-frame .learn-adult-audio .learn-button{min-height:28px}}
+@media(max-width:850px) and (min-height:801px){.learn-world-frame .story-scene.story-scene-world .story-scene-stage{height:700px;min-height:0}.learn-world-frame .story-scene-world .story-world-backdrop{object-position:30% center}.learn-world-frame .story-scene-world .story-interaction-dock.has-interaction{left:4%;right:4%;width:auto;bottom:4%}.learn-world-frame .story-scene.story-scene-world .story-scene-dialogue{top:50px;width:79%;left:4%}.learn-world-frame .story-scene-world .story-scene-tools{top:auto;bottom:calc(4% + 350px);right:4%}.learn-world-frame .learn-task-header h1{font-size:18px}.learn-world-frame .learn-task-header p{font-size:10px}.learn-scene-task{padding:17px 20px}.learn-world-frame .learn-choices .learn-button.word-choice{min-width:110px;min-height:82px;font-size:31px}}
+@media(max-width:600px){.learn-world-frame .learn-nav>span{display:none}.learn-world-frame .learn-nav .learn-button{font-size:12px;min-height:41px}.learn-world-frame .learn-task-header{display:block;margin-bottom:8px}.learn-world-frame .learn-task-header h1{max-width:none;font-size:18px;margin:0 0 5px}.learn-world-frame .learn-task-header p{max-width:none;text-align:left;font-size:10px}.learn-world-frame .story-scene.story-scene-world{border-radius:22px;border-width:2px}.learn-world-frame .story-scene.story-scene-world .story-scene-stage{min-height:690px;height:auto;aspect-ratio:auto}.learn-world-frame .story-scene-world .story-world-backdrop{object-position:28% center}.learn-world-frame .story-scene.story-scene-world .story-scene-dialogue{top:46px;width:90%;left:5%;padding:10px 12px}.learn-world-frame .story-scene-world .story-scene-topline{font-size:9px;inset:10px 10px auto}.learn-world-frame .story-scene-world .story-route{display:none}.learn-world-frame .story-scene-world .story-interaction-dock.has-interaction{left:3%;right:3%;bottom:3%;width:auto}.learn-world-frame .story-scene-world .story-scene-tools{top:auto;bottom:calc(3% + 360px);right:4%}.learn-scene-task{padding:14px 12px;border-radius:21px}.learn-mission-title>span{font-size:16px}.learn-mission-title>small{font-size:10px}.learn-world-frame .learn-choices{gap:9px}.learn-world-frame .learn-choices .learn-button.word-choice{min-width:72px;padding:9px 10px;font-size:26px;min-height:77px}.learn-world-frame .learn-bank .learn-tile{font-size:25px;padding:5px 10px;min-width:43px}.learn-world-frame .learn-task-controls .learn-button{font-size:11px;padding:7px 10px}.learn-world-frame .learn-adult-audio .learn-button{font-size:9px}.learn-world-frame .learn-feedback{font-size:10px}.learn-world-frame .learn-next-row .learn-button{font-size:12px}.learn-world-frame .learn-slot{min-width:31px;padding:3px 7px;font-size:21px}.learn-travel{font-size:18px;gap:10px}}
+@media(prefers-reduced-motion:reduce){.learn-world-frame *{animation:none!important;transition:none!important}}

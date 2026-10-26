@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { assert, getPlaywright, startServer, open, touch, stroke, assertClean } = require('./helpers.cjs');
+const { assert, getPlaywright, startServer, open, touch, stroke, assertClean, fill, next: legacyNext, review: legacyReview } = require('./helpers.cjs');
 
 const cases = [];
 const scenario = (name, run, browserOptions = {}) => cases.push({ name, run, browserOptions });
@@ -11,6 +11,8 @@ async function press(app, selector) {
   const control = typeof selector === 'string' ? app.page.locator(selector).first() : selector;
   await control.waitFor({ state: 'visible' });
   assert.equal(await control.isEnabled(), true, 'the requested control is enabled');
+  const advancesLearning = await control.getAttribute('data-learning') === 'next';
+  const previousTask = advancesLearning ? await app.page.locator('#learning').getAttribute('data-task-id') : null;
   await control.scrollIntoViewIfNeeded();
   const box = await control.boundingBox();
   assert.ok(box && box.width >= 24 && box.height >= 24, 'touch control has a reachable hit area');
@@ -18,21 +20,56 @@ async function press(app, selector) {
   await app.page.waitForTimeout(80);
   await touch(app.cdp, 'touchEnd', []);
   await app.page.waitForTimeout(80);
+  if (advancesLearning) {
+    await app.page.waitForFunction(previous => {
+      const screen = document.querySelector('#learning');
+      return screen?.dataset.screen === 'summary'
+        || (screen?.dataset.screen === 'task' && screen.dataset.taskId !== previous);
+    }, previousTask);
+  }
 }
 
 async function enter(app, parent = false) {
   await press(app, parent ? '[data-do="learning-parent"]' : '[data-do="learning"]');
-  await app.page.locator(`#learning[data-screen="${parent ? 'parent' : 'home'}"]`).waitFor();
+  await app.page.locator(parent ? '#learning[data-screen="parent"]' : '#learning').waitFor();
 }
 
 async function begin(app) {
   await enter(app);
-  await press(app, '[data-learning="start"]');
+  if (await app.page.locator('#learning[data-screen="home"]').count()) await press(app, '[data-learning="start"]');
+  await finishIntro(app);
+}
+
+async function finishIntro(app) {
   if (await app.page.locator('#learning[data-screen="intro"]').count()) {
     assert.match(await app.page.locator('#learning h1').innerText(), /Alparslan|Mektup|mektup/u, 'the connected lesson begins with its original story');
     await press(app, '[data-learning="begin-tasks"]');
   }
   await app.page.locator('#learning[data-screen="task"]').waitFor();
+}
+
+async function assertWorld(app, { chapter, art } = {}) {
+  const scene = app.page.locator('.story-scene-world');
+  await scene.waitFor();
+  if (chapter !== undefined) assert.equal(await scene.getAttribute('data-story-chapter'), String(chapter));
+  const image = app.page.locator('.story-world-backdrop');
+  await image.evaluate(element => element.decode());
+  const dimensions = await image.evaluate(element => ({ width: element.naturalWidth, height: element.naturalHeight, source: element.currentSrc }));
+  assert.ok(dimensions.width >= 1000 && dimensions.height >= 600, 'the world uses a loaded full-resolution scene illustration');
+  if (art) assert.equal(new URL(dimensions.source).pathname.endsWith(`/art/${art}`), true, 'the scene artwork corresponds to this destination');
+  const selectors = ['#learningNext', '[data-learning="listen"]'];
+  if (await app.page.locator('#learningBank').count()) selectors.push('#learningBank', '#learningSlots');
+  else selectors.push('.learn-choices');
+  for (const selector of selectors) {
+    assert.equal(await app.page.locator(selector).first().evaluate(element => {
+      const stage = element.closest('.story-scene-stage');
+      const dock = element.closest('.story-interaction-dock');
+      if (!stage || !dock) return false;
+      const rect = element.getBoundingClientRect(), boundary = stage.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0 && rect.left >= boundary.left - 2
+        && rect.right <= boundary.right + 2 && rect.top >= boundary.top - 2 && rect.bottom <= boundary.bottom + 2;
+    }), true, `${selector} is an actual in-world control inside the scene boundaries`);
+  }
 }
 
 async function snapshot(page) {
@@ -214,6 +251,13 @@ scenario('connected learning: errors are assisted, repeated cards, real writing 
   await press(app, report.locator('summary'));
   assert.ok(await report.locator('.learn-skill-grid small').count(), 'actual per-skill review times are shown to the parent');
   assert.doesNotMatch(await report.innerText(), /kesin öğrendi|kalıcı öğrendi|asla unutmaz/iu, 'a first session does not claim permanent mastery');
+  const previousSequence = saved.session.tasks.map(task => `${task.word}:${task.kind}`);
+  await press(app, '[data-learning="start"]');
+  await app.page.locator('#learning[data-screen="intro"]').waitFor();
+  const following = await snapshot(app.page);
+  assert.equal(following.session.storyEpisode, 1, 'the next journey continues the authored story instead of restarting the lost letter');
+  assert.match(await app.page.locator('#learning h1').innerText(), /Pırpır.*Bahçe Pazarı/u);
+  assert.notDeepEqual(following.session.tasks.map(task => `${task.word}:${task.kind}`), previousSequence, 'next journey changes its actual words or skill sequence');
 });
 
 scenario('writing rotation: no scroll, empty/retry review and controls remain reachable', async app => {
@@ -260,9 +304,15 @@ scenario('story scene: character controls do not complete tasks or reveal the li
   assert.equal(task.kind, 'listen');
   const scene = app.page.locator('.story-scene');
   await scene.waitFor();
+  await assertWorld(app, { chapter: 0, art: 'harf-post.webp' });
   const before = await scene.getAttribute('data-story-completed');
-  const moving = app.page.locator('.story-drifting-letter').first();
-  assert.ok(await moving.evaluate(element => element.getAnimations().some(animation => animation.playState === 'running')), 'the original scene has real running animation');
+  assert.ok(await scene.evaluate(element => element.getAnimations({ subtree: true }).some(animation => animation.playState === 'running')), 'the scene has real running world animation');
+  const animationTime = await scene.evaluate(element => element.getAnimations({ subtree: true }).find(animation => animation.playState === 'running').currentTime);
+  await app.page.waitForTimeout(150);
+  assert.ok(await scene.evaluate((element, start) => {
+    const animations = element.getAnimations({ subtree: true });
+    return animations.some(animation => animation.playState === 'running' && Number(animation.currentTime) > Number(start));
+  }, animationTime), 'world animation time actually advances');
   const sceneText = await app.page.locator('.story-scene-caption').innerText();
   const escapedWord = task.word.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&');
   assert.doesNotMatch(sceneText.toLocaleLowerCase('tr-TR'), new RegExp(`(?<!\\p{L})${escapedWord}(?!\\p{L})`, 'u'), 'the scene caption does not print the answer to a listening task');
@@ -273,16 +323,116 @@ scenario('story scene: character controls do not complete tasks or reveal the li
     assert.equal(await scene.getAttribute('data-story-completed'), before, `${action} cannot advance the story`);
     assert.equal(await app.page.locator('#learningNext').isEnabled(), false);
   }
-  assert.ok(await moving.evaluate(element => element.getAnimations().every(animation => animation.playState === 'paused')), 'the motion control pauses the scene animation');
+  assert.ok(await scene.evaluate(element => element.getAnimations({ subtree: true }).length > 0
+    && element.getAnimations({ subtree: true }).every(animation => animation.playState === 'paused')), 'the motion control pauses the actual scene animations');
   await app.page.emulateMedia({ reducedMotion: 'reduce' });
   assert.equal(await app.page.locator('[data-story-action="motion"]').isVisible(), false, 'reduced-motion preference removes the animation control');
-  assert.equal(await moving.evaluate(element => element.getAnimations().length), 0, 'reduced-motion preference actually disables animation');
+  assert.equal(await scene.evaluate(element => element.getAnimations({ subtree: true }).length), 0, 'reduced-motion preference actually disables animation');
   await solveTask(app, task);
   assert.equal(Number(await scene.getAttribute('data-story-completed')), Number(before) + 1, 'actual correct work advances the scene success count');
   assert.equal((await currentTask(app)).id, task.id, 'a correct task still waits for the child’s explicit continuation');
   await press(app, '#learningNext');
   assert.notEqual((await currentTask(app)).id, task.id);
   assert.equal(Number(await app.page.locator('.story-scene').getAttribute('data-story-completed')), Number(before) + 1, 'a genuinely completed task advances the story');
+});
+
+scenario('island map: all four destinations open distinct real in-world learning activities', async app => {
+  const homeImage = app.page.locator('.home-island-art > img');
+  await homeImage.evaluate(image => image.decode());
+  assert.ok(await homeImage.evaluate(image => image.naturalWidth >= 1000 && image.naturalHeight >= 600), 'the home island illustration actually loads');
+  assert.equal(await app.page.locator('[data-do="learning-world"]').count(), 4, 'the island has four real learning destinations');
+  const destinations = [
+    ['post', 'listen', 0, 'harf-post.webp'],
+    ['workshop', 'build', 1, 'harf-workshop.webp'],
+    ['bridge', 'recall', 2, 'harf-bridge.webp'],
+    ['garden', 'meaning', 3, 'harf-garden.webp'],
+  ];
+  const queues = new Set();
+  for (const [world, kind, chapter, art] of destinations) {
+    await press(app, `[data-do="learning-world"][data-world="${world}"]`);
+    await finishIntro(app);
+    const task = await currentTask(app);
+    assert.equal(task.kind, kind, `${world} opens the activity promised by the map`);
+    const queue = (await snapshot(app.page)).session.id;
+    assert.equal(queues.has(queue), false, 'a deliberate map destination creates a matching fresh journey');
+    queues.add(queue);
+    await assertWorld(app, { chapter, art });
+    assert.equal(await app.page.locator('#learningNext').isEnabled(), false, 'entering a destination never awards task completion');
+    await press(app, '[data-learning="home"]');
+    await app.page.locator('.home-shell').waitFor();
+  }
+});
+
+scenario('home island motion: pause freezes real animations and survives refresh', async app => {
+  const moving = app.page.locator('.home-floating-letter').first();
+  assert.ok(await moving.evaluate(element => element.getAnimations().some(animation => animation.playState === 'running')), 'the home map contains running animation');
+  const start = await moving.evaluate(element => Number(element.getAnimations()[0].currentTime));
+  await app.page.waitForTimeout(150);
+  assert.ok(await moving.evaluate((element, time) => Number(element.getAnimations()[0].currentTime) > time, start), 'the home animation clock advances');
+  await press(app, '[data-do="home-motion"]');
+  assert.equal(await app.page.locator('.home-shell').getAttribute('data-motion-paused'), 'true');
+  assert.equal(await app.page.locator('[data-do="home-motion"]').getAttribute('aria-pressed'), 'true');
+  assert.ok(await moving.evaluate(element => element.getAnimations().every(animation => animation.playState === 'paused')));
+  const paused = await moving.evaluate(element => element.getAnimations().map(animation => Number(animation.currentTime)));
+  await app.page.waitForTimeout(150);
+  assert.deepEqual(await moving.evaluate(element => element.getAnimations().map(animation => Number(animation.currentTime))), paused, 'the paused map is actually frozen');
+  await app.page.reload();
+  await app.page.locator('#ready').filter({ hasText: 'Oyun hazır' }).waitFor();
+  assert.equal(await app.page.locator('.home-shell').getAttribute('data-motion-paused'), 'true');
+  assert.ok(await app.page.locator('.home-floating-letter').first().evaluate(element => element.getAnimations().every(animation => animation.playState === 'paused')), 'a refresh retains the chosen motion preference');
+  await app.page.emulateMedia({ reducedMotion: 'reduce' });
+  assert.equal(await app.page.locator('[data-do="home-motion"]').isVisible(), false);
+  assert.equal(await app.page.locator('.home-floating-letter').first().evaluate(element => element.getAnimations().length), 0, 'system reduced-motion preference removes map animation');
+});
+
+scenario('bridge construction: only correct placed cards build physical bridge pieces', async app => {
+  await press(app, '[data-do="learning-world"][data-world="bridge"]');
+  await finishIntro(app);
+  const task = await currentTask(app);
+  assert.equal(task.kind, 'recall');
+  assert.ok(task.tokens.length >= 2);
+  await assertWorld(app, { chapter: 2, art: 'harf-bridge.webp' });
+  const scene = app.page.locator('.story-scene');
+  assert.equal(await scene.getAttribute('data-story-pieces'), '0');
+  assert.equal(await app.page.locator('.story-world-plank.is-built').count(), 0);
+  const wrong = app.page.locator('#learningBank [data-learning="tile"]').filter({ hasNotText: exactText(task.tokens[0]) }).first();
+  await press(app, wrong);
+  assert.equal(await scene.getAttribute('data-story-pieces'), '0', 'a wrong card cannot construct a bridge plank');
+  assert.equal(await app.page.locator('.story-world-plank.is-built').count(), 0);
+  const first = app.page.locator('#learningBank [data-learning="tile"]:not([disabled])').filter({ hasText: exactText(task.tokens[0]) }).first();
+  await press(app, first);
+  assert.equal(await scene.getAttribute('data-story-pieces'), '1');
+  assert.equal(await app.page.locator('.story-world-plank.is-built').count(), Math.floor(7 / task.tokens.length), 'one genuinely placed card constructs its share of the physical bridge');
+  assert.equal(await app.page.locator('#learningNext').isEnabled(), false, 'a partially built bridge is not a completed task');
+  await fillTiles(app, task.tokens.slice(1));
+  assert.equal(Number(await scene.getAttribute('data-story-pieces')), task.tokens.length);
+  assert.equal(await app.page.locator('.story-world-plank.is-built').count(), 7);
+  assert.equal(await app.page.locator('#learningNext').isEnabled(), true);
+});
+
+scenario('legacy continuation: the next journey follows the completed word instead of an old unrelated queue', async app => {
+  await begin(app);
+  const old = (await snapshot(app.page)).session;
+  assert.equal(old.tasks[0].word, 'nane');
+  await press(app, '[data-learning="home"]');
+  await press(app, '[data-do="catalog"][data-view="words"]');
+  await press(app, '[data-do="word"][data-text="anne"]');
+  await fill(app.page, [...'anne']);
+  await legacyNext(app.page);
+  await legacyReview(app.page, app.cdp);
+  await legacyNext(app.page);
+  await app.page.locator('.party').waitFor();
+  const continuation = app.page.locator('[data-do="learning-continue"]');
+  assert.equal(await continuation.getAttribute('data-focus-text'), 'anne');
+  assert.equal(await continuation.getAttribute('data-focus-skill'), 'write');
+  assert.match(await app.page.locator('.continuation-preview').innerText(), /anne/u, 'the preview describes the actual word being continued');
+  await press(app, continuation);
+  await finishIntro(app);
+  const following = (await snapshot(app.page)).session;
+  assert.notEqual(following.id, old.id, 'continuation replaces an unrelated unfinished journey');
+  assert.equal(following.tasks[0].word, 'anne', 'the completed word is the next actual task target');
+  assert.notEqual(following.tasks[0].kind, 'write', 'the word continues into a different learning skill');
+  assert.equal((await currentTask(app)).word, 'anne');
 });
 
 scenario('unavailable Turkish audio: adult support works and cannot earn independent listening credit', async app => {
@@ -392,7 +542,6 @@ scenario('existing learning areas remain reachable after an adaptive session is 
     await app.page.locator('.games').waitFor();
   }
   await enter(app);
-  await press(app, '[data-learning="start"]');
   await app.page.locator('#learning[data-screen="task"]').waitFor();
 });
 

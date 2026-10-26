@@ -64,7 +64,7 @@ class StoreLearningStateRequest extends FormRequest
             'state.events.*.independent' => ['required', 'boolean'],
             'state.events.*.at' => ['required', 'integer', 'min:0', 'max:32503680000000'],
             'state.progress' => ['present', 'array', 'max:200'],
-            'state.session' => ['present', 'nullable', 'array:id,createdAt,wordTexts,tasks,index,results,paused,storySeen'],
+            'state.session' => ['present', 'nullable', 'array:id,createdAt,wordTexts,tasks,index,results,paused,storySeen,storyEpisode'],
             'state.session.id' => ['required_with:state.session', 'string', 'max:160'],
             'state.session.createdAt' => ['required_with:state.session', 'integer', 'min:0', 'max:32503680000000'],
             'state.session.wordTexts' => ['required_with:state.session', 'array', 'list', 'max:3'],
@@ -91,6 +91,7 @@ class StoreLearningStateRequest extends FormRequest
             'state.session.results' => [Rule::excludeIf(fn (): bool => ! is_array($this->input('state.session'))), 'present', 'array', 'max:20'],
             'state.session.paused' => ['required_with:state.session', 'boolean'],
             'state.session.storySeen' => ['sometimes', 'boolean'],
+            'state.session.storyEpisode' => ['sometimes', 'integer', 'min:0', 'max:2'],
         ];
     }
 

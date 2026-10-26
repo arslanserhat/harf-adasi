@@ -179,7 +179,8 @@ function normalizeSession(value, now) {
     };
   }
   return { id: value.id, createdAt: stamp(value.createdAt), wordTexts: unique(tasks.map(task => task.word)).slice(0, 3),
-    tasks, index: Math.min(tasks.length, integer(value.index, 12)), results, paused: value.paused === true, storySeen: value.storySeen === true };
+    tasks, index: Math.min(tasks.length, integer(value.index, 12)), results, paused: value.paused === true,
+    storySeen: value.storySeen === true, storyEpisode: integer(value.storyEpisode, 2) };
 }
 
 function validInkPath(path) {
@@ -308,41 +309,145 @@ function hash(value) { let result = 2166136261; for (const letter of value) resu
 export function planSession(value, letters, now = Date.now(), options = {}) {
   const state = normalizeLearningState(value, now), selected = known(letters);
   const { eligible } = getEligibleWords(state, letters);
-  const sessionId = `journey-${stamp(now).toString(36)}-${hash(`${state.activeListId}:${state.events.at(-1)?.id || ''}`).toString(36)}`;
-  const plan = { id: sessionId, createdAt: stamp(now), wordTexts: [], tasks: [], index: 0, results: Object.create(null), paused: false, storySeen: false };
+  const focusText = normalizeWord(cleanText(options.focusText));
+  const focusTokens = unique(focusText.split(/[^abcçdefgğhıijklmnoöprsştuüvyz]+/u).filter(token => WORD.test(token)));
+  const focusSkill = SKILLS.includes(options.focusSkill) ? options.focusSkill : '';
+  const entryKind = SKILLS.includes(options.entryKind) ? options.entryKind : '';
+  const sessionId = `journey-${stamp(now).toString(36)}-${hash(`${state.activeListId}:${state.events.at(-1)?.id || ''}:${focusText}:${focusSkill}:${entryKind}`).toString(36)}`;
+  const previousEpisode = integer(state.session?.storyEpisode, 2);
+  const storyEpisode = state.session && state.session.index >= state.session.tasks.length ? (previousEpisode + 1) % 3 : previousEpisode;
+  const plan = { id: sessionId, createdAt: stamp(now), wordTexts: [], tasks: [], index: 0, results: Object.create(null),
+    paused: false, storySeen: false, storyEpisode };
   if (!eligible.length) return plan;
   const lastAt = word => Math.max(0, ...Object.values(state.progress[word.text] || {}).map(progress => progress.lastAt));
   const due = word => Object.values(state.progress[word.text] || {}).some(progress => progress.nextDueAt > 0 && progress.nextDueAt <= now);
   const weak = word => Object.values(state.progress[word.text] || {}).some(progress => progress.attempts && progress.recent.at(-1) !== 2);
   const rank = word => due(word) ? 0 : weak(word) && now - lastAt(word) >= 30 * 60000 ? 1 : !lastAt(word) ? 2 : 3;
   const ranked = eligible.map((word, index) => ({ word, index })).sort((a, b) => rank(a.word) - rank(b.word) || lastAt(a.word) - lastAt(b.word) || a.index - b.index).map(item => item.word);
-  const first = ranked[0], second = ranked[1] || first;
-  const weakSkill = ['listen', 'syllables', 'build', 'recall'].find(skill => {
+  const focusScore = word => Math.max(0, ...focusTokens.map(token => {
+    if (word.text === token) return 100;
+    if (word.parts.includes(token)) return 70;
+    if (word.text.includes(token)) return 50;
+    const overlap = unique([...token]).filter(letter => word.text.includes(letter)).length;
+    return overlap ? 10 + overlap / unique([...token]).length : 0;
+  }));
+  const focused = focusTokens.length ? [...ranked].sort((a, b) => focusScore(b) - focusScore(a) || ranked.indexOf(a) - ranked.indexOf(b))[0] : null;
+  let first = focused && focusScore(focused) > 0 ? focused : ranked[0];
+  if (entryKind && !focusTokens.length && !makeTask(first, entryKind, state, eligible, selected, 'preview')) {
+    first = ranked.find(word => makeTask(word, entryKind, state, eligible, selected, 'preview')) || first;
+  }
+  const alternatives = ranked.filter(word => word.text !== first.text);
+  // Connect new words with something familiar while giving due/difficult work
+  // priority. The active teacher list supplies every target; context never adds
+  // an invented word or silently promotes a syllable to a vocabulary item.
+  const second = alternatives.find(word => rank(word) < 2)
+    || alternatives.find(word => Boolean(lastAt(word)) !== Boolean(lastAt(first)))
+    || alternatives[0] || first;
+  const possible = (word, kind) => Boolean(makeTask(word, kind, state, eligible, selected, 'preview'));
+  const usableKinds = word => SKILLS.filter(kind => (kind !== 'syllables' || word.parts.length > 1) && possible(word, kind));
+  const weakSkill = usableKinds(first).filter(skill => skill !== focusSkill).filter(skill => {
     const progress = state.progress[first.text]?.[skill];
-    return progress?.attempts && progress.recent.at(-1) !== 2 && (skill !== 'syllables' || first.parts.length > 1);
-  });
-  const firstKind = weakSkill || (due(first) ? 'recall' : 'listen');
-  const reason = due(first) ? 'Daha önce çalıştığın kelimeyi yeniden hatırlayalım.' : weakSkill ? 'Bu beceride küçük bir destekle başlayalım.' : 'Öğretmenin kelimeleriyle yeni bir yolculuk.';
+    return progress?.attempts && progress.recent.at(-1) !== 2;
+  }).sort((a, b) => {
+    const left = state.progress[first.text][a], right = state.progress[first.text][b];
+    return left.recent.at(-1) - right.recent.at(-1) || left.lastAt - right.lastAt;
+  })[0];
+  const transferKinds = {
+    listen: ['syllables', 'build', 'recall'], syllables: ['build', 'recall', 'meaning'],
+    build: ['recall', 'meaning', 'write'], recall: ['meaning', 'sentence', 'write'],
+    write: ['meaning', 'sentence', 'recall'], meaning: ['sentence', 'recall', 'build'],
+    sentence: ['recall', 'write', 'meaning'],
+  };
+  const transfer = focusSkill && focusScore(first) > 0
+    ? transferKinds[focusSkill].find(kind => (kind !== 'syllables' || first.parts.length > 1) && possible(first, kind)) : '';
+  const entry = entryKind && possible(first, entryKind) ? entryKind : '';
+  const firstKind = entry || weakSkill || transfer || (due(first) ? 'recall' : 'listen');
+  const reason = entry ? `Bu durakta “${first.text}” kelimesiyle ${SKILL_LABELS[entry].toLocaleLowerCase('tr-TR')} çalışacağız.`
+    : entryKind ? `“${first.text}” için bu duraktaki görev henüz uygun değil. ${SKILL_LABELS[firstKind]} ile bağlantılı bir adım hazırladık.`
+      : weakSkill ? `“${first.text}” için ${SKILL_LABELS[weakSkill].toLocaleLowerCase('tr-TR')} adımında biraz destek kullandın. Yeni bir biçimde deneyelim.`
+    : transfer ? `“${first.text}” çalışmanı ${SKILL_LABELS[firstKind].toLocaleLowerCase('tr-TR')} ile sürdürelim.`
+      : due(first) ? `“${first.text}” için yeniden hatırlama zamanı geldi.`
+        : focusTokens.length && focusScore(first) > 0 ? `Çalıştığın parçaları öğretmeninin listesindeki “${first.text}” kelimesine bağlayalım.`
+          : !lastAt(first) ? `Öğretmeninin listesindeki “${first.text}” kelimesini keşfedelim.`
+            : `“${first.text}” kelimesini bu kez başka görevlerle kullanalım.`;
   const firstProgress = state.progress[first.text] || {};
   const finalKind = firstProgress.sentence?.attempts && (firstProgress.meaning?.lastAt || 0) < firstProgress.sentence.lastAt
     && makeTask(first, 'meaning', state, eligible, selected, 'preview') ? 'meaning' : 'sentence';
-  const specs = [
+  const segment = word => word.parts.length > 1 ? 'syllables' : 'build';
+  const focusPractice = weakSkill && weakSkill !== firstKind && weakSkill !== 'write' ? weakSkill : segment(first);
+  const secondKind = lastAt(second) ? 'recall' : 'listen';
+  const coldSpecs = [
     [first, firstKind, reason],
-    [first, first.parts.length > 1 ? 'syllables' : 'build', 'Parçalardan kelimenin bütününe.'],
+    [first, focusPractice, weakSkill && weakSkill !== firstKind ? 'Destek kullandığın beceriyi de bu yolculukta yeniden deneyelim.' : 'Parçalardan kelimenin bütününe.'],
     [second, 'listen', 'Araya başka bir kelimeyle küçük bir görev giriyor.'],
     [first, 'build', 'Aynı kelimeyi bu kez harflerle kur.'],
-    [second, second.parts.length > 1 ? 'syllables' : 'build', 'İkinci kelimeyle yolumuza devam edelim.'],
+    [second, segment(second), 'İkinci kelimeyle yolumuza devam edelim.'],
     [first, 'recall', 'Araya başka görevler girdi. Şimdi örneksiz deneyelim.'],
     [first, 'write', 'Kelimeyi kendin yazıp birlikte kontrol et.'],
     [first, finalKind, finalKind === 'meaning' ? 'Kelimenin anlamıyla yaptığımız işi eşleştirelim.' : 'Kelimeyi anlamlı bir mesajın içinde kullan.'],
   ];
+  const variants = [coldSpecs, [
+    [first, firstKind, reason], [second, secondKind, 'Bildiğin bir kelimeyle yeni kelime arasında bağ kuralım.'],
+    [first, focusPractice, 'Kelimeyi bu kez başka bir beceriyle kullanalım.'],
+    [first, 'build', 'Harfleri sırala, kelimenin etiketini hazırla.'],
+    [first, 'write', 'Etiketi kendi elinle yazıp birlikte kontrol et.'],
+    [second, segment(second), 'İkinci kelimeyle kısa bir görev.'],
+    [first, 'recall', 'Araya başka bir iş girdi. Şimdi örneksiz hatırlayalım.'],
+    [first, finalKind, 'Kelimeyi anlamlı bir mesajda ya da resimde kullan.'],
+  ], [
+    [first, firstKind, reason], [second, secondKind, 'Bir başka kelimeye uğrayıp geri döneceğiz.'],
+    [first, 'build', 'Harflerden kelimeyi kendin kur.'],
+    [first, finalKind, 'Kurduğun kelimeyle bir mesajı veya resmi tamamla.'],
+    [second, segment(second), 'Öğretmeninin listesinden ikinci bir çalışma.'],
+    [first, 'write', 'Kelimeyi yazıp birlikte kontrol et.'],
+    [first, 'recall', 'Biraz önce çalıştığın kelimeyi örneksiz hatırla.'],
+    [first, focusPractice, 'Son bir beceri çalışmasıyla yolculuğu tamamlayalım.'],
+  ], [
+    [first, firstKind, reason], [first, focusPractice, 'Kelimeni bu kez başka bir beceriyle kullanalım.'],
+    [second, secondKind, 'Araya başka bir kelimenin kartı giriyor.'],
+    [first, finalKind, 'Kelimeyi yaptığımız işin anlamıyla eşleştirelim.'],
+    [first, 'build', 'Mesajındaki kelimeyi bu kez harflerle kur.'],
+    [second, 'build', 'İkinci kelimenin harflerini sırala.'],
+    [first, 'write', 'Kelimeyi kendi elinle yazıp birlikte incele.'],
+    [first, 'recall', 'Yolculuğun sonunda örneksiz bir hatırlama denemesi.'],
+  ]];
+  const historyCount = state.events.length + integer(state.session?.index, 12);
+  const rotation = historyCount || transfer || entry ? 1 + hash(`${historyCount}:${state.events.at(-1)?.id || ''}:${focusSkill}:${entryKind}`) % 3 : 0;
+  const observedTasks = state.events.filter(event => /^journey-[a-z0-9]+-[a-z0-9]+-\d+$/.test(event.id))
+    .slice(-8).map(event => ({ word: event.word, kind: event.skill }));
+  const previousTasks = state.session?.tasks?.length ? state.session.tasks : observedTasks;
+  // Slot 5 may be replaced by a due letter below. Compare the surrounding
+  // progression so that a permanent letter reminder cannot conceal a replay.
+  const signature = tasks => tasks.filter((_, index) => index !== 4).map(task => `${task.word}:${task.kind}`).join('|');
+  const previousSignature = previousTasks.length ? signature(previousTasks) : '';
   const limit = Math.max(1, Math.min(12, integer(options.limit || 8, 12)));
-  for (const [word, kind, why] of specs.slice(0, limit)) {
+  const fill = specs => {
+    plan.tasks = [];
+    for (const [word, kind, why] of specs.slice(0, limit)) {
     const id = `${sessionId}-${plan.tasks.length}`;
-    const task = makeTask(word, kind, state, eligible, selected, id, why)
+    let task = makeTask(word, kind, state, eligible, selected, id, why)
       || makeTask(word, 'meaning', state, eligible, selected, id, 'Kelimenin anlamını da keşfedelim.')
       || makeTask(second, 'recall', state, eligible, selected, id, 'Bu kelimeyi de örneksiz hatırlayalım.');
-    plan.tasks.push(task);
+    const previous = plan.tasks.at(-1);
+    const duplicate = candidate => previous && candidate.word === previous.word && candidate.kind === previous.kind;
+    const alreadyWrote = task.kind === 'write' && plan.tasks.some(previousTask => previousTask.word === task.word && previousTask.kind === 'write');
+    if (duplicate(task) || alreadyWrote) {
+      const nextKinds = ['build', 'syllables', 'meaning', 'listen', 'recall', 'sentence'].filter(nextKind => nextKind !== task.kind);
+      const replacements = [
+        ...nextKinds.map(nextKind => makeTask(word, nextKind, state, eligible, selected, id, 'Aynı kelimeyi başka bir görevle kullanalım.')),
+        ...(second.text !== word.text ? [makeTask(second, kind, state, eligible, selected, id, 'Şimdi listedeki diğer kelimeyle çalışalım.')] : []),
+      ];
+      task = replacements.find(candidate => candidate && !duplicate(candidate)) || task;
+    }
+      plan.tasks.push(task);
+    }
+  };
+  fill(variants[rotation]);
+  if (previousSignature && signature(plan.tasks) === previousSignature) {
+    for (let offset = 1; offset < variants.length; offset++) {
+      fill(variants[(rotation + offset) % variants.length]);
+      if (signature(plan.tasks) !== previousSignature) break;
+    }
   }
   // A letter remembered in a previous writing/selection exercise can return
   // independently of the teacher's word list. It remains an observation about

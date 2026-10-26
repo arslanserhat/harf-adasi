@@ -41,9 +41,57 @@ const DIALOGUES = [
   [['Alparslan', 'İşte bahçe! Hazırladığımız kartları doğru yerlere ulaştıralım.'], ['Pırpır', 'Yazını bitirdiğinde bir büyüğünle birlikte kontrol edebilirsin.']],
   [['Pırpır', 'Arkadaşımıza bir cevap mektubu gönderelim.'], ['Alparslan', 'Daha önce çalıştığımız kartları yeniden hatırlayalım.']],
 ];
-export const NARRATION_PHRASES = [INTRO, ENDING, ...CHAPTERS.flatMap(chapter => [chapter.caption, chapter.success]), ...DIALOGUES.flatMap(lines => lines.map(line => line[1]))];
+const EPISODES = [
+  { title: STORY_TITLE, intro: INTRO, ending: ENDING, chapters: CHAPTERS, dialogues: DIALOGUES },
+  {
+    title: 'Pırpır’ın Bahçe Pazarı',
+    intro: 'Bahçede küçük bir pazar kuruluyor. Pırpır sipariş kartlarını toplamış. Alparslan ile etiketleri hazırlayıp köprüden geçelim ve siparişleri yerlerine ulaştıralım.',
+    ending: 'Bahçe pazarının siparişleri yerlerine ulaştı. Pırpır sepetleri hazırladı. Bir sonraki yolculukta çalıştığımız kartlardan bazıları yeniden karşımıza çıkacak.',
+    chapters: [
+      { title: 'Pırpır’ın sipariş çantası', caption: 'Pırpır’ın çantasında yeni sipariş kartları var. Önce sesini dinleyip doğru kartı bulalım.', success: 'Sipariş kartlarından birini ayırdın. Pırpır onu pazar sepetine koydu.' },
+      { title: 'Pazarın etiket atölyesi', caption: 'Pazardaki sepetlere etiket gerekiyor. Kartların parçalarını birleştirip etiketleri hazırlayalım.', success: 'Bir pazar etiketi daha hazır. Alparslan onu teslimat çantasına yerleştirdi.' },
+      { title: 'Pazara giden köprü', caption: 'Sepetler derenin öbür yanına ulaşmalı. Hatırladığın parçalar köprüdeki boşlukları tamamlayacak.', success: 'Pazar köprüsünde bir geçiş daha hazır. Pırpır sepeti karşı kıyıya taşıyor.' },
+      { title: 'Sepetler yerini buluyor', caption: 'Bahçe pazarına geldik. Sipariş kartlarını okuyup uygun sepetleri birlikte hazırlayalım.', success: 'Bir sepetin kartını daha hazırladın. Pazarın teslimat köşesi düzenleniyor.' },
+      { title: 'Pazarın teşekkür kartı', caption: 'Pırpır pazardaki arkadaşına bir teşekkür kartı göndermek istiyor. Çalıştığımız kartları yeniden kullanalım.', success: 'Teşekkür kartına bir parça daha ekledin. Pırpır kartını göndermek için sabırsızlanıyor.' },
+    ],
+    dialogues: [
+      [['Pırpır', 'Bugün bahçede pazar var! Sipariş kartlarını birlikte ayırabilir miyiz?'], ['Alparslan', 'Önce siparişin sesini dinleyelim. Doğru kartı sonra bulabiliriz.']],
+      [['Alparslan', 'Bu sepetin etiketi henüz hazır değil. Parçaları sırayla yerleştirelim.'], ['Pırpır', 'Etiket bitince onu teslimat çantamda taşıyacağım.']],
+      [['Pırpır', 'Sepetim hazır ama köprüde boşluklar var. Hatırladığımız parçalarla bir geçit kuralım.'], ['Alparslan', 'Birlikte yavaşça ilerleyebiliriz. İstersen önce bir ipucuna bakalım.']],
+      [['Alparslan', 'Sepetler pazar yerine ulaştı. Şimdi kartları kullanıp teslimatı tamamlayalım.'], ['Pırpır', 'Bir siparişi hazırlarken kelimenin ne anlattığını da düşünelim.']],
+      [['Pırpır', 'Pazardaki arkadaşımız bize yardım etti. Ona bir teşekkür kartı hazırlayalım mı?'], ['Alparslan', 'Daha önce karşılaştığımız kartlar bu mesajda yeniden işimize yarayacak.']],
+    ],
+  },
+  {
+    title: 'Fener Şenliği',
+    intro: 'Adada renkli bir fener şenliği hazırlanıyor. Alparslan ve Pırpır davet kartlarını dağıtacak. İşaretleri hazırlayalım, köprüden geçelim ve bahçedeki buluşmaya katılalım.',
+    ending: 'Şenliğin davet kartları hazır ve fenerler yerlerini buldu. Alparslan ile Pırpır bu yolculukta sana eşlik etti. Sonraki buluşmada bazı kartları yeniden hatırlayacağız.',
+    chapters: [
+      { title: 'Şenliğe bir davet', caption: 'Pırpır fener şenliği için davet kartları getirdi. Hangi kartın istendiğini dinleyerek başlayalım.', success: 'Bir davet kartını daha hazırladın. Pırpır onu şenlik çantasına yerleştirdi.' },
+      { title: 'Şenlik tabelası atölyesi', caption: 'Konukların yolu bulması için yeni tabelalar gerekiyor. İşaret kartlarını sırayla birleştirelim.', success: 'Bir yol işareti daha tamamlandı. Alparslan tabelayı şenlik yoluna taşıyor.' },
+      { title: 'Fenerlerin köprüsü', caption: 'Fenerler köprüden geçerek bahçeye ulaşacak. Önceden çalıştığımız kartları hatırlayıp geçidi hazırlayalım.', success: 'Fener yolunun bir bölümü daha hazır. Pırpır köprünün öbür ucundan sana sesleniyor.' },
+      { title: 'Bahçede renkli buluşma', caption: 'Şenlik bahçesine geldik. Hazırladığımız kartlarla fenerlerin ve davetlerin yerlerini tamamlayalım.', success: 'Şenlik hazırlığına bir katkı daha yaptın. Bahçedeki fenerlerden biri yerine yerleşti.' },
+      { title: 'Şenlikten bir haber', caption: 'Bu güzel buluşmadan arkadaşımıza bir mesaj gönderelim. Bildiğimiz kartlarla haberimizi hazırlayalım.', success: 'Şenlik mesajının bir parçası daha hazır. Alparslan cevap mektubunu zarfa yerleştiriyor.' },
+    ],
+    dialogues: [
+      [['Pırpır', 'Fener şenliğine davetliyiz! Bu kartların sesini birlikte dinleyelim.'], ['Alparslan', 'Herkesin yolu bulması için davetleri ve işaretleri hazırlayabiliriz.']],
+      [['Alparslan', 'Şenliğin yol tabelası burada hazırlanacak. Parçaları birleştirmeye başlayalım.'], ['Pırpır', 'Tabelayı görünce arkadaşlarımız hangi yoldan gideceklerini anlayacak.']],
+      [['Pırpır', 'Fenerleri köprüden birlikte geçirelim. Önce eksik geçidi tamamlamamız gerekiyor.'], ['Alparslan', 'Hatırladığımız kartları kullanalım. Bir yardım istersek örneğe yeniden bakabiliriz.']],
+      [['Alparslan', 'Bahçede buluşmaya az kaldı. Şimdi hazırladığımız kartları yerlerine ulaştıralım.'], ['Pırpır', 'Renkli fenerler bizi bekliyor. Hazır olduğunda sıradaki küçük işi sen seçebilirsin.']],
+      [['Pırpır', 'Şenlikten bir haber gönderelim. Arkadaşımız hazırlıkları merak ediyor.'], ['Alparslan', 'Mesajımızda daha önce çalıştığımız kartları bir kez daha kullanacağız.']],
+    ],
+  },
+];
+export const STORY_EPISODE_COUNT = EPISODES.length;
+export const NARRATION_PHRASES = EPISODES.flatMap(episode => [episode.intro, episode.ending,
+  ...episode.chapters.flatMap(chapter => [chapter.caption, chapter.success]),
+  ...episode.dialogues.flatMap(lines => lines.map(line => line[1]))]);
 
 const PHASES = new Set(['intro', 'task', 'success', 'complete']);
+const BASE = typeof document !== 'undefined' && document.querySelector('meta[name="harf-backend"]')?.content === 'laravel'
+  ? '/' : (import.meta.env?.BASE_URL || '/');
+const ART_BASE = `${BASE.endsWith('/') ? BASE : `${BASE}/`}art/`;
+const CHAPTER_ART = ['harf-post.webp', 'harf-workshop.webp', 'harf-bridge.webp', 'harf-garden.webp', 'harf-post.webp'];
 let serial = 0;
 let motionPaused = false;
 const escape = value => String(value ?? '').replace(/[&<>"']/g, character => ({
@@ -57,17 +105,20 @@ const bounded = (value, minimum, maximum, fallback = minimum) => {
 };
 
 /** No target word is accepted here: a story must not reveal a recall answer. */
-export function getStoryBeat({ index = 0, total = 8, phase = 'task', completed = index } = {}) {
+export function getStoryBeat({ index = 0, total = 8, phase = 'task', completed = index, chapter: chapterOverride, episode = 0 } = {}) {
   const safeTotal = bounded(total, 1, 30, 8);
   const safeCompleted = bounded(completed, 0, safeTotal);
   const safeIndex = bounded(index, 0, safeTotal);
   const safePhase = PHASES.has(phase) ? phase : 'task';
+  const safeEpisode = bounded(episode, 0, EPISODES.length - 1);
+  const story = EPISODES[safeEpisode];
   const chapter = safePhase === 'intro' ? 0 : safePhase === 'complete' ? 4
-    : Math.min(4, Math.floor(safeIndex * 5 / safeTotal));
-  const content = CHAPTERS[chapter];
-  const caption = safePhase === 'intro' ? INTRO : safePhase === 'complete' ? ENDING
+    : typeof chapterOverride === 'number' && Number.isFinite(chapterOverride) ? bounded(chapterOverride, 0, 4)
+      : Math.min(4, Math.floor(safeIndex * 5 / safeTotal));
+  const content = story.chapters[chapter];
+  const caption = safePhase === 'intro' ? story.intro : safePhase === 'complete' ? story.ending
     : safePhase === 'success' ? content.success : content.caption;
-  return { chapter, title: content.title, caption, narration: caption,
+  return { episode: safeEpisode, series: story.title, chapter, title: content.title, caption, narration: caption,
     completed: safeCompleted, total: safeTotal, phase: safePhase };
 }
 
@@ -81,46 +132,8 @@ function icon(name) {
   return `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.help}</svg>`;
 }
 
-function cloud(x, y, scale = 1) {
-  return `<g class="story-cloud" transform="translate(${x} ${y}) scale(${scale})"><path d="M0 23C-4 11 8 2 20 7 25-7 48-6 55 9 71 1 87 13 82 25Z" fill="#fff" opacity=".82"/></g>`;
-}
-
-function tree(x, y, scale = 1) {
-  return `<g transform="translate(${x} ${y}) scale(${scale})"><path d="M-5 0 0-74 7 0" fill="#9c7867"/><path d="M0-35-19-60m20 8 20-21" fill="none" stroke="#9c7867" stroke-width="5" stroke-linecap="round"/><path d="M-28-53C-52-58-44-90-25-93-38-120-3-139 13-120 40-129 57-98 40-82 54-57 22-36 7-51-4-38-22-39-28-53" fill="#8bc1a1"/><path d="M-26-85c-8-19 13-31 23-24" fill="none" stroke="#b5d8b4" stroke-width="10" stroke-linecap="round"/></g>`;
-}
-
-function envelope(x, y, scale = 1, className = '') {
-  return `<g class="${className}" transform="translate(${x} ${y}) scale(${scale})"><rect x="-29" y="-20" width="58" height="40" rx="7" fill="#fff7dc" stroke="#bda47b" stroke-width="2.5"/><path d="m-27-16 27 20 27-20M-27 17l18-15m36 15L9 2" fill="none" stroke="#d5b990" stroke-width="2.3" stroke-linejoin="round"/><circle cx="0" cy="3" r="6" fill="#c798c7"/></g>`;
-}
-
-function mailbox(x, y, filled = false) {
-  return `<g class="story-mailbox" transform="translate(${x} ${y})"><path d="M-4 0V-72" stroke="#b18461" stroke-width="11"/><path d="M-37-72v-43a30 30 0 0 1 60 0v43Z" fill="#a99ace" stroke="#7564a4" stroke-width="3"/><path d="M20-72H55v-42a29 29 0 0 0-29-30H-7a30 30 0 0 1 30 30v42Z" fill="#c5b5e2" stroke="#7564a4" stroke-width="3"/><path d="M-23-96H9" stroke="#6f6199" stroke-width="5" stroke-linecap="round"/><path class="story-mailbox-flag" d="M42-105v-44h23v17H44" fill="#e7ab80" stroke="#a66d5b" stroke-width="3"/>${filled ? envelope(-8, -102, .52, 'story-letter-arrived') : ''}</g>`;
-}
-
-function lion(x, y, complete) {
-  return `<g class="story-hero-position" style="--story-hero-x:${x}px;--story-hero-y:${y}px"><ellipse cx="0" cy="5" rx="35" ry="8" fill="#6b765c" opacity=".16"/><g class="story-hero-bounce"><path class="story-lion-tail" d="M22-28q39 12 35-18" fill="none" stroke="#ddaa66" stroke-width="10" stroke-linecap="round"/><path class="story-lion-tail-tip" d="M57-54c-13-7-18 8-8 16 12 7 20-7 8-16" fill="#ba8260"/><g class="story-lion-leg story-lion-leg-back"><path d="M17-27 22 0" stroke="#d6a262" stroke-width="15" stroke-linecap="round"/><path d="M14 2h22" stroke="#8d78b7" stroke-width="12" stroke-linecap="round"/></g><g class="story-lion-leg story-lion-leg-front"><path d="M-17-27-21 0" stroke="#e8b775" stroke-width="15" stroke-linecap="round"/><path d="M-32 2h22" stroke="#9b88c0" stroke-width="12" stroke-linecap="round"/></g><path d="M-25-60q-9 21 0 40 24 14 49-1 9-22-3-41" fill="#f4ca86" stroke="#d3a168" stroke-width="2"/><path d="M-18-44 15-21 31-42" fill="none" stroke="#aa805e" stroke-width="7"/><path d="M17-25v28h28v-29Z" fill="#d7ad7c" stroke="#ad835d" stroke-width="2"/><path d="M17-19h28m-18-8v-4q4-6 10 0v4" fill="none" stroke="#ad835d" stroke-width="2"/><g class="story-lion-arm"><path d="M-21-47-42-32" stroke="#f5ce8d" stroke-width="14" stroke-linecap="round"/><circle cx="-43" cy="-31" r="8" fill="#ffe0a9"/></g><g class="story-lion-head"><path d="M-37-68c-16-8-12-25 1-29-7-17 9-31 23-25 9-15 28-13 34 1 19-6 33 11 25 26 17 10 13 29-3 34-1 18-22 25-34 13-17 11-35 1-34-14Z" fill="#cd9465" stroke="#b78059" stroke-width="2"/><circle cx="-27" cy="-105" r="11" fill="#edbd7e"/><circle cx="27" cy="-105" r="11" fill="#edbd7e"/><circle cx="0" cy="-87" r="34" fill="#ffdb99"/><ellipse cx="0" cy="-73" rx="20" ry="16" fill="#fff0cb"/><g class="story-lion-eyes"><ellipse cx="-13" cy="-91" rx="4" ry="5.5" fill="#5e4c46"/><ellipse cx="13" cy="-91" rx="4" ry="5.5" fill="#5e4c46"/><circle cx="-12" cy="-93" r="1.4" fill="white"/><circle cx="14" cy="-93" r="1.4" fill="white"/></g><ellipse cx="-23" cy="-79" rx="6" ry="3.5" fill="#efa992"/><ellipse cx="23" cy="-79" rx="6" ry="3.5" fill="#efa992"/><path d="M-6-79q6-4 12 0l-6 7Z" fill="#8b6655"/><path class="story-lion-mouth" d="M0-72v4m-9-1q9 10 18 0" fill="none" stroke="#8b6655" stroke-width="2.5" stroke-linecap="round"/><path d="M-29-117q27-25 56-1l-5 5-51-1Z" fill="#a59bcf" stroke="#7e71b0" stroke-width="2"/><path d="M-2-121 4-139" stroke="#aa805e" stroke-width="2"/><path d="M1-134q14-17 23-1-10 10-23 1" fill="#9cc9b3"/><path d="m-20-55 19 13 20-13-11-4-9 5-9-5Z" fill="#83bcae"/></g>${complete ? '<path class="story-hero-wave" d="m22-48 21-18 6-9" fill="none" stroke="#f5ce8d" stroke-width="14" stroke-linecap="round"/>' : ''}</g></g>`;
-}
-
-function bird(x, y) {
-  return `<g class="story-bird-position" transform="translate(${x} ${y})"><g class="story-bird"><path d="m-18 1-16 5 14 9" fill="#79a6ac"/><ellipse cx="0" cy="4" rx="21" ry="17" fill="#97c7c0"/><circle cx="13" cy="-5" r="15" fill="#aad6ca"/><path class="story-bird-wing" d="M-13 4q8-20 21-4-4 18-21 4" fill="#77afa9"/><path d="m25-5 13 6-13 4Z" fill="#e2ae6d"/><circle cx="18" cy="-8" r="2.8" fill="#485b61"/><path d="m-3 18-2 8m13-9v8" stroke="#a18166" stroke-width="2.5" stroke-linecap="round"/></g></g>`;
-}
-
-function flowers(x, y, grown = true) {
-  return `<g class="story-planter${grown ? ' is-grown' : ''}" transform="translate(${x} ${y})"><path d="m-48-3 8 36h79l9-36" fill="#d2a182" stroke="#b58569" stroke-width="2.5"/><path d="M-51-7H51v11H-51Z" fill="#e3b592" stroke="#b58569" stroke-width="2.5"/><g class="story-sprouts"><path d="M-27-9v-32m27 32v-46m27 46v-29" stroke="#699d79" stroke-width="5" stroke-linecap="round"/><path d="M-28-25q-22-1-17-15 19-4 17 15m1-9q17-17 23-2-4 15-23 2M0-28q-22-6-17-21 19-3 17 21m1-15q15-18 22-3-3 15-22 3m26 21q-4-20 12-23 14 12-12 23" fill="#8fbd8a"/><g class="story-flower"><circle cx="0" cy="-57" r="12" fill="#d9b2ce"/><circle cx="0" cy="-57" r="5" fill="#f5d69b"/></g></g></g>`;
-}
-
-function bridge(chapter, completed, total) {
-  const full = chapter >= 3;
-  const count = full ? 7 : chapter === 2 ? Math.max(2, Math.min(6, Math.floor(completed / total * 7))) : 2;
-  return `<g class="story-bridge"><path d="M456 275q40-64 87 0t92 0" fill="none" stroke="#9bd1d1" stroke-width="47"/><path d="M447 243 635 243M447 220 635 220" stroke="#ae8d71" stroke-width="4"/><path d="M448 211v48m187-48v48" stroke="#9e7d60" stroke-width="8" stroke-linecap="round"/>${Array.from({ length: 7 }, (_, index) => `<rect class="story-bridge-plank${index < count ? ' is-built' : ''}" x="${451 + index * 26}" y="242" width="23" height="10" rx="3" fill="${index < count ? '#d6b28b' : '#e1e8db'}" stroke="${index < count ? '#b59171' : '#c1cec2'}" stroke-width="2" opacity="${index < count ? 1 : .45}"/>`).join('')}</g>`;
-}
-
-function props(chapter, completed, total, phase) {
-  if (chapter === 0) return `${mailbox(175, 269)}${envelope(349, 159, .8, 'story-drifting-letter')}${envelope(425, 208, .55, 'story-drifting-letter story-drifting-letter-second')}<path d="M363 144q50-42 84-4" fill="none" stroke="#e5eff2" stroke-width="3" stroke-dasharray="5 8"/>`;
-  if (chapter === 1) return `<g transform="translate(509 254)"><path d="M-91-1h182v11H-91Z" fill="#c19b7a" stroke="#9c7b65" stroke-width="3"/><path d="M-71 11v29M70 11v29" stroke="#a68368" stroke-width="9" stroke-linecap="round"/><rect x="-74" y="-52" width="51" height="45" rx="7" fill="#fff1c7" stroke="#cebb91" stroke-width="2"/><rect x="-13" y="-59" width="51" height="52" rx="7" fill="#e6daf5" stroke="#b7a7d3" stroke-width="2"/><rect x="48" y="-43" width="29" height="36" rx="5" fill="#dbebdc" stroke="#a8c7b5" stroke-width="2"/><path d="M-63-29h28m35-6h25m30 14h14" stroke="#c4b49b" stroke-width="4" stroke-linecap="round"/></g><g transform="translate(709 211)"><path d="M0-63v104" stroke="#a98467" stroke-width="8"/><path d="m-43-65 71 0 19 19-19 19h-71Z" fill="#ffedb7" stroke="#b89b71" stroke-width="3"/><path d="M-26-46H22m-7-8 9 8-9 8" fill="none" stroke="#a7885e" stroke-width="3" stroke-linecap="round"/></g>`;
-  if (chapter === 2) return `${bridge(chapter, completed, total)}<g transform="translate(728 241)"><rect x="-33" y="-30" width="66" height="46" rx="7" fill="#d1b18f" stroke="#ab8868" stroke-width="3"/><path d="m-31-27 63 41m0-41-63 41" stroke="#b99777" stroke-width="3"/></g>${envelope(728, 201, .6, phase === 'success' ? 'story-delivery-letter' : '')}`;
-  if (chapter === 3) return `${flowers(552, 230, completed / total > .6)}${flowers(735, 246, completed / total > .7)}<g transform="translate(680 165)"><path d="M-66 61V-11L0-54l66 43v72Z" fill="#e6efdb" stroke="#92b7a0" stroke-width="4"/><path d="M-66-11 0-54 66-11M0-54v115m-66-72H66m-66 29H66" fill="none" stroke="#a8c6b0" stroke-width="3"/><path d="M-20 61V25q20-16 40 0v36" fill="#f9f7df" stroke="#a8c6b0" stroke-width="3"/></g>`;
-  return `${mailbox(732, 263, phase === 'complete' || phase === 'success')}${flowers(558, 244, true)}${envelope(619, 164, .9, phase === 'complete' || phase === 'success' ? 'story-sending-letter' : 'story-ready-letter')}`;
+function envelope(x = 0, y = 0) {
+  return `<g transform="translate(${x} ${y})"><rect x="-29" y="-20" width="58" height="40" rx="7" fill="#fff7dc" stroke="#bda47b" stroke-width="2.5"/><path d="m-27-16 27 20 27-20M-27 17l18-15m36 15L9 2" fill="none" stroke="#d5b990" stroke-width="2.3" stroke-linejoin="round"/><circle cx="0" cy="3" r="6" fill="#c798c7"/></g>`;
 }
 
 export function renderStoryScene(options = {}) {
@@ -130,17 +143,32 @@ export function renderStoryScene(options = {}) {
   const caption = withoutTarget(beat.caption, hiddenWord);
   const id = `harf-story-${++serial}`;
   const progress = beat.phase === 'complete' ? 1 : beat.completed / beat.total;
-  const heroX = beat.phase === 'intro' ? 300 : [300, 319, 373 + Math.min(120, progress * 150), 385, 396][beat.chapter];
-  const heroY = 264;
+  const pieceTotal = bounded(options.pieceTotal, 1, 24, 7);
+  const pieces = options.placedPieces === undefined ? Math.floor(progress * pieceTotal) : bounded(options.placedPieces, 0, pieceTotal);
+  const builtPlanks = Math.floor(pieces / pieceTotal * 7);
+  const art = beat.phase === 'intro' ? 'harf-island.webp' : CHAPTER_ART[beat.chapter];
+  // This slot contains only trusted markup created by the lesson renderer.
+  // Parent-supplied words must be escaped by that renderer before reaching it.
+  const interaction = typeof options.interactionHtml === 'string' ? options.interactionHtml : '';
   const chapterMarkers = CHAPTERS.map((chapter, index) => `<span class="story-route-stop${index <= beat.chapter ? ' is-reached' : ''}${index === beat.chapter ? ' is-current' : ''}" aria-hidden="true"><span>${index + 1}</span></span>`).join('');
-  return `<section class="story-scene" data-story-chapter="${beat.chapter}" data-story-completed="${beat.completed}" data-story-phase="${beat.phase}" data-story-paused="${motionPaused}" data-story-speaking="false" data-story-hidden-word="${escape(hiddenWord)}" data-story-narration="${escape(beat.narration)}" aria-labelledby="${id}-title">
-    <div class="story-scene-topline"><span class="story-scene-series">${escape(withoutTarget(STORY_TITLE, hiddenWord))}</span><span class="story-scene-chapter">${beat.chapter + 1} / ${CHAPTERS.length} sahne</span></div>
-    <div class="story-scene-stage">
-      <svg class="story-scene-art" viewBox="0 0 960 300" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="${id}-art-title"><title id="${id}-art-title">${escape(title)}: Alparslan ve kuş arkadaşı mektup yolunda.</title><defs><linearGradient id="${id}-sky" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e6e8fa"/><stop offset="1" stop-color="#d9f0ec"/></linearGradient><linearGradient id="${id}-ground" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#c7dcba"/><stop offset="1" stop-color="#b3cdaa"/></linearGradient></defs><rect width="960" height="300" fill="url(#${id}-sky)"/><circle cx="825" cy="55" r="29" fill="#fff1bf"/><circle cx="825" cy="55" r="42" fill="#fff1bf" opacity=".28"/>${cloud(74, 48, .9)}${cloud(375, 30, .68)}${cloud(661, 80, .72)}<path d="M0 191q149-84 326 0 148-76 306-4 175-71 328-1v114H0Z" fill="#dce6ce"/><path d="M0 234q190-88 388-7 165-61 328-5 125-40 244-2v80H0Z" fill="url(#${id}-ground)"/><path d="M0 289q225-72 420-25t540-8" fill="none" stroke="#f5e8c7" stroke-width="31"/><path d="M0 289q225-72 420-25t540-8" fill="none" stroke="#efe0b8" stroke-width="2" stroke-dasharray="4 15"/>${tree(84, 239, .9)}${tree(891, 252, .84)}${props(beat.chapter, beat.completed, beat.total, beat.phase)}${bird(beat.chapter >= 3 ? 790 : 197, beat.chapter === 0 ? 119 : 151)}${lion(heroX, heroY, beat.phase === 'success' || beat.phase === 'complete')}<g class="story-ground-details" fill="#9bbd91"><path d="m125 276 4-9 3 9m667 12 3-9 4 9m-622 2 3-7 3 7m659-31 3-9 3 9"/></g></svg>
-      <div class="story-scene-tools"><button type="button" data-story-action="listen" aria-label="Hikâyenin bu bölümünü dinle">${icon('listen')}<span>Hikâyeyi dinle</span></button><button type="button" data-story-action="help" aria-label="Alparslan’dan görev için yardım al">${icon('help')}<span>Alparslan’a sor</span></button><button type="button" class="story-motion-control" data-story-action="motion" aria-label="${motionPaused ? 'Hareketi sürdür' : 'Hareketi duraklat'}" aria-pressed="${motionPaused}">${icon(motionPaused ? 'play' : 'pause')}</button></div>
+  return `<section class="story-scene story-scene-world" style="--story-growth:${(.4 + progress * .6).toFixed(3)};--story-piece-ratio:${(pieces / pieceTotal).toFixed(3)}" data-story-episode="${beat.episode}" data-story-series="${escape(beat.series)}" data-story-chapter="${beat.chapter}" data-story-completed="${beat.completed}" data-story-pieces="${pieces}" data-story-piece-total="${pieceTotal}" data-story-phase="${beat.phase}" data-story-paused="${motionPaused}" data-story-speaking="false" data-story-hidden-word="${escape(hiddenWord)}" data-story-narration="${escape(beat.narration)}" aria-labelledby="${id}-title">
+    <div class="story-scene-stage" aria-label="${escape(title)} oyun sahnesi">
+      <img class="story-scene-art story-world-backdrop" src="${ART_BASE}${art}" alt="" draggable="false" decoding="async" fetchpriority="high">
+      <div class="story-world-light" aria-hidden="true"></div>
+      <div class="story-world-motes" aria-hidden="true">${Array.from({ length: 7 }, (_, index) => `<i style="--mote:${index}"></i>`).join('')}</div>
+      ${beat.episode === 2 ? '<div class="story-episode-lanterns" aria-hidden="true"><i></i><i></i><i></i></div>' : ''}
+      <div class="story-world-physical-props" aria-hidden="true">
+        <div class="story-world-envelope"><svg viewBox="-35 -25 70 50">${envelope(0, 0)}</svg><span class="story-world-envelope-shadow"></span></div>
+        <div class="story-world-bridge">${Array.from({ length: 7 }, (_, index) => `<i class="story-world-plank${index < builtPlanks ? ' is-built' : ''}" data-piece="${index}" style="--piece:${index}"></i>`).join('')}</div>
+        <div class="story-world-sprout"><i></i><i></i><i></i></div>
+        <div class="story-world-water"><i></i><i></i><i></i><i></i></div>
+        <div class="story-world-delivery-stamp"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></div>
+      </div>
+      <div class="story-scene-topline"><span class="story-scene-series">${escape(withoutTarget(beat.series, hiddenWord))}</span><div class="story-route" aria-label="Hikâye ${beat.chapter + 1}. sahnede">${chapterMarkers}</div><span class="story-scene-chapter">${beat.chapter + 1} / ${CHAPTERS.length}</span></div>
+      <div class="story-scene-dialogue"><div class="story-speaker-mark" aria-hidden="true">A</div><div class="story-dialogue-copy"><h2 id="${id}-title">${escape(title)}</h2><p class="story-scene-caption">${escape(caption)}</p><button type="button" class="story-dialogue-next" data-story-action="dialogue">Pırpır ve Alparslan’ı dinleyelim →</button></div><button type="button" class="story-dialogue-listen" data-story-action="listen" aria-label="Hikâyenin bu bölümünü dinle">${icon('listen')}</button></div>
+      <div class="story-interaction-dock${interaction ? ' has-interaction' : ''}">${interaction}</div>
+      <div class="story-scene-tools"><button type="button" data-story-action="help" aria-label="Alparslan’dan görev için yardım al">${icon('help')}<span>Alparslan’a sor</span></button><button type="button" class="story-motion-control" data-story-action="motion" aria-label="${motionPaused ? 'Hareketi sürdür' : 'Hareketi duraklat'}" aria-pressed="${motionPaused}">${icon(motionPaused ? 'play' : 'pause')}</button></div>
     </div>
-    <div class="story-scene-dialogue"><div class="story-speaker-mark" aria-hidden="true">A</div><div><h2 id="${id}-title">${escape(title)}</h2><p class="story-scene-caption">${escape(caption)}</p></div><div class="story-route" aria-label="Hikâye ${beat.chapter + 1}. sahnede">${chapterMarkers}</div></div>
-    <button type="button" class="story-dialogue-next" data-story-action="dialogue">Pırpır ve Alparslan’ı dinleyelim →</button>
   </section>`;
 }
 
@@ -157,6 +185,19 @@ export function mountStoryScene(container, { onListen = () => {}, onHelp = () =>
     finally { if (alive && id === speechId) scene.dataset.storySpeaking = 'false'; }
   }
   if (!container?.addEventListener) return () => {};
+  const updatePieces = scene => {
+    const total = bounded(scene.dataset.storyPieceTotal, 1, 24, 7);
+    const count = bounded(scene.dataset.storyPieces, 0, total);
+    const ratio = count / total;
+    scene.style.setProperty('--story-piece-ratio', ratio.toFixed(3));
+    scene.querySelectorAll('.story-world-plank').forEach((plank, index) => {
+      plank.classList.toggle('is-built', index < Math.floor(ratio * 7));
+    });
+  };
+  const observer = typeof MutationObserver === 'function' ? new MutationObserver(records => {
+    for (const record of records) if (record.target?.matches?.('.story-scene')) updatePieces(record.target);
+  }) : null;
+  observer?.observe(container, { attributes: true, attributeFilter: ['data-story-pieces', 'data-story-piece-total'], subtree: true });
   const handler = event => {
     const button = event.target?.closest?.('[data-story-action]');
     if (!button || !container.contains(button) || button.disabled) return;
@@ -177,7 +218,8 @@ export function mountStoryScene(container, { onListen = () => {}, onHelp = () =>
       void listen(scene);
     } else if (action === 'dialogue') {
       const chapter = bounded(scene.dataset.storyChapter, 0, 4);
-      const lines = DIALOGUES[chapter];
+      const episode = bounded(scene.dataset.storyEpisode, 0, EPISODES.length - 1);
+      const lines = EPISODES[episode].dialogues[chapter];
       const position = dialoguePositions.get(scene) || 0;
       const [speaker, text] = lines[position % lines.length];
       dialoguePositions.set(scene, position + 1);
@@ -194,5 +236,5 @@ export function mountStoryScene(container, { onListen = () => {}, onHelp = () =>
     }
   };
   container.addEventListener('click', handler);
-  return () => { alive = false; speechId++; container.removeEventListener('click', handler); };
+  return () => { alive = false; speechId++; observer?.disconnect(); container.removeEventListener('click', handler); };
 }

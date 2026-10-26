@@ -1,4 +1,34 @@
-# Harf Adası 5 — hikâyeli ve uyarlanan öğrenme
+# Harf Adası 5.1 — oynanabilir ada ve uyarlanan öğrenme
+
+## Sürüm 5.1: görsel dünya ve devam etme düzeltmesi
+
+Sürüm 5'te sahne, alıştırmanın üstündeki küçük bir banner olarak kalmıştı. Kullanıcı
+bunu açıkça reddetti. Yeni sürümde özgün ada, postane, atölye, köprü ve bahçe
+görselleri `public/art/` içinde yerel WebP varlıklarıdır. Bu görseller proje için
+üretildi; Morpa karakteri, resmi veya videosu kullanılmadı. Pırpır'ın dört kanat
+pozu ayrı bir saydam sprite atlasından oynatılır. Bulutlar, deniz halkaları,
+kelebekler, ortam parçacıkları ve ışıklar katmanlar halinde hareket eder.
+
+Ana adada dört gerçek giriş vardır: postane dinleme, atölye harflerle kurma,
+köprü örneksiz hatırlama, bahçe anlam görevi açar. Öğretmenin içeriği bir göreve
+uygun değilse planlayıcı geçerli bir bağlantılı beceriye döner ve nedenini yazar.
+Görev düğmeleri sahnenin içinde durur. Doğru kart postaya uçar, doğru yerleştirilen
+parçalar köprü tahtalarını oluşturur, bahçe görevi sulama ve filiz hareketini açar.
+Yanlış yanıt, hikâye dinleme veya animasyon izleme bu durumu ilerletmez. Yazı
+görevi ise kaydırma korumalı ayrı defter görünümünü korur.
+
+Önceki “Öğrenme yolculuğuma devam et” düğmesi yalnızca genel girişe gidiyordu.
+Artık bitirilen kelime/hece ve son beceri yeni plana taşınır; örneğin `in` bir
+hece olarak kalır, uygun öğretmen kelimesine bağlanır. Heceden uydurma kelime
+üretilmez. Bitişteki öneri gerçek planlayıcının sonucudur. Sonraki turların görev
+sırası ve kelimeleri gerçek geçmişe göre değişir; aynı kelime başka becerilerde
+yeniden kullanılır. Dönüşümlü üç yazılmış hikâye vardır: Kayıp Bahçe Mektubu,
+Pırpır'ın Bahçe Pazarı ve Fener Şenliği. `session.storyEpisode` kaldığı bölümü
+korur; yalnızca tamamlanan yolculuk sonraki bölüme geçer.
+
+Hareket durdurma ve azaltılmış hareket tercihi korunur. Hareketler, öğrenmenin
+etkililiğinin veya çocuğun motivasyonunun ölçüldüğü anlamına gelmez; bu ürün
+kararları gerçek çocuk kullanımıyla ayrıca değerlendirilmelidir.
 
 ## İnceleme ve kararlar
 
@@ -76,6 +106,9 @@ Yeni özel kelimeler mevcut kayıt havuzunda yoksa yalnızca gerçek Türkçe ci
 sesi kullanılabilir. Türkçe ses yoksa yetişkin okuması açık bir seçenek olarak
 sunulur ve destek kaydedilir. İngilizce sesle tamamlama veya sessizce dinleme
 başarısı verme yoktur. Bu sürüm her yeni kelime için sunucuda otomatik ses üretmez.
+Üç hikâyenin 66 sabit anlatım/diyaloğu ile ilk kelime paketinin gerekli metinleri
+mevcut EmelNeural kayıt hattında tamamlandı. Bunlar ChatGPT Voice kayıtları değildir;
+insan tarafından duyulan ses kalitesi ayrıca değerlendirilmelidir.
 
 Tablet yazısı otomatik olarak okunmaz. Kâğıttaki yazma ve bağımsız sesli okuma,
 yetişkin gözlemiyle desteklenmelidir. Bu uygulama için uzun süreli çocuk pilotu

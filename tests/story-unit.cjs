@@ -28,9 +28,41 @@ test('story artwork never prints a listening or recall target as a visible model
   assert.ok(markup.includes('data-story-action="dialogue"'));
 });
 
-test('original story has recorded-narration text for the two speakers and all stages', async () => {
+test('original episodes expose unique authored narration for both speakers and all stages', async () => {
   const { NARRATION_PHRASES } = await api;
-  assert.equal(NARRATION_PHRASES.length, 22);
+  assert.equal(NARRATION_PHRASES.length, 66);
   assert.ok(NARRATION_PHRASES.every(phrase => typeof phrase === 'string' && phrase.length > 10));
   assert.equal(new Set(NARRATION_PHRASES).size, NARRATION_PHRASES.length);
+});
+
+test('completed journeys can select three distinct authored episodes without rewriting learning state', async () => {
+  const { getStoryBeat, renderStoryScene, STORY_EPISODE_COUNT } = await api;
+  assert.equal(STORY_EPISODE_COUNT, 3);
+  const intros = new Set();
+  const endings = new Set();
+  const series = new Set();
+  for (let episode = 0; episode < STORY_EPISODE_COUNT; episode++) {
+    const intro = getStoryBeat({ episode, phase: 'intro' });
+    const ending = getStoryBeat({ episode, phase: 'complete' });
+    intros.add(intro.caption); endings.add(ending.caption); series.add(intro.series);
+    assert.equal(intro.episode, episode);
+    assert.equal(ending.episode, episode);
+    for (let chapter = 0; chapter < 5; chapter++) {
+      const task = getStoryBeat({ episode, chapter, phase: 'task' });
+      const success = getStoryBeat({ episode, chapter, phase: 'success' });
+      assert.equal(task.chapter, chapter);
+      assert.notEqual(task.caption, success.caption);
+      const markup = renderStoryScene({ episode, chapter, hiddenWord: 'kartları' });
+      assert.ok(markup.includes(`data-story-episode="${episode}"`));
+      assert.ok(markup.includes('data-story-series="'));
+      const caption = markup.match(/class="story-scene-caption">([^<]*)</)[1];
+      assert.equal((caption.toLocaleLowerCase('tr-TR').match(/\p{L}+/gu) || []).includes('kartları'), false);
+    }
+  }
+  assert.equal(intros.size, 3); assert.equal(endings.size, 3); assert.equal(series.size, 3);
+  assert.match(getStoryBeat({ episode: 1, phase: 'intro' }).series, /Pırpır/);
+  assert.match(getStoryBeat({ episode: 2, phase: 'intro' }).series, /Fener/);
+  assert.equal(getStoryBeat({ episode: NaN }).episode, 0);
+  assert.equal(getStoryBeat({ episode: -1 }).episode, 0);
+  assert.equal(getStoryBeat({ episode: 999 }).episode, 2);
 });

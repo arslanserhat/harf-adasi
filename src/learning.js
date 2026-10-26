@@ -4,7 +4,8 @@ import {
   ALPHABET, SKILLS, normalizeLearningState, parseWordList, splitSyllables,
   getEligibleWords, planSession, recordAttempt, summarizeLearning,
 } from './learning-model.js';
-import { renderStoryScene, mountStoryScene, STORY_TITLE } from './story-scene.js';
+import { renderStoryScene, mountStoryScene, getStoryBeat, STORY_TITLE } from './story-scene.js';
+import './world-learning.css';
 
 const SKILL_NAMES = {
   listen: 'Dinleyip tanıma', syllables: 'Heceleri birleştirme', build: 'Harflerle kurma',
@@ -12,10 +13,10 @@ const SKILL_NAMES = {
   meaning: 'Anlamını bulma', sentence: 'Cümlede kullanma',
 };
 const TITLES = {
-  listen: 'Siparişi dinle, kartını bul', syllables: 'Etiketin parçalarını birleştir',
-  build: 'Harflerle etiketini hazırla', recall: 'Hatırlama postan geldi',
-  write: 'Etiketi kendi elinle yaz', meaning: 'Kelimenin anlamını keşfet',
-  sentence: 'Mesajın kelimelerini sırala',
+  listen: 'Postacının paketini bul', syllables: 'Yol tabelasını birleştir',
+  build: 'Atölyede bir etiket hazırla', recall: 'Köprünün yolunu tamamla',
+  write: 'Mektubuna kendi izini bırak', meaning: 'Bahçeye doğru paketi götür',
+  sentence: 'Arkadaşına bir mesaj gönder',
 };
 const escape = value => String(value ?? '').replace(/[&<>"']/g, character => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -48,6 +49,9 @@ export function createLearning({
   let editListId = '';
   let speechEpoch = 0;
   let parentDraft = null;
+  let advancing = false;
+
+  const worldFor = kind => ({ listen: 0, syllables: 1, build: 1, recall: 2, write: 1, meaning: 3, sentence: 4 }[kind] ?? 0);
 
   function snapshot() { return normalizeLearningState(getState()); }
   function persist(next) {
@@ -63,6 +67,31 @@ export function createLearning({
     storyCleanup?.();
     storyCleanup = null;
     releaseWritingGuard();
+    root.querySelectorAll('.learn-object-flight').forEach(element => element.remove());
+  }
+  function flyPiece(sourceRect, target, text) {
+    const scene = root.querySelector('.story-scene');
+    if (!scene || scene.dataset.storyPaused === 'true' || globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    const stage = scene.querySelector('.story-scene-stage');
+    const frame = stage?.getBoundingClientRect();
+    if (!frame || !sourceRect) return;
+    const destination = target?.getBoundingClientRect() || {
+      left: frame.left + frame.width * (taskUi?.task.kind === 'meaning' ? .76 : .25),
+      top: frame.top + frame.height * .56, width: 45, height: 40,
+    };
+    const piece = document.createElement('span');
+    piece.className = 'learn-object-flight'; piece.setAttribute('aria-hidden', 'true');
+    piece.textContent = text;
+    Object.assign(piece.style, { left: `${sourceRect.left}px`, top: `${sourceRect.top}px`, width: `${sourceRect.width}px`, height: `${sourceRect.height}px` });
+    root.append(piece);
+    const dx = destination.left + destination.width / 2 - sourceRect.left - sourceRect.width / 2;
+    const dy = destination.top + destination.height / 2 - sourceRect.top - sourceRect.height / 2;
+    const animation = piece.animate([
+      { transform: 'translate(0,0) rotate(-3deg) scale(1)', opacity: 1 },
+      { transform: `translate(${dx * .5}px,${dy * .5 - 45}px) rotate(8deg) scale(.9)`, opacity: 1, offset: .55 },
+      { transform: `translate(${dx}px,${dy}px) rotate(0deg) scale(.55)`, opacity: .2 },
+    ], { duration: 650, easing: 'cubic-bezier(.25,.7,.35,1)', fill: 'forwards' });
+    animation.finished.then(() => piece.remove(), () => piece.remove());
   }
   function attach() {
     if (listening) return;
@@ -121,12 +150,17 @@ export function createLearning({
     return eligible.filter(word => Object.values(progressFor(state, word.text))
       .some(progress => progress?.nextDueAt && progress.nextDueAt <= Date.now())).length;
   }
-  function sceneMarkup(phase, session = snapshot().session) {
+  function sceneMarkup(phase, session = snapshot().session, interactionHtml = '') {
     const task = session?.tasks?.[session.index];
     return `<div id="learningStory">${renderStoryScene({
       phase, index: session?.index || 0, total: session?.tasks?.length || 8,
+      episode: session?.storyEpisode || 0,
       completed: Object.values(session?.results || {}).filter(result => result.correct).length,
       skill: session?.tasks?.[session.index]?.kind || '',
+      chapter: phase === 'intro' ? 0 : phase === 'complete' ? 4 : worldFor(task?.kind),
+      interactionHtml,
+      placedPieces: taskUi?.result.correct ? taskUi.expectedTokens?.length || 1 : taskUi?.selected.length || 0,
+      pieceTotal: taskUi?.expectedTokens?.length || 1,
       hiddenWord: phase === 'task' && ['listen', 'recall'].includes(task?.kind) ? task.word : '',
     })}</div>`;
   }
@@ -145,8 +179,9 @@ export function createLearning({
   function renderIntro() {
     enter('intro');
     const session = snapshot().session;
+    const intro = getStoryBeat({ phase: 'intro', episode: session?.storyEpisode || 0 });
     root.innerHTML = `<section id="learning" class="learning" data-screen="intro">${nav()}
-      <div class="learn-intro"><span class="learn-eyebrow">Birlikte okuyacağımız bir macera</span><h1>${escape(STORY_TITLE)}</h1><p>Adadaki mektubun etiketleri eksik. Kelimeleri kurup kullanarak mektubu bahçeye ulaştıracağız.</p></div>
+      <div class="learn-intro"><span class="learn-eyebrow">${session?.storyEpisode ? 'Adadaki hikâyemiz devam ediyor' : 'Birlikte okuyacağımız bir macera'}</span><h1>${escape(intro.series || STORY_TITLE)}</h1><p>${escape(intro.caption)}</p></div>
       ${sceneMarkup('intro', session)}
       <div class="learn-intro-plan"><b>${session.tasks.length} küçük görev, tek bir macera</b><p>Dinleyeceğiz, parçaları birleştireceğiz, yazıp kontrol edeceğiz. Daha önce çalıştığın kelimeler de hatırlama postasıyla geri gelecek.</p></div>
       <div class="learn-actions">${control('begin-tasks', 'Mektubu birlikte hazırlayalım →', '', 'primary')}${control('parent', 'Öğretmenimin kelimeleri', '', 'quiet')}</div>
@@ -184,6 +219,12 @@ export function createLearning({
     if (!next.session?.tasks?.length) { renderHome(); return; }
     if (!next.session.storySeen) renderIntro();
     else renderTask();
+  }
+  function startFresh(options = {}) {
+    const state = snapshot();
+    const session = planSession(state, getLetters(), Date.now(), { limit: 8, ...options });
+    persist({ ...state, session });
+    start();
   }
   function currentTask(state = snapshot()) { return state.session?.tasks?.[state.session.index]; }
   function draftFor(state, task) {
@@ -230,8 +271,16 @@ export function createLearning({
       sentence: 'Mesajı tamamladın. Kelimeyi cümlenin içinde kullandın.',
     };
     feedback(messages[task.kind] || 'Bu adım tamam. Hazır olduğunda devam et.', 'success');
-    const scene = root.querySelector('#learningStory');
-    if (scene) { storyCleanup?.(); scene.outerHTML = sceneMarkup('success', next.session); mountScene(); }
+    const scene = root.querySelector('#learningStory .story-scene');
+    if (scene) {
+      scene.dataset.storyPhase = 'success';
+      scene.dataset.storyPieces = String(taskUi.expectedTokens?.length || 1);
+      scene.dataset.storyCompleted = String(Object.values(next.session.results).filter(result => result.correct).length);
+      const beat = getStoryBeat({ phase: 'success', episode: next.session.storyEpisode || 0, chapter: worldFor(task.kind), index: next.session.index, total: next.session.tasks.length });
+      const caption = scene.querySelector('.story-scene-caption');
+      if (caption) caption.textContent = beat.caption;
+      scene.dataset.storyNarration = beat.narration;
+    }
     const prompt = root.querySelector('#learningModel');
     if (prompt && ['build', 'recall', 'syllables'].includes(task.kind)) {
       prompt.hidden = false;
@@ -294,7 +343,7 @@ export function createLearning({
   }
   function taskBody(task, state) {
     const entry = wordEntry(state, task.word);
-    const audioLabel = task.kind === 'sentence' ? 'Mesajı dinle' : task.kind === 'listen' ? 'Siparişi dinle' : 'Kelimeyi dinle';
+    const audioLabel = task.kind === 'sentence' ? 'Mesajı dinle' : task.kind === 'listen' ? 'Mektuptaki sözü dinle' : 'Kelimeyi dinle';
     let html = `<div class="learn-task-controls">${control('listen', `<i data-lucide="volume-2"></i>${audioLabel}`, '', task.kind === 'listen' ? 'listen-primary' : 'quiet')}`;
     if (task.kind !== 'meaning' && task.kind !== 'listen') html += control('show-model', taskUi.model ? 'Örneği kapat' : 'Örneği göster', '', 'quiet');
     html += '</div>';
@@ -342,13 +391,12 @@ export function createLearning({
       saveDraft({ hints: result.hints + 1, independent: false, modelOpened: true });
       state = snapshot();
     }
-    root.innerHTML = `<section id="learning" class="learning learning-task${task.kind === 'write' ? ' learning-writing lesson' : ''}" data-screen="task" data-kind="${escape(task.kind)}" data-word="${escape(task.word)}" data-task-id="${escape(task.id)}">
+    const controls = `<div class="learn-scene-task"><div class="learn-mission-title"><span>${escape(TITLES[task.kind] || 'Birlikte keşfedelim')}</span><small>${escape(instructions(task))}</small></div>${taskBody(task, state)}<div id="learningFeedback" class="learn-feedback" role="status" aria-live="polite">${result.correct ? 'Bu adım kaydedildi. Hazır olduğunda devam et.' : 'Hazır olduğunda başlayabilirsin.'}</div><div class="learn-next-row">${control('next', state.session.index + 1 === state.session.tasks.length ? 'Mektubu gönder →' : 'Yola devam →', `id="learningNext" ${result.correct ? '' : 'disabled'}`, 'primary')}</div></div>`;
+    root.innerHTML = `<section id="learning" class="learning learning-task${task.kind === 'write' ? ' learning-writing lesson' : ' learn-world-frame'}" data-screen="task" data-kind="${escape(task.kind)}" data-word="${escape(task.word)}" data-task-id="${escape(task.id)}">
       ${nav(control('pause', 'Mola ver', '', 'quiet'))}
-      <div class="learn-task-header"><span class="learn-eyebrow">${task.kind === 'recall' ? 'Hatırlama postası' : 'Birbirine bağlı küçük görevler'}</span><h1>${escape(TITLES[task.kind] || 'Birlikte keşfedelim')}</h1><p>${escape(instructions(task))}</p></div>
+      <div class="learn-task-header"><span class="learn-eyebrow">${task.kind === 'recall' ? 'Hatırlama postası' : 'Alparslan ile ada macerası'}</span><h1>${escape(TITLES[task.kind] || 'Birlikte keşfedelim')}</h1><p>${escape(['listen', 'recall'].includes(task.kind) ? (task.reason || instructions(task)).replace(/\p{L}+/gu, token => token.toLocaleLowerCase('tr-TR') === task.word ? 'bu kelime' : token) : task.reason || instructions(task))}</p></div>
       <div class="learn-session-track" aria-label="${state.session.index + 1}. görev, toplam ${state.session.tasks.length}">${state.session.tasks.map((_, index) => `<span class="${index < state.session.index ? 'past' : index === state.session.index ? 'current' : ''}"></span>`).join('')}<small>${state.session.index + 1} / ${state.session.tasks.length}</small></div>
-      ${task.kind === 'write' ? '' : sceneMarkup(result.correct ? 'success' : 'task', state.session)}
-      <div class="learn-workspace exercise">${taskBody(task, state)}<div id="learningFeedback" class="learn-feedback" role="status" aria-live="polite">${result.correct ? 'Bu adım kaydedildi. Hazır olduğunda devam et.' : 'Hazır olduğunda başlayabilirsin.'}</div></div>
-      <div class="learn-next-row"><span>Hazır olduğunda sen devam et.</span>${control('next', state.session.index + 1 === state.session.tasks.length ? 'Yolculuğu tamamla →' : 'Sıradaki görev →', `id="learningNext" ${result.correct ? '' : 'disabled'}`, 'primary')}</div>
+      ${task.kind === 'write' ? `<div class="learn-workspace exercise">${controls}</div>` : sceneMarkup(result.correct ? 'success' : 'task', state.session, controls)}
       ${task.kind === 'build' || task.kind === 'write' ? `<div class="learn-letter-help">${control('letter-help', 'Bir harfi birlikte çalışalım', '', 'quiet')}</div>` : ''}
     </section>`;
     if (!['listen', 'meaning', 'write'].includes(task.kind)) {
@@ -373,6 +421,11 @@ export function createLearning({
     if (!slots || !bankElement) return;
     slots.innerHTML = taskUi.expectedTokens.map((_, index) => `<span class="learn-slot ${selected[index] ? 'filled' : ''}" aria-label="${index + 1}. boşluk${selected[index] ? `: ${escape(selected[index].text)}` : ''}">${escape(selected[index]?.text || '')}</span>`).join('');
     bankElement.innerHTML = bank.map(tile => control('tile', escape(tile.text), `data-id="${tile.id}" data-value="${escape(tile.text)}" ${result.correct || selected.some(item => item.id === tile.id) ? 'disabled' : ''}`, 'learn-tile')).join('');
+    const world = root.querySelector('.story-scene');
+    if (world) {
+      world.dataset.storyPieces = String(selected.length);
+      world.dataset.storyPieceTotal = String(taskUi.expectedTokens.length || 1);
+    }
   }
   function mountNotebook() {
     const svg = root.querySelector('#learningPad');
@@ -456,11 +509,26 @@ export function createLearning({
       feedback('Bu kelimenin Türkçe sesi bu cihazda çalınamadı. Bir büyüğün kelimeyi okuyabilir; örneği de açabilirsin.', 'help');
     } else { current.audioPlayed = true; feedback('Dinledin. Hazır olduğunda kartını seçebilirsin.'); }
   }
-  function next() {
+  async function next() {
     const state = snapshot();
     const task = currentTask(state);
-    if (!task || !draftFor(state, task).correct) return;
+    if (advancing || !task || !draftFor(state, task).correct) return;
+    advancing = true;
+    const nextButton = root.querySelector('#learningNext');
+    if (nextButton) nextButton.disabled = true;
+    const stage = root.querySelector('.story-scene-stage');
+    if (stage && !globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches && stage.closest('[data-story-paused="true"]') === null) {
+      const upcoming = state.session.tasks[state.session.index + 1];
+      const names = ['Postane', 'Kelime atölyesi', 'Dere köprüsü', 'Nane bahçesi', 'Cevap mektubu'];
+      const travel = document.createElement('div');
+      travel.className = 'learn-travel';
+      travel.innerHTML = `<span class="learn-travel-compass" aria-hidden="true">✦</span><span>${upcoming ? `${names[worldFor(upcoming.kind)]} yolunda…` : 'Mektubumuz yola çıkıyor…'}</span>`;
+      stage.append(travel);
+      await new Promise(resolve => setTimeout(resolve, 280));
+    }
+    if (screen !== 'task' || currentTask()?.id !== task.id) { advancing = false; return; }
     persist({ ...state, session: { ...state.session, index: state.session.index + 1 } });
+    advancing = false;
     if (state.session.index + 1 >= state.session.tasks.length) renderSummary();
     else renderTask();
   }
@@ -486,7 +554,8 @@ export function createLearning({
     const results = Object.values(session?.results || {}).filter(result => result.correct);
     const independent = results.filter(result => result.independent && !result.hints && !result.mistakes).length;
     const texts = session?.wordTexts || [];
-    root.innerHTML = `<section id="learning" class="learning" data-screen="summary">${nav()}${sceneMarkup('complete', session)}<div id="learningSummary" class="learn-summary"><span class="learn-eyebrow">Bugünkü küçük yolculuk tamam</span><h1>Birlikte yeni adımlar attık!</h1><p>${results.length} görevde ${texts.map(escape).join(', ')} kelimeleriyle çalıştın.</p><div class="learn-summary-cards"><div><b>${independent}</b><span>Örneksiz ve yardımsız tamamlanan görev</span></div><div><b>${results.length - independent}</b><span>Birlikte veya ipucuyla tamamlanan görev</span></div></div><p>Bu kelimeler sonraki günlerde yeni görevlerle geri gelecek. Bugünlük mola verebilir veya adada serbestçe oynayabilirsin.</p><div class="learn-actions">${control('home', 'Adama dön', '', 'primary')}${control('parent', 'Birlikte gelişimimize bakalım', '', 'quiet')}${control('new-session', 'Yeni bir kısa yolculuk', '', 'quiet')}</div></div></section>`;
+    const nextStory = getStoryBeat({ phase: 'intro', episode: ((session?.storyEpisode || 0) + 1) % 3 });
+    root.innerHTML = `<section id="learning" class="learning" data-screen="summary">${nav()}${sceneMarkup('complete', session)}<div id="learningSummary" class="learn-summary"><span class="learn-eyebrow">Bugünkü küçük yolculuk tamam</span><h1>Birlikte yeni adımlar attık!</h1><p>${results.length} görevde ${texts.map(escape).join(', ')} kelimeleriyle çalıştın.</p><div class="learn-summary-cards"><div><b>${independent}</b><span>Örneksiz ve yardımsız tamamlanan görev</span></div><div><b>${results.length - independent}</b><span>Birlikte veya ipucuyla tamamlanan görev</span></div></div><p>Bu kelimeler sonraki günlerde yeni görevlerle geri gelecek. Sıradaki hikâyede yeni kelimeleri, daha önce çalıştıklarınla birlikte kullanacağız.</p><div class="learn-actions">${control('home', 'Adama dön', '', 'primary')}${control('parent', 'Birlikte gelişimimize bakalım', '', 'quiet')}${control('new-session', `${nextStory.series || 'Yeni bir macera'} →`, '', 'primary')}</div></div></section>`;
     mountScene();
     window.scrollTo(0, 0);
   }
@@ -613,7 +682,7 @@ export function createLearning({
     else if (action === 'resume') {
       const state = snapshot(); persist({ ...state, session: { ...state.session, paused: false } }); renderTask();
     } else if (action === 'new-session') {
-      const state = snapshot(); persist({ ...state, session: null }); start();
+      startFresh();
     } else if (action === 'next') next();
     else if (action === 'listen') void playTask();
     else if (action === 'adult-read' && taskUi && !taskUi.result.correct) {
@@ -630,7 +699,7 @@ export function createLearning({
       if (task.kind === 'listen' && !taskUi.audioPlayed) {
         feedback('Önce siparişi dinleyelim. Sonra duyduğun kelimeyi seç.', 'help'); return;
       }
-      if (button.dataset.value === String(task.target)) { button.classList.add('correct'); finishTask(); }
+      if (button.dataset.value === String(task.target)) { const origin = button.getBoundingClientRect(); button.classList.add('correct'); finishTask(); flyPiece(origin, null, task.kind === 'meaning' ? '✓' : task.word); }
       else { button.classList.add('tried'); wrong(); }
     } else if (action === 'tile' && taskUi && !taskUi.result.correct) {
       if (taskUi.letterChoice && !taskUi.audioPlayed && !taskUi.model) {
@@ -640,8 +709,10 @@ export function createLearning({
       if (!tile || taskUi.selected.some(item => item.id === tile.id)) return;
       const expected = taskUi.task.tokens?.[taskUi.selected.length] ?? (taskUi.task.kind === 'syllables' ? taskUi.task.parts?.[taskUi.selected.length] : [...taskUi.task.word][taskUi.selected.length]);
       if (tile.text !== expected) { wrong(); observeLetter(taskUi.selected.length, expected, false); return; }
+      const origin = button.getBoundingClientRect();
       observeLetter(taskUi.selected.length, expected, true);
       taskUi.selected.push(tile); renderTokens();
+      flyPiece(origin, root.querySelectorAll('.learn-slot')[taskUi.selected.length - 1], tile.text);
       if (taskUi.selected.length === taskUi.expectedTokens.length) finishTask();
       else feedback('Parçanı yerleştirdin. Sıradaki parçayı seçebilirsin.');
     } else if ((action === 'undo' || action === 'restart') && taskUi && !taskUi.result.correct) {
@@ -694,5 +765,5 @@ export function createLearning({
     else renderHome();
   }
   function reset() { destroy(); }
-  return { renderHome, start, renderParent, destroy, resume, reset, get screen() { return screen; } };
+  return { renderHome, start, startFresh, renderParent, destroy, resume, reset, get screen() { return screen; } };
 }

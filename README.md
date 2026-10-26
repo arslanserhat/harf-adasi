@@ -2,7 +2,19 @@
 
 Türkçe okuma, yazma ve sayı alıştırmaları için Laravel 13 uygulaması. Altı mevcut oyun bölümü korunur; aynı oyun arayüzü hem Laravel sunucusunda hem GitHub Pages için üretilen statik sürümde çalışır.
 
-## Sürüm 5: hikâyeli öğrenme yolculuğu
+## Sürüm 5.1: adanın içinde öğrenme
+
+Ana ada ve dört iç sahne özgün görsellerle yenilendi. Postane, atölye, köprü ve
+bahçe gerçek oyun girişleridir; kartlar ve parçalar sahnenin içinde kullanılır.
+Pırpır'ın kanat çırpma sprite'ı, bulutlar, deniz halkaları, mektup teslimi,
+köprü tahtaları ve sulama hareketleri durdurulabilir; azaltılmış hareket desteklenir.
+
+“Devam et” bitirilen kelime/heceyi ve son beceriyi sonraki plana taşır. Sonraki
+turlar kelime ve görev sırasını değiştirir; üç yazılmış hikâye arasında ilerler:
+Kayıp Bahçe Mektubu, Pırpır'ın Bahçe Pazarı ve Fener Şenliği. Gerekli 77 sabit metnin
+hazır Türkçe kaydı vardır; bunlar ChatGPT Voice sesiyle üretilmiş değildir.
+
+## Hikâyeli öğrenme yolculuğu
 
 - **Özgün animasyonlu hikâye:** Alparslan ve Kayıp Bahçe Mektubu; tamamlanan görevlerle değişen beş sahne, karakterler, açıkça başlatılan Türkçe anlatım ve azaltılmış hareket desteği.
 - **Öğretmenin kelimeleri:** birden fazla kelime listesi, toplu giriş, düzenlenebilir heceler, isteğe bağlı anlam ve cümle. İşlenmemiş harf içeren kelimeler açıkça gösterilir.
@@ -65,7 +77,12 @@ VPS kurulumu, kalıcı SQLite volume'u ve ayrı uygulama portu için [yayın bel
 ```sh
 python -m pip install -r scripts/requirements-audio.txt
 python scripts/generate-speech.py
+python scripts/complete-story-speech.py
 python scripts/download-illustrations.py
 ```
 
 Ses üreteci kayıtları önbelleğe alır ve TLS doğrulamasını açık tutar. Dört efekt bu proje için dalga senteziyle üretildi. 112 görsel, [Microsoft Fluent Emoji 3D](https://github.com/microsoft/fluentui-emoji) koleksiyonundan MIT lisansıyla gelir; lisans kopyası `public/illustrations/LICENSE.microsoft.txt` içindedir. Howler, canvas-confetti, Lucide, Vite ve Laravel paket sürümleri kilit dosyalarındadır.
+
+Yeni ada/sahne resimleri ve Pırpır sprite atlası bu proje için üretildi;
+`public/art/` altında bulunur. Nunito Sans değişken yazı tipi Fontsource üzerinden
+yerel sunulur; OFL lisansı `public/fonts/LICENSE.NunitoSans.txt` içindedir.

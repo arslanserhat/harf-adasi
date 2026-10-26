@@ -4,6 +4,16 @@
   "rate": "-5%",
   "delivery_profile": "warm-prompts",
   "delivery_overrides": {
+    "acelemiz yok. ipucu istersek birlikte yeniden bakabiliriz.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Acelemiz yok. İpucu istersek birlikte yeniden bakabiliriz."
+    },
+    "adada renkli bir fener şenliği hazırlanıyor. alparslan ve pırpır davet kartlarını dağıtacak. işaretleri hazırlayalım, köprüden geçelim ve bahçedeki buluşmaya katılalım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Adada renkli bir fener şenliği hazırlanıyor. Alparslan ve Pırpır davet kartlarını dağıtacak. İşaretleri hazırlayalım, köprüden geçelim ve bahçedeki buluşmaya katılalım."
+    },
     "adım adım, birlikte.": {
       "voice": "tr-TR-EmelNeural",
       "rate": "+2%",
@@ -13,6 +23,11 @@
       "voice": "tr-TR-EmelNeural",
       "rate": "+6%",
       "spoken": "Aferin! Çok güzel çalıştın!"
+    },
+    "ali lale al.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-5%",
+      "spoken": "Ali lale al."
     },
     "alparslan annesine küçük bir kart hazırlıyor. kartın üstüne anne yazmak için üç küçük görevimiz var.": {
       "voice": "tr-TR-EmelNeural",
@@ -54,6 +69,11 @@
       "rate": "+1%",
       "spoken": "Alparslan üç küçük kart hazırlıyor. Bildiğin harfleri bulup kendi kartını tamamlayalım."
     },
+    "arkadaşımıza bir cevap mektubu gönderelim.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Arkadaşımıza bir cevap mektubu gönderelim."
+    },
     "aynısını buldun! hazırsan devam edebilirsin.": {
       "voice": "tr-TR-EmelNeural",
       "rate": "+5%",
@@ -64,6 +84,26 @@
       "rate": "+0%",
       "spoken": "Şimdi sen yaz. Bitirince, birlikte bakalım."
     },
+    "bahçe pazarına geldik. sipariş kartlarını okuyup uygun sepetleri birlikte hazırlayalım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Bahçe pazarına geldik. Sipariş kartlarını okuyup uygun sepetleri birlikte hazırlayalım."
+    },
+    "bahçe pazarının siparişleri yerlerine ulaştı. pırpır sepetleri hazırladı. bir sonraki yolculukta çalıştığımız kartlardan bazıları yeniden karşımıza çıkacak.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Bahçe pazarının siparişleri yerlerine ulaştı. Pırpır sepetleri hazırladı. Bir sonraki yolculukta çalıştığımız kartlardan bazıları yeniden karşımıza çıkacak."
+    },
+    "bahçede buluşmaya az kaldı. şimdi hazırladığımız kartları yerlerine ulaştıralım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Bahçede buluşmaya az kaldı. Şimdi hazırladığımız kartları yerlerine ulaştıralım."
+    },
+    "bahçede küçük bir pazar kuruluyor. pırpır sipariş kartlarını toplamış. alparslan ile etiketleri hazırlayıp köprüden geçelim ve siparişleri yerlerine ulaştıralım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Bahçede küçük bir pazar kuruluyor. Pırpır sipariş kartlarını toplamış. Alparslan ile etiketleri hazırlayıp köprüden geçelim ve siparişleri yerlerine ulaştıralım."
+    },
     "bahçedeki arının isim kartı kaybolmuş. alparslan ile yeni kartın harflerini ve hecelerini bulalım.": {
       "voice": "tr-TR-EmelNeural",
       "rate": "+1%",
@@ -73,6 +113,21 @@
       "voice": "tr-TR-EmelNeural",
       "rate": "+1%",
       "spoken": "Bahçedeki lalenin isim kartı eksik. Alparslan ile harfleri ve heceleri birleştirip kartı hazırlayalım."
+    },
+    "bahçeden bir cevap mektubu gönderelim. daha önce çalıştığımız kartları yeniden hatırlayalım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Bahçeden bir cevap mektubu gönderelim. Daha önce çalıştığımız kartları yeniden hatırlayalım."
+    },
+    "bahçenin mektup kartları rüzgârla dağılmış. alparslan ilk kartı bulmak için seni bekliyor.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Bahçenin mektup kartları rüzgârla dağılmış. Alparslan ilk kartı bulmak için seni bekliyor."
+    },
+    "bahçeye ulaştık. şimdi buradaki sipariş kartlarını hazırlayıp yerlerine ulaştıralım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Bahçeye ulaştık. Şimdi buradaki sipariş kartlarını hazırlayıp yerlerine ulaştıralım."
     },
     "bir daha bakalım. yukarıdaki işarete dikkat et.": {
       "voice": "tr-TR-EmelNeural",
@@ -89,10 +144,50 @@
       "rate": "-1%",
       "spoken": "Olur böyle! Bir daha deneyelim. Acelemiz yok."
     },
+    "bir davet kartını daha hazırladın. pırpır onu şenlik çantasına yerleştirdi.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Bir davet kartını daha hazırladın. Pırpır onu şenlik çantasına yerleştirdi."
+    },
     "bir dost seç.": {
       "voice": "tr-TR-EmelNeural",
       "rate": "+3%",
       "spoken": "Hadi! Bir dost seç."
+    },
+    "bir etiket daha hazır. alparslan yol işaretini yerine taktı.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Bir etiket daha hazır. Alparslan yol işaretini yerine taktı."
+    },
+    "bir köprü tahtası daha yerine geldi. bahçeye bir adım daha yaklaştık.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Bir köprü tahtası daha yerine geldi. Bahçeye bir adım daha yaklaştık."
+    },
+    "bir pazar etiketi daha hazır. alparslan onu teslimat çantasına yerleştirdi.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Bir pazar etiketi daha hazır. Alparslan onu teslimat çantasına yerleştirdi."
+    },
+    "bir sepetin kartını daha hazırladın. pazarın teslimat köşesi düzenleniyor.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Bir sepetin kartını daha hazırladın. Pazarın teslimat köşesi düzenleniyor."
+    },
+    "bir sipariş kartı daha yerine ulaştı. bahçedeki arkadaşımız sana el sallıyor.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Bir sipariş kartı daha yerine ulaştı. Bahçedeki arkadaşımız sana el sallıyor."
+    },
+    "bir siparişi hazırlarken kelimenin ne anlattığını da düşünelim.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Bir siparişi hazırlarken kelimenin ne anlattığını da düşünelim."
+    },
+    "bir yol işareti daha tamamlandı. alparslan tabelayı şenlik yoluna taşıyor.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Bir yol işareti daha tamamlandı. Alparslan tabelayı şenlik yoluna taşıyor."
     },
     "birlikte kontrol edelim.": {
       "voice": "tr-TR-EmelNeural",
@@ -104,15 +199,65 @@
       "rate": "+3%",
       "spoken": "Birlikte kontrol ettiniz! Hazırsan, devam edelim."
     },
+    "birlikte yavaşça ilerleyebiliriz. istersen önce bir ipucuna bakalım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Birlikte yavaşça ilerleyebiliriz. İstersen önce bir ipucuna bakalım."
+    },
     "bitirdiğinde yazdım, birlikte bakalım düğmesine dokun.": {
       "voice": "tr-TR-EmelNeural",
       "rate": "+0%",
       "spoken": "Bitirdiğinde, Yazdım, birlikte bakalım düğmesine dokun."
     },
+    "bu etiketin parçaları karışmış. birlikte sıraya koyalım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Bu etiketin parçaları karışmış. Birlikte sıraya koyalım."
+    },
+    "bu güzel buluşmadan arkadaşımıza bir mesaj gönderelim. bildiğimiz kartlarla haberimizi hazırlayalım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Bu güzel buluşmadan arkadaşımıza bir mesaj gönderelim. Bildiğimiz kartlarla haberimizi hazırlayalım."
+    },
     "bu kelime hangi resmi anlatıyor?": {
       "voice": "tr-TR-EmelNeural",
       "rate": "+1%",
       "spoken": "Bir bakalım! Bu kelime hangi resmi anlatıyor?"
+    },
+    "bu sepetin etiketi henüz hazır değil. parçaları sırayla yerleştirelim.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Bu sepetin etiketi henüz hazır değil. Parçaları sırayla yerleştirelim."
+    },
+    "bugün bahçede pazar var! sipariş kartlarını birlikte ayırabilir miyiz?": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Bugün bahçede pazar var! Sipariş kartlarını birlikte ayırabilir miyiz?"
+    },
+    "bugünkü mektup yolculuğunu tamamladın. hazırladığın kartlar bahçeye ulaştı. bir sonraki buluşmada bazılarını yeniden hatırlayacağız.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Bugünkü mektup yolculuğunu tamamladın. Hazırladığın kartlar bahçeye ulaştı. Bir sonraki buluşmada bazılarını yeniden hatırlayacağız."
+    },
+    "bulduğumuz kartlardan bir yol etiketi hazırlayalım. parçalar birleşince yolumuz da belirginleşecek.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Bulduğumuz kartlardan bir yol etiketi hazırlayalım. Parçalar birleşince yolumuz da belirginleşecek."
+    },
+    "cevap mektubuna bir kart daha ekledin. alparslan mektubu göndermeye hazırlanıyor.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Cevap mektubuna bir kart daha ekledin. Alparslan mektubu göndermeye hazırlanıyor."
+    },
+    "daha önce karşılaştığımız kartlar bu mesajda yeniden işimize yarayacak.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Daha önce karşılaştığımız kartlar bu mesajda yeniden işimize yarayacak."
+    },
+    "daha önce çalıştığımız kartları yeniden hatırlayalım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Daha önce çalıştığımız kartları yeniden hatırlayalım."
     },
     "dostunla top oyna.": {
       "voice": "tr-TR-EmelNeural",
@@ -139,6 +284,31 @@
       "rate": "+6%",
       "spoken": "Emek verdin, tamamladın! Harika!"
     },
+    "etiket bitince onu teslimat çantamda taşıyacağım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Etiket bitince onu teslimat çantamda taşıyacağım."
+    },
+    "fener yolunun bir bölümü daha hazır. pırpır köprünün öbür ucundan sana sesleniyor.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Fener yolunun bir bölümü daha hazır. Pırpır köprünün öbür ucundan sana sesleniyor."
+    },
+    "fener şenliğine davetliyiz! bu kartların sesini birlikte dinleyelim.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Fener şenliğine davetliyiz! Bu kartların sesini birlikte dinleyelim."
+    },
+    "fenerler köprüden geçerek bahçeye ulaşacak. önceden çalıştığımız kartları hatırlayıp geçidi hazırlayalım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Fenerler köprüden geçerek bahçeye ulaşacak. Önceden çalıştığımız kartları hatırlayıp geçidi hazırlayalım."
+    },
+    "fenerleri köprüden birlikte geçirelim. önce eksik geçidi tamamlamamız gerekiyor.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Fenerleri köprüden birlikte geçirelim. Önce eksik geçidi tamamlamamız gerekiyor."
+    },
     "güzel, şimdi sıradaki parçayı seç.": {
       "voice": "tr-TR-EmelNeural",
       "rate": "+2%",
@@ -159,6 +329,11 @@
       "rate": "+6%",
       "spoken": "Harika! Doğru cevabı buldun!"
     },
+    "hatırladığımız kartları kullanalım. bir yardım istersek örneğe yeniden bakabiliriz.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Hatırladığımız kartları kullanalım. Bir yardım istersek örneğe yeniden bakabiliriz."
+    },
     "hazineni koyacağın yeri seç.": {
       "voice": "tr-TR-EmelNeural",
       "rate": "+4%",
@@ -174,10 +349,30 @@
       "rate": "+3%",
       "spoken": "Hazırsan, birlikte devam edelim!"
     },
+    "herkesin yolu bulması için davetleri ve işaretleri hazırlayabiliriz.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Herkesin yolu bulması için davetleri ve işaretleri hazırlayabiliriz."
+    },
+    "ilk kartlardan biri hazır. alparslan onu mektup çantasına koydu.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "İlk kartlardan biri hazır. Alparslan onu mektup çantasına koydu."
+    },
+    "işte bahçe! hazırladığımız kartları doğru yerlere ulaştıralım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "İşte bahçe! Hazırladığımız kartları doğru yerlere ulaştıralım."
+    },
     "kartlara sırayla dokun, boşlukları doldur.": {
       "voice": "tr-TR-EmelNeural",
       "rate": "+2%",
       "spoken": "Hadi, kartları birleştirelim! Sırayla dokun, boşlukları doldur."
+    },
+    "kartları birlikte hazırlayabiliriz. önce hangi kartı aradığımızı dinleyelim.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Kartları birlikte hazırlayabiliriz. Önce hangi kartı aradığımızı dinleyelim."
     },
     "kaç tane elma var?": {
       "voice": "tr-TR-EmelNeural",
@@ -194,6 +389,21 @@
       "rate": "+5%",
       "spoken": "Buldun! Kelimeyle resim eşleşti!"
     },
+    "konukların yolu bulması için yeni tabelalar gerekiyor. işaret kartlarını sırayla birleştirelim.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Konukların yolu bulması için yeni tabelalar gerekiyor. İşaret kartlarını sırayla birleştirelim."
+    },
+    "köprü henüz tamamlanmamış. hazırladığımız kartlarla bir tahta daha koyalım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Köprü henüz tamamlanmamış. Hazırladığımız kartlarla bir tahta daha koyalım."
+    },
+    "köprünün birkaç tahtası eksik. hazırladığın kartlar geldikçe geçidi birlikte tamamlayacağız.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Köprünün birkaç tahtası eksik. Hazırladığın kartlar geldikçe geçidi birlikte tamamlayacağız."
+    },
     "küçük bir mola verelim.": {
       "voice": "tr-TR-EmelNeural",
       "rate": "-2%",
@@ -209,10 +419,70 @@
       "rate": "+4%",
       "spoken": "Merhaba! Harf Adası'na hoş geldin! Hadi, birlikte oynayalım."
     },
+    "mesajımızda daha önce çalıştığımız kartları bir kez daha kullanacağız.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Mesajımızda daha önce çalıştığımız kartları bir kez daha kullanacağız."
+    },
+    "nine nane al.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-5%",
+      "spoken": "Nine nane al."
+    },
     "paketi dinle ve bul.": {
       "voice": "tr-TR-EmelNeural",
       "rate": "+2%",
       "spoken": "Paketi dinle. Hadi, birlikte bulalım!"
+    },
+    "parçalar birleşince yol tabelamız hazır olacak.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Parçalar birleşince yol tabelamız hazır olacak."
+    },
+    "pazar köprüsünde bir geçiş daha hazır. pırpır sepeti karşı kıyıya taşıyor.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Pazar köprüsünde bir geçiş daha hazır. Pırpır sepeti karşı kıyıya taşıyor."
+    },
+    "pazardaki arkadaşımız bize yardım etti. ona bir teşekkür kartı hazırlayalım mı?": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Pazardaki arkadaşımız bize yardım etti. Ona bir teşekkür kartı hazırlayalım mı?"
+    },
+    "pazardaki sepetlere etiket gerekiyor. kartların parçalarını birleştirip etiketleri hazırlayalım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Pazardaki sepetlere etiket gerekiyor. Kartların parçalarını birleştirip etiketleri hazırlayalım."
+    },
+    "pırpır fener şenliği için davet kartları getirdi. hangi kartın istendiğini dinleyerek başlayalım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Pırpır fener şenliği için davet kartları getirdi. Hangi kartın istendiğini dinleyerek başlayalım."
+    },
+    "pırpır pazardaki arkadaşına bir teşekkür kartı göndermek istiyor. çalıştığımız kartları yeniden kullanalım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Pırpır pazardaki arkadaşına bir teşekkür kartı göndermek istiyor. Çalıştığımız kartları yeniden kullanalım."
+    },
+    "pırpırın çantasında yeni sipariş kartları var. önce sesini dinleyip doğru kartı bulalım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Pırpır’ın çantasında yeni sipariş kartları var. Önce sesini dinleyip doğru kartı bulalım."
+    },
+    "renkli fenerler bizi bekliyor. hazır olduğunda sıradaki küçük işi sen seçebilirsin.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Renkli fenerler bizi bekliyor. Hazır olduğunda sıradaki küçük işi sen seçebilirsin."
+    },
+    "rüzgâr mektubun kartlarını uçurdu! bahçedeki arkadaşımıza nasıl haber vereceğiz?": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Rüzgâr mektubun kartlarını uçurdu! Bahçedeki arkadaşımıza nasıl haber vereceğiz?"
+    },
+    "rüzgâr, bahçenin mektup kartlarını dağıtmış. alparslan ile kartları hazırlayalım, köprüden geçelim ve bahçeye bir cevap götürelim.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Rüzgâr, bahçenin mektup kartlarını dağıtmış. Alparslan ile kartları hazırlayalım, köprüden geçelim ve bahçeye bir cevap götürelim."
     },
     "sandığı aç.": {
       "voice": "tr-TR-EmelNeural",
@@ -244,6 +514,36 @@
       "rate": "+5%",
       "spoken": "Saydın, buldun! Harika!"
     },
+    "sepetim hazır ama köprüde boşluklar var. hatırladığımız parçalarla bir geçit kuralım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Sepetim hazır ama köprüde boşluklar var. Hatırladığımız parçalarla bir geçit kuralım."
+    },
+    "sepetler derenin öbür yanına ulaşmalı. hatırladığın parçalar köprüdeki boşlukları tamamlayacak.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Sepetler derenin öbür yanına ulaşmalı. Hatırladığın parçalar köprüdeki boşlukları tamamlayacak."
+    },
+    "sepetler pazar yerine ulaştı. şimdi kartları kullanıp teslimatı tamamlayalım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Sepetler pazar yerine ulaştı. Şimdi kartları kullanıp teslimatı tamamlayalım."
+    },
+    "sipariş kartlarından birini ayırdın. pırpır onu pazar sepetine koydu.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Sipariş kartlarından birini ayırdın. Pırpır onu pazar sepetine koydu."
+    },
+    "tabelayı görünce arkadaşlarımız hangi yoldan gideceklerini anlayacak.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Tabelayı görünce arkadaşlarımız hangi yoldan gideceklerini anlayacak."
+    },
+    "tane": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-5%",
+      "spoken": "tane"
+    },
     "tebrikler!": {
       "voice": "tr-TR-EmelNeural",
       "rate": "+6%",
@@ -259,10 +559,20 @@
       "rate": "+6%",
       "spoken": "Tebrikler! Birlikte başardık! Adım adım ilerliyorsun."
     },
+    "teşekkür kartına bir parça daha ekledin. pırpır kartını göndermek için sabırsızlanıyor.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Teşekkür kartına bir parça daha ekledin. Pırpır kartını göndermek için sabırsızlanıyor."
+    },
     "vagonlar hazır. treni gönder.": {
       "voice": "tr-TR-EmelNeural",
       "rate": "+4%",
       "spoken": "Vagonlar hazır! Hadi, treni gönder!"
+    },
+    "yazını bitirdiğinde bir büyüğünle birlikte kontrol edebilirsin.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Yazını bitirdiğinde bir büyüğünle birlikte kontrol edebilirsin."
     },
     "yeni bir çıkartma kazandın!": {
       "voice": "tr-TR-EmelNeural",
@@ -284,6 +594,41 @@
       "rate": "+5%",
       "spoken": "Çıkartman seni bekliyor! Hadi bakalım!"
     },
+    "önce siparişin sesini dinleyelim. doğru kartı sonra bulabiliriz.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Önce siparişin sesini dinleyelim. Doğru kartı sonra bulabiliriz."
+    },
+    "şenlik bahçesine geldik. hazırladığımız kartlarla fenerlerin ve davetlerin yerlerini tamamlayalım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Şenlik bahçesine geldik. Hazırladığımız kartlarla fenerlerin ve davetlerin yerlerini tamamlayalım."
+    },
+    "şenlik hazırlığına bir katkı daha yaptın. bahçedeki fenerlerden biri yerine yerleşti.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Şenlik hazırlığına bir katkı daha yaptın. Bahçedeki fenerlerden biri yerine yerleşti."
+    },
+    "şenlik mesajının bir parçası daha hazır. alparslan cevap mektubunu zarfa yerleştiriyor.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Şenlik mesajının bir parçası daha hazır. Alparslan cevap mektubunu zarfa yerleştiriyor."
+    },
+    "şenlikten bir haber gönderelim. arkadaşımız hazırlıkları merak ediyor.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Şenlikten bir haber gönderelim. Arkadaşımız hazırlıkları merak ediyor."
+    },
+    "şenliğin davet kartları hazır ve fenerler yerlerini buldu. alparslan ile pırpır bu yolculukta sana eşlik etti. sonraki buluşmada bazı kartları yeniden hatırlayacağız.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Şenliğin davet kartları hazır ve fenerler yerlerini buldu. Alparslan ile Pırpır bu yolculukta sana eşlik etti. Sonraki buluşmada bazı kartları yeniden hatırlayacağız."
+    },
+    "şenliğin yol tabelası burada hazırlanacak. parçaları birleştirmeye başlayalım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+1%",
+      "spoken": "Şenliğin yol tabelası burada hazırlanacak. Parçaları birleştirmeye başlayalım."
+    },
     "şimdi paketi mama kabına koy.": {
       "voice": "tr-TR-EmelNeural",
       "rate": "+3%",
@@ -300,7 +645,8 @@
     "syllables": 48,
     "words": 80,
     "sentences": 17,
-    "stories": 10
+    "stories": 10,
+    "scripted_learning_entries": 77
   },
   "phrases": {
     "0": "voice-17fab18009548a628b57.mp3",
@@ -407,12 +753,15 @@
     "a": "voice-bb87acea07a60aa9b22f.mp3",
     "a harfi": "voice-d3a5f4bd91379c902ab8.mp3",
     "a harfini bul.": "voice-fec7a9ddc03c243ca7ca.mp3",
+    "acelemiz yok. ipucu istersek birlikte yeniden bakabiliriz.": "voice-18c685bbf431601925a0.mp3",
     "ada balon al.": "voice-9b08af86ebe7259df2f3.mp3",
+    "adada renkli bir fener şenliği hazırlanıyor. alparslan ve pırpır davet kartlarını dağıtacak. işaretleri hazırlayalım, köprüden geçelim ve bahçedeki buluşmaya katılalım.": "voice-67b92d37a75ae950eefa.mp3",
     "adım adım, birlikte.": "voice-211e9af115be24ddd67e.mp3",
     "aferin! çok güzel çalıştın.": "voice-5840f0545936c904ac0b.mp3",
     "ak": "voice-a583ce9114a5d772b8b1.mp3",
     "al": "voice-19f04789276c51061130.mp3",
     "ali gel.": "voice-61b4a283733580899a11.mp3",
+    "ali lale al.": "voice-a2e4e1b98c6a9aa28ee1.mp3",
     "ali ve ela oynadı.": "voice-6d177ff5730d790b5a81.mp3",
     "alparslan annesine küçük bir kart hazırlıyor. kartın üstüne anne yazmak için üç küçük görevimiz var.": "voice-451e8acaa262a883ddf0.mp3",
     "alparslan bahçedeki saksı için bir nane etiketi arıyor. harfi bul, heceyi yap, etiketi tamamla.": "voice-e67c79d1d1aec2db169e.mp3",
@@ -438,6 +787,7 @@
     "anne nane al.": "voice-4a53db557be0138ac9eb.mp3",
     "ar": "voice-fe67b7487b3d77e77897.mp3",
     "araba": "voice-27a58838ec7e1606cb5e.mp3",
+    "arkadaşımıza bir cevap mektubu gönderelim.": "voice-a0076108c1f96dccf580.mp3",
     "armut": "voice-113e21d5a311f7cb8021.mp3",
     "arı": "voice-07324dcbdc09b6cfda6b.mp3",
     "arı bal yapar.": "voice-2ef5399f1ecbd1898711.mp3",
@@ -454,8 +804,15 @@
     "b harfi": "voice-9be3093e7114ac887f43.mp3",
     "b harfini bul.": "voice-1549654385c620a8db44.mp3",
     "baba su iç.": "voice-e282e68615d1e99173da.mp3",
+    "bahçe pazarına geldik. sipariş kartlarını okuyup uygun sepetleri birlikte hazırlayalım.": "voice-d34ae5717555cf0c1633.mp3",
+    "bahçe pazarının siparişleri yerlerine ulaştı. pırpır sepetleri hazırladı. bir sonraki yolculukta çalıştığımız kartlardan bazıları yeniden karşımıza çıkacak.": "voice-1ef72152b31637667288.mp3",
+    "bahçede buluşmaya az kaldı. şimdi hazırladığımız kartları yerlerine ulaştıralım.": "voice-eb010d473caeb42f8fba.mp3",
+    "bahçede küçük bir pazar kuruluyor. pırpır sipariş kartlarını toplamış. alparslan ile etiketleri hazırlayıp köprüden geçelim ve siparişleri yerlerine ulaştıralım.": "voice-7d76bf7d8b65da9f1261.mp3",
     "bahçedeki arının isim kartı kaybolmuş. alparslan ile yeni kartın harflerini ve hecelerini bulalım.": "voice-4852ff6f42ee27614b1a.mp3",
     "bahçedeki lalenin isim kartı eksik. alparslan ile harfleri ve heceleri birleştirip kartı hazırlayalım.": "voice-9c882d875a30b861f166.mp3",
+    "bahçeden bir cevap mektubu gönderelim. daha önce çalıştığımız kartları yeniden hatırlayalım.": "voice-3db112b6de729746121a.mp3",
+    "bahçenin mektup kartları rüzgârla dağılmış. alparslan ilk kartı bulmak için seni bekliyor.": "voice-68ba6bbff86c2c8c5b78.mp3",
+    "bahçeye ulaştık. şimdi buradaki sipariş kartlarını hazırlayıp yerlerine ulaştıralım.": "voice-993428ae9382b42620f7.mp3",
     "balon": "voice-96c5e56323754871139d.mp3",
     "balık": "voice-f3b025e495a1019c2b0a.mp3",
     "be harfini bul.": "voice-1549654385c620a8db44.mp3",
@@ -465,21 +822,39 @@
     "bir daha bakalım. yukarıdaki işarete dikkat et.": "voice-daec7cf63b3334ed7a44.mp3",
     "bir daha deneyelim.": "voice-f8640826477397f94d08.mp3",
     "bir daha deneyelim. acelemiz yok.": "voice-2141f47f74d8eedd71ea.mp3",
+    "bir davet kartını daha hazırladın. pırpır onu şenlik çantasına yerleştirdi.": "voice-732856596a47c0431dba.mp3",
     "bir dost seç.": "voice-64001485844ff1393905.mp3",
+    "bir etiket daha hazır. alparslan yol işaretini yerine taktı.": "voice-3eaffb3b9217bf73b11b.mp3",
+    "bir köprü tahtası daha yerine geldi. bahçeye bir adım daha yaklaştık.": "voice-eacc734abb2cee1c2d22.mp3",
+    "bir pazar etiketi daha hazır. alparslan onu teslimat çantasına yerleştirdi.": "voice-caea059394cd5814ed2a.mp3",
+    "bir sepetin kartını daha hazırladın. pazarın teslimat köşesi düzenleniyor.": "voice-b623c18312ce5d30f02f.mp3",
+    "bir sipariş kartı daha yerine ulaştı. bahçedeki arkadaşımız sana el sallıyor.": "voice-332331dd2e1043336d7d.mp3",
+    "bir siparişi hazırlarken kelimenin ne anlattığını da düşünelim.": "voice-8bbc6a93bb23a3770640.mp3",
+    "bir yol işareti daha tamamlandı. alparslan tabelayı şenlik yoluna taşıyor.": "voice-98ffb5b95ba161c7b859.mp3",
     "birlikte kontrol edelim.": "voice-d1bcb711a8e20f5d2d24.mp3",
     "birlikte kontrol ettiniz. hazırsan devam edebilirsin.": "voice-6cac7456f3be8627dd71.mp3",
+    "birlikte yavaşça ilerleyebiliriz. istersen önce bir ipucuna bakalım.": "voice-7115f4660e353c3bc1f8.mp3",
     "bisiklet": "voice-8ddb39e76c645b7cb1d0.mp3",
     "bitirdiğinde yazdım, birlikte bakalım düğmesine dokun.": "voice-13726aedac4bcc5cbe94.mp3",
+    "bu etiketin parçaları karışmış. birlikte sıraya koyalım.": "voice-6ae49b5922ac2d4300b0.mp3",
+    "bu güzel buluşmadan arkadaşımıza bir mesaj gönderelim. bildiğimiz kartlarla haberimizi hazırlayalım.": "voice-11629418ee81bd181613.mp3",
     "bu kelime hangi resmi anlatıyor?": "voice-904a9f0f3aa81cad72cf.mp3",
+    "bu sepetin etiketi henüz hazır değil. parçaları sırayla yerleştirelim.": "voice-4191b08feab6965fe93e.mp3",
+    "bugün bahçede pazar var! sipariş kartlarını birlikte ayırabilir miyiz?": "voice-8880ae94e5c292e6b87b.mp3",
+    "bugünkü mektup yolculuğunu tamamladın. hazırladığın kartlar bahçeye ulaştı. bir sonraki buluşmada bazılarını yeniden hatırlayacağız.": "voice-72f89cae8f59989534cf.mp3",
+    "bulduğumuz kartlardan bir yol etiketi hazırlayalım. parçalar birleşince yolumuz da belirginleşecek.": "voice-f74179ca12084f9fbf27.mp3",
     "bulut": "voice-6d82f3bbae42738eedc4.mp3",
     "burun": "voice-b4561a6477a77fa648e2.mp3",
     "c": "voice-96f452f5289dee227ecf.mp3",
     "c harfi": "voice-eadee5575c5243c4b6bf.mp3",
     "c harfini bul.": "voice-32da8568fbc404e40e4d.mp3",
     "ce harfini bul.": "voice-32da8568fbc404e40e4d.mp3",
+    "cevap mektubuna bir kart daha ekledin. alparslan mektubu göndermeye hazırlanıyor.": "voice-6486c8f2adb165eb9f24.mp3",
     "d": "voice-6d5dbbb6b40775c320f1.mp3",
     "d harfi": "voice-306da6090ff6d942edae.mp3",
     "d harfini bul.": "voice-d99efb15d142dd32a9e7.mp3",
+    "daha önce karşılaştığımız kartlar bu mesajda yeniden işimize yarayacak.": "voice-17ad27c843af68f347ae.mp3",
+    "daha önce çalıştığımız kartları yeniden hatırlayalım.": "voice-4e6eba316dfee1fa22c5.mp3",
     "dağ": "voice-7b8be9aeba43c7fe4cb0.mp3",
     "de harfini bul.": "voice-d99efb15d142dd32a9e7.mp3",
     "diş": "voice-71457f8b2097dc66b713.mp3",
@@ -522,6 +897,7 @@
     "en": "voice-477a21e7ed396ff999ca.mp3",
     "er": "voice-ccc156bc6c80c8363879.mp3",
     "et": "voice-96642de11cd5636ff8f0.mp3",
+    "etiket bitince onu teslimat çantamda taşıyacağım.": "voice-efbd9c882831d68cec55.mp3",
     "etti": "voice-638bb7656cef0121b223.mp3",
     "ev": "voice-c6450fd36b4941d45ed6.mp3",
     "f": "voice-f35140448414cac6d295.mp3",
@@ -529,6 +905,10 @@
     "f harfini bul.": "voice-ece84d21732f6f42b76c.mp3",
     "fare": "voice-a56e9fdeacb4aa2322eb.mp3",
     "fe harfini bul.": "voice-ece84d21732f6f42b76c.mp3",
+    "fener yolunun bir bölümü daha hazır. pırpır köprünün öbür ucundan sana sesleniyor.": "voice-794392d34e8f27896de8.mp3",
+    "fener şenliğine davetliyiz! bu kartların sesini birlikte dinleyelim.": "voice-fbac1f411ff51244944a.mp3",
+    "fenerler köprüden geçerek bahçeye ulaşacak. önceden çalıştığımız kartları hatırlayıp geçidi hazırlayalım.": "voice-10fa7cb4af5bca584df9.mp3",
+    "fenerleri köprüden birlikte geçirelim. önce eksik geçidi tamamlamamız gerekiyor.": "voice-a2a1da7b0d78e5e6319e.mp3",
     "fil": "voice-b75f6f2b68c8a0c769fa.mp3",
     "g": "voice-8bf5c70ee6719f9fc722.mp3",
     "g harfi": "voice-94d52ccbdea829df1b1d.mp3",
@@ -545,17 +925,20 @@
     "harika! başardın.": "voice-4cdbf580a387d7b605bc.mp3",
     "harika! doğru cevap.": "voice-ff08a693896cbe02383f.mp3",
     "harika, doğru cevap!": "voice-ff08a693896cbe02383f.mp3",
+    "hatırladığımız kartları kullanalım. bir yardım istersek örneğe yeniden bakabiliriz.": "voice-71f255da6621eb1e2238.mp3",
     "havuç": "voice-a858cc797835537f517d.mp3",
     "hazineni koyacağın yeri seç.": "voice-84c91931b9584e2b5f2b.mp3",
     "hazır olduğunda başlayabilirsin.": "voice-d3e26eaf057d065e430f.mp3",
     "hazırsan devam edebilirsin.": "voice-7978922d6500f6a38ba3.mp3",
     "he harfini bul.": "voice-8ee81e4e022d0da68bbf.mp3",
+    "herkesin yolu bulması için davetleri ve işaretleri hazırlayabiliriz.": "voice-4024cb2b1666a8c87316.mp3",
     "i": "voice-5f119e67b0b4564751cc.mp3",
     "i harfi": "voice-56f362e66f01916b2649.mp3",
     "i harfini bul.": "voice-6b75a7daaefd85eaba29.mp3",
     "ik": "voice-dcda1e8f41eae5cb29b0.mp3",
     "iki": "voice-2a37dd3fcfe17dba54c2.mp3",
     "il": "voice-29aebd55a7bab73c6950.mp3",
+    "ilk kartlardan biri hazır. alparslan onu mektup çantasına koydu.": "voice-f6f9e77123ad772176e9.mp3",
     "in": "voice-36a2319981e407487b6d.mp3",
     "inan inat etti.": "voice-4adf48a217af1498e415.mp3",
     "inat": "voice-f45117093c699dd4141f.mp3",
@@ -563,6 +946,7 @@
     "inek ot yer.": "voice-99e11371ee39711c5f29.mp3",
     "ir": "voice-73a0bb2bef000e3b0cad.mp3",
     "it": "voice-3214dd4efea9537aa3f3.mp3",
+    "işte bahçe! hazırladığımız kartları doğru yerlere ulaştıralım.": "voice-434912021dca7eb646cb.mp3",
     "j": "voice-d1cc1784b74574f6944b.mp3",
     "j harfi": "voice-cd978322964ca60806ab.mp3",
     "j harfini bul.": "voice-4ecf78c8727a116903db.mp3",
@@ -578,6 +962,7 @@
     "kar": "voice-697f917547122f4545d4.mp3",
     "karpuz": "voice-33369d131e49cda90d11.mp3",
     "kartlara sırayla dokun, boşlukları doldur.": "voice-f380ee156f76a6e8b7b7.mp3",
+    "kartları birlikte hazırlayabiliriz. önce hangi kartı aradığımızı dinleyelim.": "voice-0dc0529ad09d485a3d80.mp3",
     "kavun": "voice-295c9d22df30d04f8c81.mp3",
     "kaç tane elma var?": "voice-1200de0e1f17b3b846bf.mp3",
     "ke": "voice-008a92f45e40f27eef9a.mp3",
@@ -590,6 +975,7 @@
     "ki": "voice-fc4fae44fd6334fbe974.mp3",
     "kiraz": "voice-39342c0ec46e7f9b1c7b.mp3",
     "kitap": "voice-f6517f895d1d11f8efaa.mp3",
+    "konukların yolu bulması için yeni tabelalar gerekiyor. işaret kartlarını sırayla birleştirelim.": "voice-41ca61b9dd2030bf5ef4.mp3",
     "koyun": "voice-3f113aeda2cebabcd599.mp3",
     "ku": "voice-7479e280b7d802f6eade.mp3",
     "kulak": "voice-1c9a89cf2c2d29529498.mp3",
@@ -597,6 +983,8 @@
     "kuş": "voice-03dad3fc74c6be0ed679.mp3",
     "kuş uçtu.": "voice-b4ec4266e0ea4bd37602.mp3",
     "köpek": "voice-ccfc3418f11cb43bc322.mp3",
+    "köprü henüz tamamlanmamış. hazırladığımız kartlarla bir tahta daha koyalım.": "voice-5fee553558d1d7ce0006.mp3",
+    "köprünün birkaç tahtası eksik. hazırladığın kartlar geldikçe geçidi birlikte tamamlayacağız.": "voice-e753d1f78f1a2c71a1e2.mp3",
     "küçük bir mola verelim.": "voice-caf708eb7d9e900bdfa3.mp3",
     "kırk": "voice-297d74bd624dd8e6792f.mp3",
     "kırk altı": "voice-c387fd7f25d4e66cea82.mp3",
@@ -628,6 +1016,7 @@
     "me harfini bul.": "voice-6e5a0c7b070e793d7819.mp3",
     "merhaba! birlikte oynayalım.": "voice-e2f260a5ac37c5affad1.mp3",
     "merhaba! harf adası'na hoş geldin.": "voice-7542c2b1e6e4cddf29fa.mp3",
+    "mesajımızda daha önce çalıştığımız kartları bir kez daha kullanacağız.": "voice-f8e45e9423814da9cc81.mp3",
     "mete kalem al.": "voice-d65864eff25d89e2b9e6.mp3",
     "mi": "voice-376ebce6ecfd4499daac.mp3",
     "mu": "voice-5b9b4ccbd370a280fb56.mp3",
@@ -642,6 +1031,7 @@
     "ni": "voice-e37f5ed113887e41f15e.mp3",
     "nine": "voice-522829f63bf0a3038b63.mp3",
     "nine eve gel.": "voice-66c9a6b08d5bc790a122.mp3",
+    "nine nane al.": "voice-0c4e4ba986175ea4d2ea.mp3",
     "no": "voice-2efc3f790c58ccae0118.mp3",
     "o": "voice-2fbc06e232f7158eea59.mp3",
     "o harfi": "voice-78ac33adfb17ed133065.mp3",
@@ -676,16 +1066,26 @@
     "p harfi": "voice-30cc297090366afa880a.mp3",
     "p harfini bul.": "voice-7a767e384834a1f43bc4.mp3",
     "paketi dinle ve bul.": "voice-67c4685fc2996d7f2bbe.mp3",
+    "parçalar birleşince yol tabelamız hazır olacak.": "voice-c04a94dd80c0fcfcb0e2.mp3",
+    "pazar köprüsünde bir geçiş daha hazır. pırpır sepeti karşı kıyıya taşıyor.": "voice-ee12af3722f168fe9ffc.mp3",
+    "pazardaki arkadaşımız bize yardım etti. ona bir teşekkür kartı hazırlayalım mı?": "voice-f058ea6b2ece1e51e5aa.mp3",
+    "pazardaki sepetlere etiket gerekiyor. kartların parçalarını birleştirip etiketleri hazırlayalım.": "voice-1ef2c298b3a0e7aec9b5.mp3",
     "pe harfini bul.": "voice-7a767e384834a1f43bc4.mp3",
     "peynir": "voice-a93661ece5f6fb4ab256.mp3",
+    "pırpır fener şenliği için davet kartları getirdi. hangi kartın istendiğini dinleyerek başlayalım.": "voice-b86fd5f7d425c0770c96.mp3",
+    "pırpır pazardaki arkadaşına bir teşekkür kartı göndermek istiyor. çalıştığımız kartları yeniden kullanalım.": "voice-dbf18dab41d6bedd8a5b.mp3",
+    "pırpırın çantasında yeni sipariş kartları var. önce sesini dinleyip doğru kartı bulalım.": "voice-88cd312304a650cb1ef6.mp3",
     "r": "voice-2bf1b4dd374a31daa0bb.mp3",
     "r harfi": "voice-8fedeb870481f187fc24.mp3",
     "r harfini bul.": "voice-fc2991dc0079ddeef96e.mp3",
     "ra": "voice-8c8c6960304c0901a480.mp3",
     "re": "voice-2bf1b4dd374a31daa0bb.mp3",
     "re harfini bul.": "voice-fc2991dc0079ddeef96e.mp3",
+    "renkli fenerler bizi bekliyor. hazır olduğunda sıradaki küçük işi sen seçebilirsin.": "voice-9f4c5959d409689cc377.mp3",
     "ri": "voice-b8e496b14c52a6d4d20c.mp3",
     "ru": "voice-e17555affded389a41e2.mp3",
+    "rüzgâr mektubun kartlarını uçurdu! bahçedeki arkadaşımıza nasıl haber vereceğiz?": "voice-6cf37c483687c11a8b00.mp3",
+    "rüzgâr, bahçenin mektup kartlarını dağıtmış. alparslan ile kartları hazırlayalım, köprüden geçelim ve bahçeye bir cevap götürelim.": "voice-18faf6d0103730099e10.mp3",
     "s": "voice-34ef0f6a96d90773e527.mp3",
     "s harfi": "voice-d339df82bc8da782f868.mp3",
     "s harfini bul.": "voice-6db5eded7829b101f3d6.mp3",
@@ -711,7 +1111,11 @@
     "seksen sekiz": "voice-9186a4dbfa95bf80c43e.mp3",
     "seksen yedi": "voice-7cc5f454799d700e57c6.mp3",
     "seksen üç": "voice-783cbd8a4fdfdaa018d3.mp3",
+    "sepetim hazır ama köprüde boşluklar var. hatırladığımız parçalarla bir geçit kuralım.": "voice-10ff5d1c1a612c784474.mp3",
+    "sepetler derenin öbür yanına ulaşmalı. hatırladığın parçalar köprüdeki boşlukları tamamlayacak.": "voice-1cb60329cd6563cb839c.mp3",
+    "sepetler pazar yerine ulaştı. şimdi kartları kullanıp teslimatı tamamlayalım.": "voice-3dfcf23b35a567fddbc7.mp3",
     "si": "voice-0d1e29875d22004a4e10.mp3",
+    "sipariş kartlarından birini ayırdın. pırpır onu pazar sepetine koydu.": "voice-a4cf6ae5253955fb0cb1.mp3",
     "su": "voice-0894d0a4ab49f39c0051.mp3",
     "süt": "voice-ac8707a2c8f0d0cb7c99.mp3",
     "sıfır": "voice-17fab18009548a628b57.mp3",
@@ -719,12 +1123,15 @@
     "t harfi": "voice-7e32313e3d09f6c18d23.mp3",
     "t harfini bul.": "voice-1afb5448db971fae446a.mp3",
     "ta": "voice-89a33b1ee1ee76231a1c.mp3",
+    "tabelayı görünce arkadaşlarımız hangi yoldan gideceklerini anlayacak.": "voice-ca1d38d1517ebb392ed5.mp3",
+    "tane": "voice-7f42f2a06da94042744c.mp3",
     "tavuk": "voice-6a76117faba4e6f07c09.mp3",
     "te": "voice-3bad2002d5b4b26ff17a.mp3",
     "te harfini bul.": "voice-1afb5448db971fae446a.mp3",
     "tebrikler!": "voice-c7d17597a7c04bb0f20d.mp3",
     "tebrikler, başardın!": "voice-8f2a537f677ad25145fd.mp3",
     "tebrikler, başardın! adım adım öğrendin.": "voice-b8e923a0554186a58041.mp3",
+    "teşekkür kartına bir parça daha ekledin. pırpır kartını göndermek için sabırsızlanıyor.": "voice-a64a8081750e41c7c5a1.mp3",
     "ti": "voice-42b898e9c82f49062aac.mp3",
     "tilki": "voice-5e776a0c564091564b89.mp3",
     "to": "voice-c64f88abeece4c25773f.mp3",
@@ -744,6 +1151,7 @@
     "y harfi": "voice-e10597c3bba25d269bdc.mp3",
     "y harfini bul.": "voice-cac0fb29fbb42199110b.mp3",
     "yaprak": "voice-aa281117791199b741fc.mp3",
+    "yazını bitirdiğinde bir büyüğünle birlikte kontrol edebilirsin.": "voice-0bcebbee20623d7cb14d.mp3",
     "yağmur": "voice-b066987af1d09a8d4bec.mp3",
     "ye harfini bul.": "voice-cac0fb29fbb42199110b.mp3",
     "yedi": "voice-bbf5ddb6e8e10ab7c420.mp3",
@@ -792,6 +1200,7 @@
     "ö": "voice-1238755a1c1eb009ed15.mp3",
     "ö harfi": "voice-41b29b10dc390959a18e.mp3",
     "ö harfini bul.": "voice-547b101e8a2b08f1810a.mp3",
+    "önce siparişin sesini dinleyelim. doğru kartı sonra bulabiliriz.": "voice-3e27af24d603098a0ee0.mp3",
     "ördek": "voice-559f0e0e1f138e3f4033.mp3",
     "ü": "voice-8f69766dc9b978e166d2.mp3",
     "ü harfi": "voice-0c46cb1181286e2bd0a6.mp3",
@@ -810,6 +1219,12 @@
     "şapka": "voice-19bb0562b62d1477920c.mp3",
     "şe harfini bul.": "voice-02e27553b59d58eb8fae.mp3",
     "şemsiye": "voice-e64357c6678ad9114b93.mp3",
+    "şenlik bahçesine geldik. hazırladığımız kartlarla fenerlerin ve davetlerin yerlerini tamamlayalım.": "voice-b714769734a6dfe11e4d.mp3",
+    "şenlik hazırlığına bir katkı daha yaptın. bahçedeki fenerlerden biri yerine yerleşti.": "voice-5f3e6df1c19715419204.mp3",
+    "şenlik mesajının bir parçası daha hazır. alparslan cevap mektubunu zarfa yerleştiriyor.": "voice-aeea0c7de6e354461e8c.mp3",
+    "şenlikten bir haber gönderelim. arkadaşımız hazırlıkları merak ediyor.": "voice-dd504cab9a1875d2d73f.mp3",
+    "şenliğin davet kartları hazır ve fenerler yerlerini buldu. alparslan ile pırpır bu yolculukta sana eşlik etti. sonraki buluşmada bazı kartları yeniden hatırlayacağız.": "voice-acfd049b7657ed7a2d96.mp3",
+    "şenliğin yol tabelası burada hazırlanacak. parçaları birleştirmeye başlayalım.": "voice-e1cbcc424340e6352211.mp3",
     "şimdi paketi mama kabına koy.": "voice-594f297e69eb3435fd22.mp3",
     "şimdi sıra sende.": "voice-154a823584623179d70e.mp3"
   }

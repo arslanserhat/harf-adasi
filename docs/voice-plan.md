@@ -1,51 +1,53 @@
-# Ses envanteri ve doğal ses geçişi
+# Ses kayıtları ve ChatGPT Voice isteğinin durumu
 
-Kullanıcı sesli sohbet sesini oyunda kullanmak istiyor. Bu oturumda ChatGPT Voice
-sesini dışa aktarma, aynı sesi API'ye eşleme veya yeni bir ücretli ses üretimi
-başlatma aracı/erişimi yoktur. Mevcut sesi hızlandırmak bu isteği karşılamaz.
+ChatGPT Voice sesini bu oturumdan dışa aktaramıyoruz veya aynı sesi API ile
+kullanabildiğimizi varsayamıyoruz. Sürüm 5.1 kayıtlarında mevcut Türkçe
+`tr-TR-EmelNeural` kullanıldı; bunlar ChatGPT sesli sohbet kayıtları değildir.
 
-## Mevcut yapı
+## Sürüm 5.1 kayıtları
 
-- `src/audio.js`: Howler ile önceden üretilmiş dosya; kayıt yoksa gerçek Türkçe
-  cihaz sesi; Türkçe ses de yoksa yazılı yönerge ve açık yetişkin desteği.
-- `public/audio/manifest.json`: **509 metin anahtarı / 379 aktif MP3**, yaklaşık
-  5,47 MB; ses `tr-TR-EmelNeural`. Dört özgün WAV efekt ayrıca bulunur.
-- `scripts/generate-speech.py`: geliştirme zamanında Edge TTS kullanır. Bu araç,
-  ChatGPT Voice kaydı veya doğal ses seçiminin onayı değildir.
-- Sabit içerikler: harf adları, heceler, kelimeler, sayılar, cümleler ve hikâye
-  anlatımları. Yeni bölümün özgün 22 anlatım/diyalog metni kaynakta tanımlıdır.
-- Dinamik içerikler: yetişkinin eklediği kelimeler ve cümleler. Bunlar toplu ses
-  üretimi için dış bir servise otomatik gönderilmez.
+Mevcut Edge TTS kayıt hattı yeniden denendi ve çalıştı. Önce zaten onaylı,
+herkese açık selamlama yalnızca scratch dosyasına üretildi; ardından depodaki
+sabit metinlerin eksik 69 kaydı tamamlandı. Yeni ücretli sağlayıcı, API anahtarı
+veya çocuk kaydı kullanılmadı. Öğretmenin tarayıcıda girdiği kelimeler gönderilmedi.
 
-Güncel, salt okunur envanteri üretmek için:
+- 578 metin anahtarı / 448 aktif MP3; dört WAV efekt ayrıca korunur.
+- Üç özgün hikâyede 66 sabit anlatım/diyalog vardır.
+- Hikâyeler ve ilk kelime/cümle paketi için gerekli 77 metnin tamamının hazır
+  kaydı vardır. Envanterde eksik sayı 0.
+- Hikâye kayıtları mevcut warm-prompts hattının +1% anlatım ritmini kullanır;
+  eski öğrenme hedeflerinin kayıtları değiştirilmedi.
+- Gerekli 77 dosyanın MP3 biçimi ve pozitif süresi ffprobe ile denetlendi.
+  Bu, insan tarafından dinlenmiş ses kalitesi veya gerçek oyuncu kaydı değildir.
+
+## Yeniden üretme
 
 ```sh
 node scripts/speech-inventory.mjs > speech-inventory.json
+python scripts/complete-story-speech.py --dry-run
+python scripts/complete-story-speech.py
 ```
 
-Betik yalnızca depodaki sabit metinleri okur; çocuk kaydı, tarayıcı depolaması,
-ortam anahtarı veya kişisel ses dosyası okumaz. Ağ isteği yapmaz. Eksik yeni bölüm
-kayıtlarını açıkça listeler. Bu sürümde eksik kayıtlar sessizce tamamlandı sayılmaz.
+Envanter yalnızca depodaki sabit metinleri ve manifesti okur; ağ isteği yapmaz.
+Tamamlama betiği mevcut Emel sesini/kayıtlarını korur ve yalnız eksikleri üretir.
+Bütün dosyalar geçerli olmadan manifesti değiştirmez. Eski generate-speech.py ile
+ana paket yeniden üretildiyse ardından bu tamamlama betiği çalıştırılarak üç
+hikâye tekrar manifeste eklenir. TLS doğrulaması açık kalır.
 
-## Uygulanabilir geçiş
+## Dinamik kelimeler ve ses kalitesi
 
-1. Aynı kısa Türkçe örnekler için onaylı kaynaktan 2–3 aday ses hazırlanır.
-   `nine`, `nane`, `ı/i`, soru cümlesi ve hikâye diyaloğu birlikte dinlenir.
-2. Yetişkin bir sesi seçtikten sonra sabit metinler topluca kayıt dosyalarına
-   dönüştürülür. Harf adı ve harf sesi ayrı öğretim içerikleridir; hız değiştirme
-   harf sesi doğrulaması yerine geçmez.
-3. Dinlenmiş kayıtlar mevcut manifest anahtarlarına bağlanır; oyun motorunun
-   yeniden yazılması gerekmez. Yeni paket tamamlanana kadar mevcut kayıtlar korunur.
-4. Dinamik kelimeler için ayrıca onaylı sunucu hizmeti ve önbellek gerekir. Anahtar
-   tarayıcıya yazılmaz; çocuk sesi veya kimliği bu iş için gerekli değildir.
+src/audio.js önce hazır dosyayı çalar. Yeni öğretmen kelimesinin kaydı yoksa
+sadece gerçek Türkçe cihaz sesi kullanılır; Türkçe ses yoksa açık yetişkin
+desteği gerekir. İngilizce ses yedeği yoktur. Hazır kayıt, cihaz sesi ve yetişkin
+okuması birbirinin yerine bağımsız dinleme kanıtı olarak gösterilmez.
+
+Daha doğal bir anlatıcıya geçiş için nine, nane, ı/i, soru cümlesi ve hikâye
+diyaloğu içeren örneklerin insan tarafından dinlenip seçilmesi gerekir. Mevcut
+sesi hızlandırmak, ChatGPT Voice isteğinin karşılanması değildir. Seçilen kayıtlar
+manifest anahtarlarına bağlanabilir; dinamik kelimeler için ayrıca onaylı sunucu
+hizmeti/önbellek gerekir. Anahtar tarayıcıya yazılmaz.
 
 OpenAI'nin [Voice açıklaması](https://help.openai.com/en/articles/20001274-chatgpt-voice)
-ile [ses üretimi API belgesi](https://developers.openai.com/api/docs/guides/text-to-speech)
-farklı ses seçenekleri ve iş akışları tanımlar; aynı ses eşlemesi varsayılamaz.
-26 Ekim 2026'da incelenen API belgesi eski Speech API modelleri için 6 Ocak 2027
-kapanış duyurusu ve Realtime'a geçiş notu içeriyor. Yeni bir sağlayıcı entegrasyonu
-yapılırken o gün desteklenen model/iş akışı yeniden doğrulanmalıdır.
-
-Bu görevde yeni ücretli üretim yapılmadı, API anahtarı istenmedi ve yeni bir ses
-modeline çocuk verisi gönderilmedi. Ses kalitesinin insan tarafından dinlenmesi
-ve ChatGPT Voice ile aynılık bu otomatik testlerle doğrulanmış değildir.
+ve [ses üretimi API belgesi](https://developers.openai.com/api/docs/guides/text-to-speech)
+ayrı iş akışları tanımlar; aynı ses varsayılamaz. Bu görevde ücretli OpenAI ses
+üretimi veya çocuk sesi/kimliği aktarımı başlatılmadı.

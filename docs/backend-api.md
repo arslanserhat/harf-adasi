@@ -42,6 +42,8 @@ eder. State; listeler, seçili liste, en fazla 500 gözlem, kelime/harf bazında
 toplam 1000 kelime ve 512 KiB istek kabul edilir. Türkçe kelimeler, hecelerin
 birleşimi, oturum görevleri, sonuçlar ve yazı çizgileri doğrulanır. Kimlik alanları
 ve HTML kabul edilmez. State modeli `src/learning-model.js` içinde tanımlıdır.
+`state.session.storyEpisode` isteğe bağlı `0..2` tamsayısıdır; eski kayıtlar `0`
+ile açılır. Bölüm, görev sırası ve yazı taslağı birlikte geri yüklenir.
 
 İlk kayıt `201`, güncelleme `200` ile `{saved:true, state, revision, reset_revision}` döndürür.
 Revizyon tek bir koşullu veritabanı güncellemesiyle artar. Eski `base_revision`

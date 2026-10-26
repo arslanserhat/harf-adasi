@@ -312,3 +312,135 @@ test('a long teacher sentence cannot create an impossible or server-incompatible
   state.session.tasks[0].tokens = Array(60).fill('a');
   assert.equal(normalizeLearningState(state, NOW).session.tasks[0].tokens.length, 40);
 });
+
+test('the next completed round mixes new and practiced words and changes its task progression', async () => {
+  const { createLearningState, planSession, recordAttempt } = await api;
+  let state = createLearningState(NOW);
+  const first = planSession(state, LETTERS, NOW);
+  state.session = first;
+  for (const [index, task] of first.tasks.entries()) {
+    const at = NOW + index * 1000;
+    state = recordAttempt(state, attempt({ id: task.id, word: task.word, skill: task.skill,
+      hints: task.support >= 2 ? 1 : 0, independent: task.support < 2,
+      writingReviewed: task.kind === 'write', at }), at);
+  }
+  state.session.index = first.tasks.length;
+  const next = planSession(state, LETTERS, NOW + 60000);
+  const signature = plan => plan.tasks.map(task => `${task.word}:${task.kind}`).join('|');
+  assert.notEqual(signature(next), signature(first));
+  assert.ok(next.wordTexts.some(word => !first.wordTexts.includes(word)), 'new teacher content joins the next round');
+  assert.ok(next.wordTexts.some(word => first.wordTexts.includes(word)), 'a practiced word returns in a different context');
+  assert.ok(new Set(next.tasks.map(task => task.kind)).size >= 4);
+  assert.equal(next.tasks.length, 8);
+  assert.deepEqual(next, planSession(state, LETTERS, NOW + 60000), 'history-driven selection stays reproducible');
+});
+
+test('continuing a completed word changes the first skill instead of replaying that activity', async () => {
+  const { createLearningState, planSession } = await api;
+  const state = createLearningState(NOW);
+  const plan = planSession(state, LETTERS, NOW, { focusText: 'NANE', focusSkill: 'build' });
+  assert.equal(plan.tasks[0].word, 'nane');
+  assert.equal(plan.tasks[0].kind, 'recall');
+  assert.match(plan.tasks[0].reason, /nane/);
+  assert.ok(plan.tasks.some(task => task.word !== 'nane'));
+  const afterWriting = planSession(state, LETTERS, NOW, { focusText: 'nane', focusSkill: 'write' });
+  assert.equal(afterWriting.tasks[0].word, 'nane');
+  assert.notEqual(afterWriting.tasks[0].kind, 'write');
+});
+
+test('a syllable bridge selects a real eligible teacher word without inventing vocabulary', async () => {
+  const { createLearningState, planSession } = await api;
+  const state = createLearningState(NOW);
+  const plan = planSession(state, LETTERS, NOW, { focusText: 'in', focusSkill: 'syllables' });
+  assert.equal(plan.tasks[0].word, 'nine');
+  assert.notEqual(plan.tasks[0].kind, 'syllables');
+  const teacherWords = new Set(state.lists[0].words.map(word => word.text));
+  assert.ok(plan.tasks.every(task => teacherWords.has(task.word)));
+  assert.equal(plan.tasks.some(task => task.word === 'in'), false);
+  const unknown = planSession(state, LETTERS, NOW, { focusText: 'şeker', focusSkill: 'build' });
+  assert.ok(unknown.tasks.every(task => [...task.word].every(letter => LETTERS.includes(letter))));
+});
+
+test('explicit world entries start in distinct valid task formats with bounded fallback', async () => {
+  const { createLearningState, planSession, parseWordList } = await api;
+  const state = createLearningState(NOW);
+  for (const entryKind of ['listen', 'build', 'recall', 'meaning']) {
+    const plan = planSession(state, LETTERS, NOW, { entryKind });
+    assert.equal(plan.tasks[0].kind, entryKind);
+    assert.match(plan.tasks[0].reason, /Bu durakta/);
+    assert.equal(plan.tasks.length, 8);
+  }
+  state.lists[0].words = parseWordList('tane').words;
+  const fallback = planSession(state, LETTERS, NOW, { entryKind: 'meaning', focusText: 'tane' });
+  assert.notEqual(fallback.tasks[0].kind, 'meaning');
+  assert.match(fallback.tasks[0].reason, /henüz uygun değil/);
+  assert.ok(fallback.tasks.every(task => task.word === 'tane'));
+});
+
+test('successive plans avoid identical adjacent word formats and retain a due weak skill', async () => {
+  const { createLearningState, planSession, recordAttempt, ALPHABET } = await api;
+  let state = createLearningState(NOW);
+  state = recordAttempt(state, attempt({ id: 'needs-hece-help', word: 'anne', skill: 'syllables', hints: 2, at: NOW - DAY }), NOW - DAY);
+  const plan = planSession(state, LETTERS, NOW, { entryKind: 'meaning' });
+  assert.equal(plan.tasks[0].word, 'anne');
+  assert.equal(plan.tasks[0].kind, 'meaning');
+  assert.ok(plan.tasks.some(task => task.word === 'anne' && task.kind === 'syllables'), 'selected world does not discard the observed weak skill');
+  for (const task of plan.tasks) {
+    for (const text of [task.word, task.target, ...task.options]) {
+      assert.ok([...text.toLocaleLowerCase('tr-TR')].filter(letter => ALPHABET.includes(letter)).every(letter => LETTERS.includes(letter)));
+    }
+  }
+  for (let round = 0; round < 5; round++) {
+    const next = planSession(state, LETTERS, NOW + round * 60000, { focusText: 'anne', focusSkill: 'syllables' });
+    for (let index = 1; index < next.tasks.length; index++) {
+      const before = next.tasks[index - 1], current = next.tasks[index];
+      assert.notEqual(`${current.word}:${current.kind}`, `${before.word}:${before.kind}`);
+    }
+    const task = next.tasks[0];
+    state = recordAttempt(state, attempt({ id: task.id, word: task.word, skill: task.skill, at: NOW + round * 60000 }), NOW + round * 60000);
+    state.session = { ...next, index: next.tasks.length };
+  }
+});
+
+test('a one-word teacher list still varies actual task progression after the completed queue is cleared', async () => {
+  const { createLearningState, planSession, parseWordList, recordAttempt } = await api;
+  let state = createLearningState(NOW);
+  state.lists[0].words = parseWordList('nane').words;
+  let previous = null;
+  for (let round = 0; round < 6; round++) {
+    const now = NOW + round * 60000;
+    const plan = planSession(state, LETTERS, now, { focusText: 'nane', focusSkill: 'build' });
+    const signature = plan.tasks.map(task => `${task.word}:${task.kind}`).join('|');
+    if (previous) assert.notEqual(signature, previous, `round ${round} should offer a different progression`);
+    for (const [index, task] of plan.tasks.entries()) {
+      state = recordAttempt(state, attempt({ id: task.id, word: task.word, skill: task.skill,
+        hints: task.support >= 2 ? 1 : 0, independent: task.support < 2,
+        writingReviewed: task.kind === 'write', at: now + index * 1000 }), now + index * 1000);
+    }
+    state.session = null;
+    previous = signature;
+  }
+});
+
+test('story episodes advance after completed journeys and survive reload without advancing unfinished routes', async () => {
+  const { createLearningState, planSession, normalizeLearningState, mergeLearningStates } = await api;
+  let state = createLearningState(NOW);
+  state.session = planSession(state, LETTERS, NOW);
+  assert.equal(state.session.storyEpisode, 0);
+  for (const [round, episode] of [1, 2, 0].entries()) {
+    state.session.index = state.session.tasks.length;
+    state.session = planSession(state, LETTERS, NOW + (round + 1) * 60000);
+    assert.equal(state.session.storyEpisode, episode);
+    state.session.index = 2;
+    state.session.storySeen = true;
+    const reloaded = normalizeLearningState(JSON.parse(JSON.stringify(state)), NOW + (round + 1) * 60000);
+    assert.equal(reloaded.session.storyEpisode, episode);
+    assert.equal(reloaded.session.index, 2);
+    const anotherWorld = planSession(reloaded, LETTERS, NOW + (round + 1) * 60000, { entryKind: 'meaning' });
+    assert.equal(anotherWorld.storyEpisode, episode, 'changing routes mid-episode keeps the current story');
+    const merged = mergeLearningStates(reloaded, reloaded, NOW + (round + 1) * 60000);
+    assert.equal(merged.session.storyEpisode, episode);
+  }
+  state.session = null;
+  assert.equal(planSession(state, LETTERS, NOW).storyEpisode, 0, 'a changed list starts at its first episode');
+});

@@ -4,30 +4,3 @@
 @media(prefers-reduced-motion:reduce){.learning *{scroll-behavior:auto!important;transition:none!important}}
 .learn-intro-plan{padding:19px 22px;background:#fffef7;border:2px solid #e5dfed;border-radius:21px;margin:20px 0;color:#5f567b}.learn-intro-plan p{margin:7px 0 0;font-size:14px;color:#69728a}.learn-adult-audio{margin:0 0 10px}.learn-adult-audio .learn-button{min-height:44px;padding:6px 11px;font-size:11px;background:transparent;border-style:dashed;box-shadow:none}.learning-task #learningStory{margin:10px 0 16px}.learning-task .story-scene{margin:0}.learning-task .story-scene-stage{height:150px}.learning-task .story-scene-dialogue{min-height:64px}.learning-task .story-scene-dialogue h2{font-size:16px!important}.learning-task .story-scene-caption{font-size:12px!important}.learning-task .story-scene-topline{font-size:11px}.learning-task .story-scene-tools button{font-size:11px}.learning-task[data-kind=sentence] .learn-tile,.learning-task[data-kind=sentence] .learn-slot{font-size:23px;letter-spacing:0}.learning-task[data-kind=meaning] .meaning-choice .illustration{width:70px;height:70px}.learn-button[aria-busy=true]{background:#e9e6f2;color:#736e81}.learn-button[aria-busy=true]:after{content:'…';font-weight:900}
 @media(min-width:700px) and (max-height:820px){.learning-task .learn-nav{margin-bottom:10px}.learning-task .learn-task-header{margin:5px 0 9px}.learning-task .learn-task-header h1{font-size:27px;margin:5px 0 6px}.learning-task .learn-task-header p{font-size:13px}.learning-task .learn-session-track{margin:9px 0 12px}.learning-task .story-scene-stage{height:115px}.learning-task .story-scene-dialogue{min-height:54px;padding:7px 12px}.learning-task .story-scene-caption{font-size:11px!important}.learning-task .learn-workspace{min-height:250px;padding:14px 17px}.learning-task .learn-whole-word{font-size:36px;min-height:48px;margin:6px 0 10px}.learning-task .learn-bank,.learning-task .learn-slots{margin:12px 0}.learning-task .learn-task-controls{margin:5px 0 10px}.learning-task .learn-feedback{min-height:44px;margin-top:12px;padding:8px 12px}.learning-task .learn-choices{margin:18px 0}.learning-task .learn-next-row{margin:17px 0}.writing-focus .learning-writing .learn-workspace{min-height:0;padding:9px 12px}.writing-focus .learning-writing .learn-whole-word{font-size:28px;min-height:0;margin:2px 0 4px}.writing-focus .learning-writing .learn-feedback{min-height:34px;margin-top:3px;padding:5px 9px}.writing-focus .learning-writing .learn-task-controls{margin:0 0 3px}}
-@media(min-width:700px) and (min-height:821px){
-  .learning-task:not(.learning-writing) .learn-nav{margin-bottom:12px}
-  .learning-task:not(.learning-writing) .learn-task-header{margin:7px 0 12px}
-  .learning-task:not(.learning-writing) .learn-task-header h1{font-size:32px;margin:6px 0 8px}
-  .learning-task:not(.learning-writing) .learn-session-track{margin:10px 0 14px}
-  .learning-task:not(.learning-writing) .story-scene-stage{height:132px}
-  .learning-task:not(.learning-writing) .story-scene-dialogue{min-height:55px;padding:8px 12px}
-  .learning-task:not(.learning-writing) .learn-workspace{min-height:270px;padding:17px}
-  .learning-task:not(.learning-writing) .learn-choices{margin:15px 0;gap:14px}
-  .learning-task:not(.learning-writing) .learn-choices .learn-button{min-height:80px}
-  .learning-task:not(.learning-writing) .learn-feedback{min-height:44px;margin-top:12px;padding:9px 12px}
-  .learning-task:not(.learning-writing) .learn-next-row{margin:8px 0 12px}
-}
-@media(min-width:900px) and (max-height:820px) and (orientation:landscape){
-  .learning-task:not(.learning-writing){display:grid;grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr);column-gap:16px;align-items:start}
-  .learning-task:not(.learning-writing)>.learn-nav,.learning-task:not(.learning-writing)>.learn-task-header,.learning-task:not(.learning-writing)>.learn-session-track,.learning-task:not(.learning-writing)>.learn-next-row,.learning-task:not(.learning-writing)>.learn-letter-help{grid-column:1/-1}
-  .learning-task:not(.learning-writing)>#learningStory{grid-column:1;margin:0}
-  .learning-task:not(.learning-writing)>.learn-workspace{grid-column:2;margin:0}
-  .learning-task:not(.learning-writing) .story-scene-stage{height:190px}
-  .learning-task:not(.learning-writing) .story-scene-dialogue{align-items:flex-start}
-  .learning-task:not(.learning-writing) .story-route{display:none}
-  .learning-task:not(.learning-writing) .story-scene-tools{left:7px;right:7px;justify-content:center;flex-wrap:wrap}
-  .learning-task:not(.learning-writing) .story-scene-series{font-size:10px}
-  .learning-task:not(.learning-writing) .learn-choices{gap:10px;margin:14px 0}
-  .learning-task:not(.learning-writing) .learn-choices .learn-button{min-width:105px;min-height:75px;padding:12px;font-size:28px}
-  .learning-task:not(.learning-writing) .learn-choices .meaning-choice{font-size:17px}
-}

@@ -1,5 +1,36 @@
 # Harf Adası — güncel devir notu
 
+## 26 Ekim 2026 — sürüm 5.1 revizyonu
+
+Kullanıcı sürüm 5'in tasarımını ve küçük banner üstündeki alıştırma yapısını
+reddetti. Yeni kaynak `5.1.0`dır; önceki 5.0 canlı kanıtını bu sürümün kanıtı
+olarak kullanma. Güncel yayın kaydı `docs/QA.md` başına eklenir.
+
+- `src/home.css`: özgün ada üzerinde dört gerçek dokunma durağı; tek ana giriş,
+  ayrı öğretmen listesi, altı eski oyun ve bilinen harflerin hızlı girişleri.
+- `public/art/`: bu proje için üretilmiş beş sahne ve Pırpır'ın dört kareli saydam
+  sprite atlası. `src/world-ambience.js/css`, `theme.css`: kanat çırpma, bulut,
+  deniz, kelebek ve ışık hareketleri; yerel Nunito Sans yazı tipi.
+- `src/story-scene.js/css`: sahne içinde güvenilir HTML etkileşim yuvası,
+  gerçek parça sayısıyla köprü tahtaları, mektup/sulama animasyonları ve
+  üç yazılmış hikâye. Görev/ipuçları hâlâ öğrenme denetleyicisine aittir.
+- `src/learning.js`, `world-learning.css`: sorular dünya içinde, yazı defteri
+  ayrı ve kaydırma korumalı; doğru nesneler yerlerine uçar. Ana giriş doğrudan
+  hikâyeyi veya yarım görevi açar. Geçiş çocuğun Devam eylemini bekler.
+- `planSession(...,{focusText,focusSkill,entryKind})`: bitirilen eski çalışmadan
+  bağlantı, harita durağına özel giriş, geçmişe göre değişen kelime/görev sırası.
+  `session.storyEpisode` 0..2 alanı tam tur sonrası döner; yarım tur değiştirmez.
+  Laravel isteği bu alanı doğrular; ayrıca migration gerekmez.
+- Mevcut Emel kayıt hattı yeniden çalıştı. 69 eksik sabit kayıt eklendi:
+  578 anahtar / 448 aktif MP3; üç hikâye ve ilk paket için 77/77 hazır kayıt.
+  ChatGPT Voice aktarımı yapılmadı. Özel öğretmen kelimeleri dışarı gönderilmedi.
+  `scripts/complete-story-speech.py` yalnız depodaki sabit eksikleri tamamlar.
+
+Hareketi durdurma, azaltılmış hareket, yalnız Türkçe ses, yetişkin yazı kontrolü
+ve mevcut altı oyun korunur. Sürüm 5'in eski kompakt banner/grid CSS blokları
+yenisiyle çakıştığı için kaldırıldı. Fiziksel iPad/WebKit ve insan dinlemesi
+otomatik Chromium kontrollerinin yerine geçmez. Yeni VPS yayını varsayma.
+
 ## Geçerli kapsam
 
 Kullanıcı mevcut altı bölümü koruyarak uygulamayı **Laravel** projesine dönüştürmemizi istedi. Adı Harf Adası kalır. Başlıca gerçek cihaz sorunları: iPad Safari'de yazarken sayfanın kayması, İngilizce cihaz sesinin `nine` kelimesini yanlış okuması ve daha iyi ses/görsel geri bildirim ihtiyacı.
@@ -23,7 +54,7 @@ Yalnızca `arslanserhat/harf-adasi` üzerinde çalış. Başlangıç dalı `main
 - `src/island-model.js`: üç temada altışar yazılmış görev, seçilen harflerle sınırlı hedef/seçenekler, az harf için sade görevler ve doğrulanmış tamamlanma anahtarlarından kalıcı ada durumu. `island` backend modu; hazine konumu veya seçilen hayvan tek tamamlanma anahtarının sonundadır, aynı görevi tekrarlamak ikinci ödül vermez. Sunucudan geri yükleme son deneme sırasını korur.
 - `src/celebration.js` / `celebration.css`: başarılı adımda Türkçe kayıtlı “Tebrikler!” ve “Hazırsan devam edebilirsin.”, modal içinde konfeti ve yalnızca “Devam et” ile ilerleme. Çalışmaya dönmek veya Escape adımı ilerletmez. Sessiz ve azaltılmış hareket tercihleri korunur.
 - `resources/views/game.blade.php`, `routes/web.php`, `app/`, `database/`: gerçek Laravel 13 backend.
-- `public/audio`: 379 aktif Türkçe kayıt / 509 metin eşleştirmesi, dört özgün efekt. Eski kayıtlar da korunur. Kullanıcının seçtiği Emel sesiyle 48 yönerge/kutlama (8 ada hareketi dahil) ve 10 hikâye girişi daha canlı konuşma dili ve okuma ritmiyle yeniden hazırlandı; harf/hece/kelime/sayı telaffuz kayıtları aynı kaldı. `scripts/generate-speech.py --profile warm-prompts` bu ayrımı korur.
+- `public/audio`: 448 aktif Türkçe kayıt / 578 metin eşleştirmesi, dört özgün efekt. Eski kayıtlar korunur. Kullanıcının seçtiği Emel sesi kullanılır; harf/hece/kelime/sayı telaffuzlarının eski dosyaları değişmedi. Ana paket için `generate-speech.py`, üç hikâye için ardından `complete-story-speech.py` çalıştırılır.
 - `public/illustrations`: 112 Microsoft Fluent 3D çizimi ve MIT lisansı.
 
 PHP kilitli paketleri PHP 8.4.1+ ister; üretim Docker imajı FrankenPHP/PHP 8.5 kullanır. Node 22, Vite, Howler, canvas-confetti ve Lucide kullanılır. `.env`, gerçek anahtarlar, veritabanı ve vendor/build çıktıları Git'e eklenmez.

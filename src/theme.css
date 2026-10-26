@@ -1,0 +1,35 @@
+:root{--ink:#294b43;--blue:#327d72;--line:#dce6db;--cream:#fffcf4;--coral:#ec7850;--forest:#244f43}
+body{font-family:'Nunito Sans Variable',system-ui,sans-serif;background:#fffcf4;background-image:none;color:#294b43}
+button,input,textarea,select{font-family:inherit}
+body>header{max-width:1280px;padding:21px 28px 15px}
+body>main,body>.status{max-width:1280px}
+body>main{padding:20px 28px 40px}
+body>header .logo{color:#285b4d;gap:11px;font-size:31px;letter-spacing:-1.3px}
+body>header .logo em{color:#e88d4d}
+body>header .logo small{color:#688275;font-size:8px;font-weight:800;letter-spacing:1.3px;margin-top:6px}
+body>header .mark{background:#f0b55a;border:2px solid #fff4d9;box-shadow:0 4px 0 #d69a40,0 5px 13px #d69a4020;border-radius:17px;width:47px;height:51px;font-size:39px}
+body>header nav{gap:9px}
+body>header .pill{border:1px solid #e4e9df;background:#fffef9;box-shadow:0 3px 8px #37524407;border-radius:15px;min-height:46px;padding:10px 14px;color:#375748}
+body>header .pill svg{height:20px;width:20px}
+body>.status{font-size:11px;padding:0 30px;color:#728575}
+body>.status #ready{display:inline-flex;align-items:center;gap:6px}
+body>footer{font-size:11px;color:#6d8273;background:transparent;padding-top:16px}
+.learning .learn-button{border:1px solid #e0e5d8;background:#fffdf5;color:#375647;box-shadow:0 3px 0 #d9dfd1;border-radius:14px;font-weight:800}
+.learning .learn-button.primary{background:#eb7951;border-color:#dd7048;color:#fffdf8;box-shadow:0 4px 0 #bd5736}
+.learning .learn-button.primary:hover{background:#e47148}
+.learning .learn-intro h1,.learning .learn-task-header h1{color:#2c594b}
+.learning .learn-eyebrow{color:#65806b}
+.learning .learn-intro p,.learning .learn-task-header p{color:#607567}
+.learning .learn-nav>span{color:#708574}
+.learning .learn-panel{border-color:#e2e6d6;border-radius:23px;background:#fffef8;box-shadow:0 5px 16px #3a553b05}
+.learning .learn-panel h2{color:#345949}
+.learning input,.learning textarea,.learning select{border-color:#dce5d5;color:#2d5145;background:#fffef9}
+.learning .learn-summary{background:#f3f2db;border-color:#fff9df;box-shadow:0 5px 0 #d5dabb;color:#45614a}
+.learning .learn-summary h1{color:#375e46}
+.party{border-color:#fff7e6;background:#fff4d9;box-shadow:0 6px 0 #ded6b7;border-radius:32px}
+.party h1{color:#365e46}
+.party .actions{gap:12px}
+.party .btn{border:1px solid #df784f;background:#ec7b50;color:white;box-shadow:0 4px 0 #b75935;border-radius:16px}
+.party .btn.secondary{background:#fffdf4;border-color:#e3dcc6;box-shadow:0 3px 0 #ddd4b8;color:#526749}
+@media(max-width:700px){body>header{padding:16px 18px 12px}body>header .logo{font-size:25px;gap:9px}body>header .mark{width:42px;height:45px;font-size:35px}body>header .logo small{font-size:6px}body>header nav{gap:6px}body>header .pill{padding:9px 11px;border-radius:13px}body>.status{padding:0 20px;font-size:10px}body>main{padding:17px 17px 32px}}
+@media(min-width:700px) and (max-height:800px){body>header{padding-top:12px;padding-bottom:9px}body>header .logo{font-size:27px}body>header .mark{height:43px;width:43px;font-size:34px}body>header .logo small{font-size:6px}body>.status{font-size:10px}body>main{padding-top:12px}}

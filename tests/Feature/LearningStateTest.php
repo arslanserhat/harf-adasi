@@ -208,14 +208,19 @@ class LearningStateTest extends TestCase
                 'writingReviewed' => false, 'independent' => false, 'modelOpened' => true,
             ]],
             'paused' => true,
+            'storyEpisode' => 2,
         ];
 
         $this->saveState($state)->assertCreated();
         $this->getJson('/api/learning')->assertOk()
             ->assertJsonPath('state.session.results.task-1.modelOpened', true)
             ->assertJsonPath('state.session.tasks.0.tokens.2', 'n')
+            ->assertJsonPath('state.session.storyEpisode', 2)
             ->assertJsonPath('state.progress.nane.build.independentSuccesses', 0)
             ->assertJsonPath('state.events.0.writingReviewed', false);
+        $state['session']['storyEpisode'] = 3;
+        $this->saveState($state, 1)->assertUnprocessable()
+            ->assertJsonValidationErrors('state.session.storyEpisode');
     }
 
     public function test_long_bounded_writing_and_story_resume_round_trip_without_html_or_unbounded_paths(): void

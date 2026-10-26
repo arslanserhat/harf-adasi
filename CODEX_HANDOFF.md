@@ -1,5 +1,54 @@
 # Harf Adası — güncel devir notu
 
+## 26 Ekim 2026 — altı macera dünyası ve kullanıcının seçtiği Pixabay sesleri
+
+Son uygulama kodu **a716bfc775761a76a24c8842a252ee31ea006488**, teknik sürüm
+5.4.0. Görünür sürüm etiketi ekleme. Pages workflow
+[40349996437](https://github.com/arslanserhat/harf-adasi/actions/runs/40349996437)
+başarılı. Gerçek https://arslanserhat.github.io/harf-adasi/?yenile=4 adresinde
+yeni altı görevlik Kelime Pazarı tamamlandı; sonuçtan **Hece Ekspresi** açıldı.
+Eski sekiz görevlik hikâye ve dört efektin gerçek çalımı da ayrıca doğrulandı.
+Canlı JS ve CSS yerel son derlemeyle aynı; kanıt ve sınırlar `docs/QA.md` başında.
+Aşağıdaki 5.3 ve daha eski kayıtlar geçmiş sürümleri anlatır.
+
+Kullanıcı piyano efektlerini açıkça reddetti. Doğru cevap **miraclei success03,
+Pixabay 360151**; bitiş **Universfield Level Complete, 143022**; dokunma ve
+sessiz yeniden deneme **Soft UI Click, 147352**. `audio.js` yalnız açıkça
+eşlenmiş `fx-*-pixabay-v4.mp3` dosyalarını çalar; piyano yedeği yoktur.
+Kaynaklar, özgün dosya özetleri ve **Pixabay Content License** atfı
+`public/audio/pixabay-v4.sources.json` ve `LICENSE-pixabay-v4.txt` içindedir.
+Konuşan kişi hâlâ mevcut Emel anlatıcısıdır; yeni insan veya ChatGPT Voice
+kaydı eklenmedi. Ayarlardaki iki X, tek erişilebilir kapatma düğmesine indirildi.
+
+- `quest-model.js`: öğretmenin gerçek kelime/hece/cümleleri ve işlenen harflerle
+  altı ayrı altı aşamalı plan; vadesi gelen veya zorlanılan beceriye göre öneri,
+  mümkünse bitirilen dünyadan farklı sonraki dünya. Keyfi kelimeye anlam uydurma.
+- `quests.js`: Fener Atölyesi, Hece Ekspresi, Kelime Pazarı, Orman Dedektifi,
+  Mektup Postanesi, Şenlik Bahçesi. Animasyon başarı üretmez; her devam elle,
+  yazı yetişkin onayıyla. Hata/ipucu olayları toplamı iki kez eklenmez.
+- `quest-scenes.js`, `quests.css`, `quest-home.js/css`: bu proje için üretilen
+  altı özgün WebP dünya, ayrı sahne nesneleri ve hayvan hareketleri. Telefon
+  oyuncusunda cevap ve Devam görünür; uzun içerik kendi alanında kayar.
+  Sonraki dünya düğmesinin gerçek hesaplanmış renk kontrastı da sınanır.
+- Yeni ana giriş macerayı önerir veya yarım turu sürdürür. Eski altı katalog
+  Serbest alıştırmalar altında; eski sekiz görevli hikâye ayrı girişte korunur.
+- `harf-adasi-quests-v1`: tur konumu ve sayısal geçmiş tarayıcıda. Kelime/harf
+  gözlemleri mevcut öğrenme deposunu ve Laravel sürümünde onun eşitlemesini
+  kullanır; yeni macera geçmişi sunucuya eşitlenmez. Boş cevap dizisi veya
+  kazanılmamış doğru bayrağı tamamlanma üretmez. Sıfırlama listeleri korur.
+- Yazı korumasını yalnız onu oluşturan bileşen kapatır. `quests.destroy()`
+  etkin macera yokken genel `releaseWritingGuard()` çağırmamalı: eski bölümün
+  yazı kilidini açan regresyon böyle düzeltildi. Gerçek çizim, mola, ana sayfa,
+  yenileme, döndürme ve arka plandan dönüşte korunur.
+
+Son derlemede **99/99** mantık ve **36/36** yeni macera tarayıcı senaryosu geçti
+(Chromium 24, Linux WebKit 12). Gerçek yayında yeni tur, eski tam tur/sesler ve
+iki kapatma senaryosu **4/4** geçti. Ayrıntılı eski bölüm regresyonlarının
+ilk hata ve hedefli tekrar kaydı QA belgesindedir; eski sonucu yeni koşu diye sayma.
+Pages ve Laravel derlemeleri başarılı. Fiziksel iPhone/iPad ve insan ses
+dinlemesi yapılmadı; Linux WebKit fiziksel iOS değildir. Bu sürüm VPS'ye
+yüklenmedi; e-Tahlil, diğer depolar ve pytest değiştirilmedi.
+
 ## 26 Ekim 2026 — ekrana sığan oyuncu ve gerçek akustik efektler
 
 Güncel uygulama kodu **036da60191dc7bf0a3f33908e81d2fa9bdaad956**, teknik

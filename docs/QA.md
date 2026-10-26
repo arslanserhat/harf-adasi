@@ -1,4 +1,84 @@
-# Ekrana sığan macera ve akustik bildirimler — 26 Ekim 2026
+# Altı macera dünyası ve Pixabay sesleri — 26 Ekim 2026
+
+Son uygulama kodu **a716bfc775761a76a24c8842a252ee31ea006488** (teknik sürüm
+5.4.0); ilk macera/ses uygulaması `421df87`, son düğme kontrastı ve gerçek
+sonraki dünya kontrolü bu son kodda. Çocuk ekranında sürüm etiketi yok.
+Pages workflow [40349996437](https://github.com/arslanserhat/harf-adasi/actions/runs/40349996437)
+başarılı. Gerçek yayın: https://arslanserhat.github.io/harf-adasi/?yenile=4
+
+Kullanıcının seçtiği onay sesi miraclei `success03` / Pixabay **360151**,
+bitiş sesi Universfield `Level Complete` / **143022**. Dokunma/yeniden deneme
+`Soft UI Click` / **147352**. Kaynak MP3'leri değiştirilmedi; oynatım düzeyi
+uygulamada ayarlanır. Eski piyano seti etkin eşlemeden çıkarıldı. Bu sesler
+Pixabay Content License kapsamındadır; kaynak ve özetler yayımlanan
+`audio/pixabay-v4.sources.json` ve `audio/LICENSE-pixabay-v4.txt` içinde.
+
+Son derleme üzerinde:
+
+- **99/99 JavaScript mantık testi**, yerelde ve son Pages işinde geçti:
+  ses 18, eski macera 11, ada 12, öğrenme 28, eşitleme 10, hikâye 4,
+  yeni macera modeli 16. Öğretmen heceleri, ayrı çift harfler, öğretilen harf
+  filtresi, bilinmeyen anlamlara içerik uydurmama, gerçek saatle tekrar
+  vadesi ve biten dünyadan başka uygun dünya seçimi kapsanır.
+- `tests/quests.spec.cjs`: **24/24 Chromium** ve **12/12 Linux WebKit 26.0**.
+  Chromium: 390×660, 1366×768, 360×640, 844×390; WebKit: 390×660 ve 1366×768.
+  Her boyutta altı dünyanın her biri altı gerçek cevapla bitirildi; ardından
+  sonuçtaki düğmeyle farklı dünya açıldı. Cevap/Devam görünüm alanında kalır,
+  belge yatay/dikey uzamaz; düğmenin hesaplanmış kontrastı en az 4.5'tir.
+- Kelime Pazarı telefon turunda öğretmen formundan gerçekten `nane / anne`
+  girilir. Hata ve ipucu toplamları tamamlanmada yeniden eklenmez. Gerçek
+  çizim/yetişkin onayı, mola, ana sayfa, yenileme, döndürme ve benzetilmiş
+  arka plandan dönüş sınanır. Eksik hece sorusu kendi başına ipucu sayılmaz;
+  cümle ipucu tam öğretmen cümlesini gösterir. Sayılar okuma kaydı üretmez.
+- Pages ve Laravel üretim derlemeleri geçti. Yeni bağımlılık veya sunucu
+  uç noktası eklenmedi. Macera turu/geçmişi yerel; gerçek kelime/harf
+  gözlemleri mevcut öğrenme eşitlemesini kullanır.
+
+Son kontrast değişikliğinden önce, aynı oyun mantığıyla ek regresyonlar:
+öğrenme **26/26**, bozuk macera kaydı kurtarma **2/2**, kapatma **2/2**.
+İlk eski bölüm koşusu **25/32** idi: dört senaryo değişen ana sayfa
+seçicilerini bekliyordu; iki kutlama ve bir sayı senaryosu, etkin olmayan
+macera bileşeninin başka bölümün yazı korumasını açtığını gösterdi. Seçiciler
+güncellendi, bileşenin kendisine ait olmayan korumayı kapatması kaldırıldı.
+Yazı stüdyosu, 1. sınıf menüsü, kutlama ve sayı hedefli tekrarları **8/8** geçti.
+Tek bir son tam koşu 32/32 yapılmış gibi raporlanmaz. Sonraki kaynak değişikliği
+yalnız yeni macera düğmesi stili, testler ve ses seçim metadata'sıdır.
+
+## Son kodla gerçek yayın kontrolü
+
+390×660 gerçek Pages adresinde öğretmen listesiyle **Kelime Pazarı'nın altı
+görevi** tamamlandı; sonuçtaki **Hece Ekspresi** düğmesi farklı dünyayı açtı.
+390×844 ile eski **sekiz görevli hikâye**; yazı, rotasyon, yetişkin kontrolü ve
+son sesli kartıyla tamamlandı. Dört Pixabay MP3'ünün gerçek ses yanıtları,
+gerçek Web Audio kaynaklarının `ended` olayları ve kayıtlı macera tebrik
+sesinin `ended` olayı doğrulandı. 390×660 ve 1366×768 gerçek yayında ayarlar
+iki kez açılıp kapatıldı; tek X ve 44px dokunma alanı doğrulandı. Toplam
+**4/4 canlı senaryo**, tüm süreçler çıkış kodu 0. Başarı enjekte edilmedi.
+
+Yayımlanan JS ve CSS yerel son derlemeyle bayt bayt aynı:
+
+- `assets/index-Ct02pfBQ.js`: SHA-256
+  `1dd75ec08cc2a1d9f206ba4b6aff492b4176fa1aaa2333fb700ce38b993953a8`
+- `assets/index-CgiRj8Dn.css`: SHA-256
+  `2060c000c24ab4ce3940cb7811e6d5d60098a5cb14979479b50b42367f20a14a`
+
+Çalışma alanı kanıtları `test-results/live-v54/` ve
+`/workspace/scratch/harf-v54-final-*.log` içinde. HTTPS doğrulaması kapatılmadı;
+ortamın mevcut proxy CA'sı ve Chromium'un mevcut NSS veritabanı kullanıldı.
+Eski `harf-v54-live-*` kaydı ilk `421df87` yayınına aittir; final kaydı
+`harf-v54-final-live-*` dosyalarıdır.
+
+Fiziksel iPhone/iOS Chrome veya iPad testi ve insan tarafından ses dinlemesi
+yapılmadı. Linux WebKit gerçek motor kontrolüdür; fiziksel Apple cihazı değildir.
+Anlatıcı hâlâ mevcut Türkçe Emel kaydıdır; ChatGPT Voice/oyuncu kaydı eklenmedi.
+Uzun dönem öğrenme/pedagojik etkililik pilotu yapılmadı. Bu, Pages statik
+yayınıdır; PHP/Laravel sunucusu Pages'te çalışmaz. VPS bu sürümle güncellenmedi;
+e-Tahlil, diğer depolar ve pytest değiştirilmedi. Backend değişmediği için eski
+PHP testleri bu turda yeniden koşulmuş gibi sayılmaz.
+
+---
+
+# Önceki sürüm: ekrana sığan macera ve akustik bildirimler — 26 Ekim 2026
 
 Uygulama kodu **036da60191dc7bf0a3f33908e81d2fa9bdaad956** (teknik sürüm
 5.3.0); çocuk arayüzünde sürüm etiketi yok. Pages workflow

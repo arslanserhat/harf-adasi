@@ -236,6 +236,15 @@ scenario('connected learning: errors are assisted, repeated cards, real writing 
     await press(app, '#learningNext');
   }
   await app.page.locator('#learningSummary').waitFor();
+  const celebration = app.page.locator('#celebrationDialog[open].celebration-journey');
+  await celebration.waitFor();
+  assert.match(await celebration.innerText(), /Tebrikler, başardın!/u, 'a completed journey opens its explicit congratulations card');
+  await app.page.locator('#celebrationRewardImage').evaluate(image => image.decode());
+  const completedId = (await snapshot(app.page)).session.id;
+  await app.page.waitForTimeout(350);
+  assert.equal((await snapshot(app.page)).session.id, completedId, 'celebration never starts the next story automatically');
+  await press(app, '#celebrationReturn');
+  await celebration.waitFor({state:'hidden'});
   assert.ok(kinds.has('listen') && kinds.has('syllables') && kinds.has('build') && kinds.has('recall') && kinds.has('write'), `multiple learning formats are used: ${[...kinds]}`);
   assert.ok([...wordCounts.values()].some(value => value >= 3), 'the same word connects several learning tasks');
   assert.ok(writingChecked, 'actual touch writing and adult review were exercised');

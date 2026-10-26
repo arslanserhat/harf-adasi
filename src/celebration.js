@@ -119,12 +119,22 @@ function ensureDialog() {
       </div>
       <p class="celebration-eyebrow">Adım adım öğreniyorum</p>
       <h2 id="celebrationTitle">Tebrikler!</h2>
+      <figure id="celebrationReward" class="celebration-journey-card" hidden>
+        <span class="celebration-card-ribbon">MACERA KARTI</span>
+        <div class="celebration-card-art"><img id="celebrationRewardImage" alt="" draggable="false"><svg class="celebration-card-fallback" viewBox="0 0 120 100" aria-hidden="true"><path d="M16 77q44-43 88 0v12H16Z" fill="#a7bf9b"/><path d="m60 15 10 20 23 3-17 16 4 23-20-11-20 11 4-23-17-16 23-3Z" fill="#f0cf8c" stroke="#d8b474" stroke-width="3"/></svg></div>
+        <figcaption id="celebrationRewardTitle"></figcaption>
+        <span class="celebration-card-seal" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></span>
+      </figure>
       <p id="celebrationMessage"></p>
       <div id="celebrationItem" class="celebration-item"></div>
       <p id="celebrationHint">Hazırsan devam edebilirsin.</p>
       <button id="celebrationContinue" type="button" autofocus>Devam et <span aria-hidden="true">→</span></button>
     </div>`;
   document.body.appendChild(dialog);
+  dialog.querySelector('#celebrationRewardImage').addEventListener('error', event => {
+    event.target.hidden = true;
+    dialog.querySelector('#celebrationReward').dataset.art = 'unavailable';
+  });
 
   // A fresh gesture or keyboard activation is always allowed. Only the one
   // trailing click from our handled release is blocked, even after navigation.
@@ -189,40 +199,73 @@ function celebrateWithConfetti(celebration) {
     ticks: 68,
     scalar: 0.85,
     origin,
-    colors: ['#8b77d8', '#f4c267', '#65bfaa', '#ef9ea5'],
+    colors: celebration.mode === 'journey'
+      ? ['#e8bd78', '#7eaa8b', '#df9c87', '#f2dfb9']
+      : ['#8b77d8', '#f4c267', '#65bfaa', '#ef9ea5'],
     disableForReducedMotion: true,
   });
-  burst(30, { x: 0.23, y: 0.39 }, 60);
-  schedule(celebration, () => burst(24, { x: 0.77, y: 0.39 }, 120), 220);
-  schedule(celebration, () => burst(18, { x: 0.5, y: 0.36 }, 90), 440);
-  schedule(celebration, () => celebration.confetti?.reset(), 1400);
+  const journey = celebration.mode === 'journey';
+  burst(journey ? 18 : 30, { x: 0.23, y: 0.39 }, 60);
+  schedule(celebration, () => burst(journey ? 12 : 24, { x: 0.77, y: 0.39 }, 120), 220);
+  if (!journey) schedule(celebration, () => burst(18, { x: 0.5, y: 0.36 }, 90), 440);
+  schedule(celebration, () => celebration.confetti?.reset(), journey ? 1150 : 1400);
 }
 
 async function speakCongratulations(celebration) {
   const status = audio.voiceStatus();
   if (status.muted || status.volume <= 0 || !stillOpen(celebration)) return;
   try {
-    // These exact phrases have local Turkish recordings in the audio manifest.
-    const finished = await audio.speak('Tebrikler!');
-    const currentStatus = audio.voiceStatus();
-    if (!finished || !stillOpen(celebration) || currentStatus.muted || currentStatus.volume <= 0) return;
-    await audio.speak('Hazırsan devam edebilirsin.');
+    // One short supplied clip; the host chooses a matching Turkish recording.
+    await audio.speak(celebration.voiceText);
   } catch {
     // The modal and its written instructions also work without audio output.
   }
 }
 
-export function showCelebration({ message, itemText, final = false, effects = true, onContinue } = {}) {
+export function showCelebration({ message, itemText, final = false, effects = true, onContinue,
+  mode = 'step', title = 'Tebrikler!', voiceText = 'Tebrikler!',
+  continueLabel = 'Devam et', returnLabel = 'Çalışmama dön', reward,
+} = {}) {
   hideCelebration();
   ensureDialog();
+  const journey = mode === 'journey';
+  dialog.dataset.celebrationMode = journey ? 'journey' : 'step';
+  dialog.classList.toggle('celebration-journey', journey);
+  dialog.querySelector('#celebrationTitle').textContent = String(title || 'Tebrikler!');
+  dialog.querySelector('.celebration-eyebrow').textContent = journey ? 'Bu maceradan bir hatıra' : 'Adım adım öğreniyorum';
+  dialog.querySelector('#celebrationContinue').textContent = String(continueLabel || 'Devam et');
+  const returnControl = dialog.querySelector('#celebrationReturn');
+  returnControl.textContent = String(returnLabel || 'Çalışmama dön');
+  returnControl.setAttribute('aria-label', returnControl.textContent);
+  dialog.querySelector('#celebrationHint').textContent = journey
+    ? 'Macera kartın açıldı. Hazır olduğunda yeni bir yolculuğa çıkabilirsin.'
+    : 'Hazırsan devam edebilirsin.';
   dialog.querySelector('#celebrationMessage').textContent = message
-    || (final ? 'Emek verdin, bu oyunu tamamladın!' : 'Emek verdin, bu adımı tamamladın!');
+    || (journey ? 'Bu yolculuktaki görevleri tamamladın.' : final ? 'Emek verdin, bu oyunu tamamladın!' : 'Emek verdin, bu adımı tamamladın!');
   const item = dialog.querySelector('#celebrationItem');
   item.textContent = itemText || '';
   item.hidden = !itemText;
   dialog.classList.toggle('celebration-final', Boolean(final));
+  const card = dialog.querySelector('#celebrationReward');
+  const image = dialog.querySelector('#celebrationRewardImage');
+  card.hidden = !journey;
+  card.dataset.art = 'unavailable';
+  dialog.querySelector('#celebrationRewardTitle').textContent = String(reward?.title || 'Yolculuk hatıram');
+  image.hidden = true;
+  image.removeAttribute('src');
+  if (journey && typeof reward?.image === 'string') {
+    try {
+      const source = new URL(reward.image, document.baseURI);
+      if (source.origin === window.location.origin && ['http:', 'https:'].includes(source.protocol)) {
+        card.dataset.art = 'available';
+        image.hidden = false;
+        image.src = source.href;
+      }
+    } catch { /* The original fallback card remains visible. */ }
+  }
 
-  const celebration = { onContinue, continued: false, timers: new Set(), confetti: null };
+  const celebration = { mode: journey ? 'journey' : 'step', voiceText: String(voiceText || 'Tebrikler!'),
+    onContinue, continued: false, timers: new Set(), confetti: null };
   activeCelebration = celebration;
   document.body.classList.add('celebration-open');
   dialog.showModal();

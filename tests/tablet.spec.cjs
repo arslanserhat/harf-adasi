@@ -316,7 +316,7 @@ scenario('Turkish audio: nine and every word have bundled recordings; celebratio
   assert.ok(phrases.nine, 'nine does not depend on an English default browser voice');
   const celebration = Object.keys(phrases).find(text => /tebrikler.*başardın/.test(text));
   assert.ok(celebration, 'spoken congratulation is included');
-  const filenames = [phrases.nine, phrases[celebration], 'fx-tap.wav', 'fx-correct.wav', 'fx-retry.wav', 'fx-complete.wav'];
+  const filenames = [phrases.nine, phrases[celebration], 'fx-tap-v2.wav', 'fx-correct-v2.wav', 'fx-retry-v2.wav', 'fx-complete-v2.wav'];
   for (const filename of filenames) {
     assert.equal(/^(https?:|\/\/|\.\.)/.test(filename), false, 'sound assets are bundled with the game');
   }
@@ -346,7 +346,7 @@ scenario('celebration: recorded congratulations, no automatic advance, Escape an
   const response = await page.request.get(new URL('audio/manifest.json', page.url()).href);
   assert.equal(response.status(), 200);
   const { phrases } = await response.json();
-  const recordings = ['tebrikler!', 'hazırsan devam edebilirsin.'].map(phrase => {
+  const recordings = ['tebrikler!'].map(phrase => {
     assert.equal(typeof phrases[phrase], 'string', `${phrase} has a bundled Turkish recording`);
     return new URL(`audio/${phrases[phrase]}`, page.url()).href;
   });

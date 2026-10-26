@@ -4,7 +4,7 @@ import { Howl, Howler } from 'howler';
 // device actually supplies a Turkish voice; lang='tr-TR' alone is insufficient.
 const BASE = typeof document !== 'undefined' && document.querySelector('meta[name="harf-backend"]')?.content === 'laravel' ? '/' : (import.meta.env?.BASE_URL || '/');
 const AUDIO_BASE = `${BASE.endsWith('/') ? BASE : `${BASE}/`}audio/`;
-const EFFECT_LEVELS = { tap: 0.2, correct: 0.42, retry: 0.2, complete: 0.42 };
+const EFFECT_LEVELS = { tap: 0.25, correct: 0.42, retry: 0.2, complete: 0.42 };
 // Keep the live HTML5 clip cache within Safari's unlocked audio pool.
 const MAX_CACHED_PHRASES = 8;
 const effects = new Map();
@@ -80,7 +80,7 @@ function ensureEffects() {
   for (const name of Object.keys(EFFECT_LEVELS)) {
     if (!effects.has(name)) {
       effects.set(name, new Howl({
-        src: [`${AUDIO_BASE}fx-${name}.wav`],
+        src: [`${AUDIO_BASE}fx-${name}-v2.wav`],
         preload: true,
         volume: volume * EFFECT_LEVELS[name],
       }));
@@ -256,8 +256,12 @@ async function speak(value) {
   const sequence = speechSequence;
   await loadManifest();
   if (sequence !== speechSequence || muted) return false;
-  const file = phrases[normalizeSpeechText(text)];
-  return file ? recordedSpeech(file, text, sequence) : nativeSpeech(text, sequence);
+  const key = normalizeSpeechText(text);
+  // A single literacy word may come from a sentence card with its final stop.
+  // Keep exact phrases first; never strip dots from numbers or whole sentences.
+  const word = key.match(/^([abcçdefgğhıijklmnoöprsştuüvyz]{1,24})[.!?…]+$/u)?.[1];
+  const file = phrases[key] || (word ? phrases[word] : null);
+  return file ? recordedSpeech(file, phrases[key] ? text : word, sequence) : nativeSpeech(text, sequence);
 }
 
 function playEffect(name) {
@@ -267,7 +271,7 @@ function playEffect(name) {
   if (name === 'tap') lastTap = now;
   unlock();
   const effect = effects.get(name);
-  effect?.volume(volume * EFFECT_LEVELS[name]);
+  effect?.volume(volume * EFFECT_LEVELS[name] * (currentClip || currentUtterance ? 0.55 : 1));
   effect?.play();
 }
 

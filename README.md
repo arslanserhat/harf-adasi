@@ -2,7 +2,19 @@
 
 Türkçe okuma, yazma ve sayı alıştırmaları için Laravel 13 uygulaması. Altı mevcut oyun bölümü korunur; aynı oyun arayüzü hem Laravel sunucusunda hem GitHub Pages için üretilen statik sürümde çalışır.
 
-## Sürüm 5.1: adanın içinde öğrenme
+## Ses, kutlama ve telefon düzeni
+
+Noktalı tek kelimeler hazır Türkçe kayıtlarını kullanır; `al.` artık kayıtlı `al`
+kelimesini atlayıp cihaz sesine geçmez. Tebrik tek kısa kayıttır. Dört efekt,
+yumuşak ahşap/kâğıt/vurmalı tınılarla yenilendi. Ses kaynağı EmelNeural'dır;
+ChatGPT Voice aktarımı değildir.
+
+Tam yolculuk bitince açılan macera kartı çocuğun devamını bekler. Logo, menü,
+oyun kartları ve sayfa kenarları da hareketlidir; dekor dokunmaları engellemez ve
+yazı sırasında kapanır. Telefon düzeninde okunabilir metin, büyük dokunma alanları,
+ekran güvenli alanları ve döndürülebilen yazı defteri bulunur.
+
+## Adanın içinde öğrenme
 
 Ana ada ve dört iç sahne özgün görsellerle yenilendi. Postane, atölye, köprü ve
 bahçe gerçek oyun girişleridir; kartlar ve parçalar sahnenin içinde kullanılır.
@@ -60,6 +72,7 @@ npm run test:unit
 node tests/learning.spec.cjs
 node tests/island.spec.cjs
 node tests/tablet.spec.cjs
+node tests/mobile.spec.cjs
 ```
 
 PHP testleri SQLite `:memory:` kullanır. Tarayıcı testleri `dist/` çıktısını `/harf-adasi/` altında 768×1024 ve 1024×768 dokunmatik Chromium görünümünde çalıştırır. `CHROMIUM_EXECUTABLE_PATH` ile tarayıcı seçilir; `TEST_FILTER` senaryoları sınırlar. `TEST_BASE_URL` canlı adresi hedefler ve yerel adrese geri dönmez. Fiziksel iPad, WebKit ve insan tarafından dinlenmiş ses kalitesi bu otomasyonla kanıtlanmaz.
@@ -78,6 +91,8 @@ VPS kurulumu, kalıcı SQLite volume'u ve ayrı uygulama portu için [yayın bel
 python -m pip install -r scripts/requirements-audio.txt
 python scripts/generate-speech.py
 python scripts/complete-story-speech.py
+python scripts/refresh-feedback-speech.py
+python scripts/generate-soft-effects.py
 python scripts/download-illustrations.py
 ```
 

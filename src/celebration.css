@@ -1,7 +1,7 @@
 body.celebration-open { overflow: hidden; }
 
 #celebrationDialog {
-  --celebration-purple: #7058b5;
+  --celebration-purple: #315f4d;
   position: fixed;
   inset: 0;
   box-sizing: border-box;
@@ -14,17 +14,17 @@ body.celebration-open { overflow: hidden; }
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
-  border: 5px solid #fff;
+  border: 3px solid #fff5df;
   border-radius: 32px;
-  color: #45425c;
-  background: radial-gradient(ellipse at 50% 12%, #fff8dd 0, transparent 56%), linear-gradient(145deg, #fbf9ff, #f0eafb);
-  box-shadow: 0 12px 0 #54408038, 0 26px 85px #30264b45;
+  color: #385a48;
+  background: radial-gradient(ellipse at 50% 12%, #fff0c7 0, transparent 56%), linear-gradient(145deg, #fffdf5, #f5f3df);
+  box-shadow: 0 8px 0 #6e805131, 0 26px 85px #263e3445;
   text-align: center;
   -webkit-overflow-scrolling: touch;
 }
 
 #celebrationDialog::backdrop {
-  background: #29223d82;
+  background: #243f377d;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
@@ -57,7 +57,7 @@ body.celebration-open { overflow: hidden; }
   border: 0;
   border-radius: 12px;
   background: #ffffffa8;
-  color: #655780;
+  color: #617657;
   font-size: 13px;
   font-weight: 700;
   text-decoration: underline;
@@ -87,7 +87,7 @@ body.celebration-open { overflow: hidden; }
 
 #celebrationDialog .celebration-eyebrow {
   margin: 6px 0 4px;
-  color: #79688c;
+  color: #738667;
   font-size: 13px;
   font-weight: 800;
 }
@@ -104,7 +104,7 @@ body.celebration-open { overflow: hidden; }
 #celebrationMessage {
   max-width: 100%;
   margin: 0;
-  color: #57526b;
+  color: #52664c;
   font-size: 17px;
   line-height: 1.45;
   overflow-wrap: anywhere;
@@ -114,10 +114,10 @@ body.celebration-open { overflow: hidden; }
   align-self: stretch;
   margin: 16px 0 0;
   padding: 10px 14px;
-  border: 2px solid #e5d8f3;
+  border: 2px solid #e7dab2;
   border-radius: 18px;
-  background: #fff9;
-  color: #7058aa;
+  background: #fff8e2;
+  color: #6c5b35;
   font-size: clamp(25px, 6vw, 36px);
   font-weight: 900;
   line-height: 1.3;
@@ -127,7 +127,7 @@ body.celebration-open { overflow: hidden; }
 
 #celebrationHint {
   margin: 17px 0 15px;
-  color: #72677e;
+  color: #748267;
   font-size: 14px;
   line-height: 1.4;
 }
@@ -140,10 +140,10 @@ body.celebration-open { overflow: hidden; }
   width: 100%;
   min-height: 60px;
   padding: 12px 24px;
-  border: 3px solid #b9a7e5;
+  border: 2px solid #f1a07a;
   border-radius: 18px;
-  background: #7961be;
-  box-shadow: 0 5px #55418f;
+  background: #e67c50;
+  box-shadow: 0 5px #b45a36;
   color: #fff;
   font-size: 21px;
   font-weight: 900;
@@ -151,8 +151,8 @@ body.celebration-open { overflow: hidden; }
 }
 
 #celebrationContinue span { font-size: 27px; line-height: 1; }
-#celebrationContinue:hover { background: #6f56b5; }
-#celebrationContinue:active { transform: translateY(3px); box-shadow: 0 2px #55418f; }
+#celebrationContinue:hover { background: #de7145; }
+#celebrationContinue:active { transform: translateY(3px); box-shadow: 0 2px #b45a36; }
 #celebrationDialog button:focus-visible { outline: 4px solid #d59125; outline-offset: 4px; }
 
 @keyframes celebration-pop {
@@ -177,3 +177,34 @@ body.celebration-open { overflow: hidden; }
   #celebrationDialog[open] .celebration-badge { animation: none; }
   #celebrationDialog .celebration-confetti { display: none; }
 }
+
+#celebrationDialog .celebration-journey-card[hidden]{display:none}
+#celebrationDialog.celebration-journey{--celebration-purple:#426a53;width:min(560px,calc(100vw - 28px));border:4px solid #fff7e7;border-radius:32px;color:#4e5f4e;background:radial-gradient(ellipse at 50% 16%,#f9e9c8 0,transparent 63%),linear-gradient(150deg,#fffdf4,#f2f3df);box-shadow:0 10px 0 #8a9d783d,0 25px 75px #263c3445}
+#celebrationDialog.celebration-journey::backdrop{background:#203e387d;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+#celebrationDialog.celebration-journey .celebration-content{padding:16px 27px 27px}
+#celebrationDialog.celebration-journey .celebration-badge{display:none}
+#celebrationDialog.celebration-journey #celebrationReturn{color:#66745b;background:#fffdf6c4;margin-top:-5px}
+#celebrationDialog.celebration-journey .celebration-eyebrow{margin:3px 0 7px;color:#977b4f;font-size:12px;letter-spacing:.2px}
+#celebrationDialog.celebration-journey #celebrationTitle{font-size:clamp(28px,6.6vw,39px);line-height:1.15;letter-spacing:-.65px;overflow-wrap:anywhere;margin-bottom:15px}
+#celebrationDialog .celebration-journey-card{position:relative;display:flex;flex-direction:column;align-items:stretch;width:min(260px,100%);margin:0 0 18px;padding:12px 12px 10px;border:3px solid #fdf6df;border-radius:20px;background:linear-gradient(135deg,#fffdf3,#f0e4c8);box-shadow:0 7px 0 #b69b6e55,0 13px 27px #6e654425;transform:rotate(-2deg);transform-origin:50% 80%;isolation:isolate}
+#celebrationDialog[open].celebration-journey .celebration-journey-card{animation:celebration-card-open .75s cubic-bezier(.2,.75,.3,1) both}
+.celebration-card-ribbon{position:absolute;z-index:2;top:17px;left:-11px;padding:6px 13px 6px 15px;border:1px solid #f4cfaa;border-radius:4px 10px 10px 4px;background:#d89e78;color:#fff9e9;font-size:9px;font-weight:900;letter-spacing:1px;box-shadow:0 3px 0 #91694b2e}
+.celebration-card-ribbon:before{content:"";position:absolute;left:-1px;top:100%;width:0;height:0;border-top:7px solid #a47753;border-left:8px solid transparent}
+.celebration-card-art{position:relative;overflow:hidden;aspect-ratio:3/2;border:2px solid #d3c19e;border-radius:12px;background:linear-gradient(145deg,#d7e7cf,#f4e7c6)}
+#celebrationRewardImage{display:block;width:100%;height:100%;object-fit:cover;object-position:center;user-select:none;-webkit-user-select:none;-webkit-user-drag:none}
+#celebrationRewardImage[hidden]{display:none}
+.celebration-card-fallback{display:block;width:100%;height:100%;padding:10px;position:absolute;inset:0}
+.celebration-journey-card[data-art=available] .celebration-card-fallback{display:none}
+#celebrationRewardTitle{padding:11px 28px 2px 3px;color:#52694c;font-size:17px;font-weight:850;line-height:1.25;text-align:left;overflow-wrap:anywhere}
+.celebration-card-seal{position:absolute;right:-11px;bottom:-9px;display:grid;place-items:center;width:49px;height:49px;border:3px solid #faeac7;border-radius:50%;background:radial-gradient(circle at 30% 25%,#f2d38b,#cfab63);box-shadow:0 3px 0 #a7874a5c;transform:rotate(13deg)}
+.celebration-card-seal svg{width:28px;height:28px;fill:none;stroke:#fffbed;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+#celebrationDialog.celebration-journey #celebrationMessage{font-size:15px;line-height:1.4;color:#64715b}
+#celebrationDialog.celebration-journey #celebrationItem{color:#59714f;border-color:#d7ddc5;background:#fffdf6;font-size:24px}
+#celebrationDialog.celebration-journey #celebrationHint{margin:12px 0 16px;color:#79806b;font-size:12px;max-width:330px}
+#celebrationDialog.celebration-journey #celebrationContinue{min-height:54px;padding:11px 19px;background:#547c61;border-color:#97b194;border-radius:18px;box-shadow:0 5px #345841;color:#fffbed;font-size:19px;gap:9px}
+#celebrationDialog.celebration-journey #celebrationContinue:hover{background:#476f55}
+#celebrationDialog.celebration-journey #celebrationContinue:active{transform:translateY(3px);box-shadow:0 2px #345841}
+@keyframes celebration-card-open{0%{opacity:0;transform:perspective(700px) rotateY(-45deg) rotate(-5deg) translateY(12px) scale(.88)}65%{opacity:1;transform:perspective(700px) rotateY(3deg) rotate(-1deg) translateY(-2px) scale(1.02)}100%{opacity:1;transform:perspective(700px) rotateY(0deg) rotate(-2deg) translateY(0) scale(1)}}
+@media(max-width:420px){#celebrationDialog.celebration-journey{border-radius:25px;max-height:calc(100dvh - 22px)}#celebrationDialog.celebration-journey .celebration-content{padding:12px 18px 23px}#celebrationDialog.celebration-journey #celebrationTitle{font-size:31px;margin-bottom:13px}#celebrationDialog .celebration-journey-card{width:min(225px,100%);margin-bottom:17px;padding:10px}#celebrationRewardTitle{font-size:15px;padding-top:9px}#celebrationDialog.celebration-journey #celebrationMessage{font-size:14px}#celebrationDialog.celebration-journey #celebrationContinue{font-size:18px;min-height:54px}}
+@media(min-width:600px) and (max-height:500px){#celebrationDialog.celebration-journey{width:min(720px,calc(100vw - 24px));max-height:calc(100dvh - 20px);border-radius:24px}#celebrationDialog.celebration-journey .celebration-content{display:grid;grid-template-columns:minmax(135px,185px) minmax(0,1fr);column-gap:24px;row-gap:0;padding:10px 23px 19px;align-items:center}#celebrationDialog.celebration-journey #celebrationReturn{grid-column:1/-1;grid-row:1;justify-self:end;margin:-2px -8px 0 0;min-height:44px}#celebrationDialog.celebration-journey .celebration-eyebrow{grid-column:2;grid-row:2;margin:0 0 4px;font-size:10px}#celebrationDialog.celebration-journey #celebrationTitle{grid-column:2;grid-row:3;margin:0 0 8px;font-size:28px}#celebrationDialog.celebration-journey .celebration-journey-card{grid-column:1;grid-row:2/8;align-self:center;width:100%;margin:0;padding:8px}#celebrationDialog.celebration-journey #celebrationMessage{grid-column:2;grid-row:4;font-size:13px}#celebrationDialog.celebration-journey #celebrationItem{grid-column:2;grid-row:5;margin-top:7px;padding:6px 9px;font-size:20px}#celebrationDialog.celebration-journey #celebrationHint{grid-column:2;grid-row:6;margin:7px 0 10px;font-size:11px}#celebrationDialog.celebration-journey #celebrationContinue{grid-column:2;grid-row:7;min-height:48px;font-size:17px;padding:9px 14px}#celebrationDialog.celebration-journey #celebrationRewardTitle{font-size:14px;padding:9px 20px 2px 1px}.celebration-card-ribbon{top:14px;padding:5px 10px;font-size:8px}.celebration-card-seal{width:41px;height:41px;right:-9px;bottom:-8px}.celebration-card-seal svg{width:23px;height:23px}}
+@media(prefers-reduced-motion:reduce){#celebrationDialog[open].celebration-journey .celebration-journey-card{animation:none;transform:rotate(-2deg)}}

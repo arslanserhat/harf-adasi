@@ -1,8 +1,71 @@
-.world-pirpir-flight{position:absolute;z-index:4;top:30%;left:65%;width:95px;height:73px;pointer-events:none;user-select:none;animation:pirpir-world-flight 13s ease-in-out infinite;filter:drop-shadow(0 7px 5px #294d4926)}
-.world-pirpir-sprite{display:block;width:100%;height:100%;background-size:200% 200%;background-repeat:no-repeat;animation:pirpir-wing-frames .6s steps(1,end) infinite}
-.home-island-art>.world-pirpir-flight{width:76px;height:58px;top:31%;left:73%;animation-duration:16s}
-@keyframes pirpir-wing-frames{0%,100%{background-position:0 0}25%{background-position:100% 0}50%{background-position:0 100%}75%{background-position:100% 100%}}
-@keyframes pirpir-world-flight{0%,100%{transform:translate(0,0) rotate(-4deg)}25%{transform:translate(-50px,-17px) rotate(-8deg)}50%{transform:translate(-8px,-35px) rotate(0deg)}75%{transform:translate(45px,-12px) rotate(5deg)}}
-.story-scene[data-story-paused=true] .world-pirpir-flight,.story-scene[data-story-paused=true] .world-pirpir-sprite,.home-shell[data-motion-paused=true] .world-pirpir-flight,.home-shell[data-motion-paused=true] .world-pirpir-sprite{animation-play-state:paused!important}
-@media(max-width:700px){.world-pirpir-flight{width:72px;height:55px;top:35%;left:70%}.home-island-art>.world-pirpir-flight{width:55px;height:42px;top:30%;left:72%}}
-@media(prefers-reduced-motion:reduce){.world-pirpir-flight,.world-pirpir-sprite{animation:none!important}.world-pirpir-sprite{background-position:100% 0}}
+/* Calm movement spans the interface while the writing desk stays still. */
+body.world-ambience-enabled{isolation:isolate}
+.world-ambience-sky{position:fixed;inset:0;z-index:2;overflow:hidden;pointer-events:none;user-select:none;-webkit-user-select:none;contain:strict}
+body.world-ambience-enabled>header{position:relative;z-index:3}
+.world-ambience-sky *,.world-ambience-effects *{pointer-events:none!important}
+.world-ambience-effects{position:fixed;inset:0;z-index:440;overflow:hidden;pointer-events:none;contain:strict;user-select:none;-webkit-user-select:none}
+.world-background-butterfly{position:absolute;display:block;width:34px;height:30px;opacity:.52;animation:world-background-flight 12s ease-in-out infinite;filter:drop-shadow(0 2px 3px #756b3e10)}
+.world-background-butterfly svg{display:block;width:100%;height:100%}
+.world-butterfly-wings{transform-origin:22px 19px;animation:world-wing-flutter .7s ease-in-out infinite alternate}
+.world-background-butterfly-one{left:.5%;top:23%;rotate:-13deg}
+.world-background-butterfly-two{right:.7%;top:63%;width:27px;height:25px;rotate:18deg;animation-duration:14.6s;animation-delay:-5s;filter:hue-rotate(26deg)}
+.world-background-butterfly-three{left:.8%;top:87%;width:23px;height:22px;rotate:-8deg;opacity:.35;animation-duration:17s;animation-delay:-9s}
+.world-cloud-wisp{position:absolute;display:block;width:180px;height:18px;opacity:.47;background:linear-gradient(90deg,transparent,#fffdf0b3 35%,#fff9d370 70%,transparent);border-radius:50%;filter:blur(3px);animation:world-cloud-sail 28s ease-in-out infinite}
+.world-cloud-wisp:before,.world-cloud-wisp:after{content:'';position:absolute;border-radius:50%;background:inherit;bottom:0;width:43%;height:170%;left:23%;filter:blur(1px)}
+.world-cloud-wisp:after{left:52%;height:130%;width:30%}
+.world-cloud-wisp-one{left:-35px;top:8%;rotate:-6deg}.world-cloud-wisp-two{right:-55px;top:78%;width:220px;rotate:6deg;animation-duration:35s;animation-delay:-12s}
+.world-background-orbit{position:absolute;display:block;width:170px;height:170px;border:1px solid #bdcda019;border-radius:50%;box-shadow:0 0 0 28px #d8d2b309;animation:world-orbit-breathe 15s ease-in-out infinite}
+.world-background-orbit-one{left:-95px;top:52%}.world-background-orbit-two{right:-100px;top:17%;width:200px;height:200px;animation-delay:-7s}
+.world-firefly{position:absolute;display:block;width:4px;height:4px;border-radius:50%;background:#d5b478;box-shadow:0 0 9px 3px #e4c58e25;opacity:.35;animation:world-firefly-drift 10s ease-in-out infinite}
+.world-firefly-1{left:2%;top:47%}.world-firefly-2{right:6%;top:12%;animation-delay:-3.2s}.world-firefly-3{left:15%;top:70%;width:3px;height:3px;animation-delay:-5.4s}.world-firefly-4{right:2%;top:84%;animation-delay:-8.7s}.world-firefly-5{left:8%;top:9%;width:3px;height:3px;animation-delay:-7.2s}.world-firefly-6{right:12%;top:44%;width:3px;height:3px;animation-delay:-1.9s}.world-firefly-7{left:23%;top:95%;animation-delay:-6.2s}
+.world-ambience-enabled .logo .mark{transform-origin:50% 70%;animation:world-logo-greeting 7s ease-in-out infinite}
+.world-ambience-enabled .logo:hover .mark{animation-duration:2.6s}
+.world-ambience-enabled header nav .pill>svg,.world-ambience-enabled header nav .pill>.illustration{transform-origin:50% 65%;animation:world-menu-bob 7.8s ease-in-out infinite}
+.world-ambience-enabled header nav .pill:nth-child(2)>svg,.world-ambience-enabled header nav .pill:nth-child(2)>.illustration{animation-delay:-2.3s}
+.world-ambience-enabled header nav .pill:nth-child(3)>svg,.world-ambience-enabled header nav .pill:nth-child(3)>.illustration{animation-delay:-4.2s}
+.world-ambience-enabled header nav .pill:nth-child(4)>svg,.world-ambience-enabled header nav .pill:nth-child(4)>.illustration{animation-delay:-6s}
+.world-ambience-enabled .home-game-card .pic>.illustration{transform-origin:50% 85%;animation:world-workshop-icon 6.4s ease-in-out infinite}
+.world-ambience-enabled .home-game-card:nth-child(2) .pic>.illustration{animation-delay:-1.2s;animation-duration:7.3s}.world-ambience-enabled .home-game-card:nth-child(3) .pic>.illustration{animation-delay:-2.3s;animation-duration:6.9s}.world-ambience-enabled .home-game-card:nth-child(4) .pic>.illustration{animation-delay:-3.4s;animation-duration:7.8s}.world-ambience-enabled .home-game-card:nth-child(5) .pic>.illustration{animation-delay:-4.6s;animation-duration:7.2s}.world-ambience-enabled .home-game-card:nth-child(6) .pic>.illustration{animation-delay:-5.6s;animation-duration:8.1s}
+.world-ambience-enabled .home-explore-picture>.illustration{transform-origin:50% 80%;animation:world-explore-sway 8.2s ease-in-out infinite}.world-ambience-enabled .home-explore-card:nth-child(2) .home-explore-picture>.illustration{animation-delay:-4s}
+.world-ambience-enabled .home-parent-symbol svg{transform-origin:50% 50%;animation:world-parent-gear 14s ease-in-out infinite}
+.world-ambience-enabled .home-section-heading h2{position:relative}
+.world-ambience-enabled .home-section-heading h2:after{content:'';position:absolute;width:5px;height:5px;right:-15px;top:6px;border-radius:50%;background:#d6b574;box-shadow:0 0 8px 3px #e3c89533;animation:world-heading-firefly 7.8s ease-in-out infinite;pointer-events:none}
+.world-ambience-enabled .home-section-heading:nth-of-type(2) h2:after{animation-delay:-4s}
+.world-ambience-enabled [data-world-reveal=shown]{animation:world-section-arrive .65s cubic-bezier(.2,.65,.3,1) both}
+.world-ambience-enabled .home-game-card:nth-child(2)[data-world-reveal=shown]{animation-delay:.045s}.world-ambience-enabled .home-game-card:nth-child(3)[data-world-reveal=shown]{animation-delay:.09s}.world-ambience-enabled .home-game-card:nth-child(4)[data-world-reveal=shown]{animation-delay:.035s}.world-ambience-enabled .home-game-card:nth-child(5)[data-world-reveal=shown]{animation-delay:.08s}.world-ambience-enabled .home-game-card:nth-child(6)[data-world-reveal=shown]{animation-delay:.125s}
+.world-button-ring{position:absolute;display:block;width:var(--world-ring-size,50px);height:var(--world-ring-size,50px);margin:calc(var(--world-ring-size,50px) / -2);border:1.5px solid #e9bc8e9c;border-radius:50%;animation:world-button-ripple .64s ease-out both}
+.world-click-spark{position:absolute;display:block;width:8px;height:10px;margin:-5px -4px;background:var(--world-spark-color,#d9ad6f);clip-path:polygon(50% 0,62% 37%,100% 50%,62% 63%,50% 100%,38% 63%,0 50%,38% 37%);animation:world-click-scatter .7s cubic-bezier(.12,.6,.32,1) both}
+.world-click-spark-dot{width:4px;height:4px;margin:-2px;border-radius:50%;clip-path:none}
+.home-shell .home-version{display:none}
+@keyframes world-background-flight{0%,100%{translate:0 0;rotate:-3deg}30%{translate:8px -12px;rotate:8deg}65%{translate:-6px -21px;rotate:-6deg}}
+@keyframes world-wing-flutter{from{scale:.65 1}to{scale:1 1}}
+@keyframes world-cloud-sail{0%,100%{translate:-9px 0;opacity:.3}50%{translate:18px -4px;opacity:.5}}
+@keyframes world-orbit-breathe{0%,100%{scale:.94;opacity:.45}50%{scale:1.06;opacity:.8}}
+@keyframes world-firefly-drift{0%,100%{translate:0 0;opacity:.25}50%{translate:5px -11px;opacity:.6}}
+@keyframes world-logo-greeting{0%,64%,100%{transform:rotate(-7deg) translateY(0)}72%{transform:rotate(-3deg) translateY(-3px)}81%{transform:rotate(-9deg) translateY(-1px)}90%{transform:rotate(-6deg) translateY(0)}}
+@keyframes world-menu-bob{0%,55%,100%{translate:0 0;rotate:0deg}68%{translate:0 -2px;rotate:-4deg}81%{translate:0 0;rotate:3deg}}
+@keyframes world-workshop-icon{0%,100%{translate:0 0;rotate:0deg}35%{translate:0 -4px;rotate:-2deg}70%{translate:0 -1px;rotate:2deg}}
+@keyframes world-explore-sway{0%,100%{translate:0 0;rotate:-1deg}50%{translate:0 -3px;rotate:2deg}}
+@keyframes world-parent-gear{0%,75%,100%{rotate:0deg}82%{rotate:12deg}91%{rotate:-5deg}}
+@keyframes world-heading-firefly{0%,100%{translate:0 0;opacity:.3}45%{translate:3px -4px;opacity:.75}75%{translate:-2px -1px;opacity:.4}}
+@keyframes world-section-arrive{from{opacity:.3;translate:0 11px}to{opacity:1;translate:0 0}}
+@keyframes world-button-ripple{0%{scale:.45;opacity:.75}100%{scale:1.65;opacity:0}}
+@keyframes world-click-scatter{0%{translate:0 0;rotate:0deg;scale:.35;opacity:0}15%{opacity:.85;scale:1}100%{translate:var(--world-spark-x) var(--world-spark-y);rotate:var(--world-spark-turn);scale:.45;opacity:0}}
+body[data-motion-paused=true].world-ambience-enabled *,body[data-motion-paused=true].world-ambience-enabled *:before,body[data-motion-paused=true].world-ambience-enabled *:after,body[data-ambience-hidden=true].world-ambience-enabled *,body[data-ambience-hidden=true].world-ambience-enabled *:before,body[data-ambience-hidden=true].world-ambience-enabled *:after{animation-play-state:paused!important}
+body[data-motion-paused=true].world-ambience-enabled [data-world-reveal],body[data-ambience-hidden=true].world-ambience-enabled [data-world-reveal],body.writing-focus.world-ambience-enabled [data-world-reveal]{animation:none!important;opacity:1;translate:none}
+body.writing-focus.world-ambience-enabled .world-ambience-sky{display:none}
+body.writing-focus.world-ambience-enabled .world-ambience-sky *,body.writing-focus.world-ambience-enabled .world-ambience-sky *:before,body.writing-focus.world-ambience-enabled .world-ambience-sky *:after{animation-play-state:paused!important}
+body.writing-focus .world-ambience-effects,body[data-motion-paused=true] .world-ambience-effects,body[data-ambience-hidden=true] .world-ambience-effects{display:none}
+@media(max-width:700px){.world-background-butterfly{width:24px;height:22px;opacity:.33}.world-background-butterfly-one{left:1%;top:42%}.world-background-butterfly-two{right:1%;top:77%;width:21px;height:20px}.world-background-butterfly-three,.world-cloud-wisp-two,.world-background-orbit-two{display:none}.world-cloud-wisp-one{width:120px;left:-55px;top:16%;opacity:.3}.world-firefly{width:3px;height:3px;opacity:.25}.world-firefly-3,.world-firefly-6{display:none}.world-ambience-enabled .home-section-heading h2:after{right:-11px;width:4px;height:4px}.world-ambience-enabled .home-game-card .pic>.illustration{animation-duration:8.8s}}
+@media(prefers-reduced-motion:reduce){.world-ambience-enabled *,.world-ambience-enabled *:before,.world-ambience-enabled *:after{animation:none!important;transition:none!important}.world-ambience-sky{opacity:.3}.world-ambience-effects{display:none}.world-ambience-enabled [data-world-reveal]{opacity:1;translate:none}.world-ambience-enabled .logo .mark{transform:rotate(-7deg)}}
+
+/* Pırpır keeps the original four poses as the page-wide ambience grows. */
+.world-pirpir{position:absolute;left:61%;top:28%;z-index:3;display:block;width:90px;aspect-ratio:44/34;pointer-events:none!important;user-select:none;-webkit-user-select:none;filter:drop-shadow(0 7px 5px #294b3926);animation:world-pirpir-flight 13s ease-in-out infinite;transform-origin:50% 60%}
+.world-pirpir-sprite{display:block;width:100%;height:100%;background-image:var(--pirpir-sprite);background-size:200% 200%;background-repeat:no-repeat;background-position:0 0;animation:world-pirpir-flap .6s steps(1,end) infinite;pointer-events:none!important}
+.story-scene-stage>.world-pirpir{left:81%;top:40%;width:80px;z-index:3;animation-delay:-4.2s}
+@keyframes world-pirpir-flap{0%,24.999%{background-position:0 0}25%,49.999%{background-position:100% 0}50%,74.999%{background-position:0 100%}75%,100%{background-position:100% 100%}}
+@keyframes world-pirpir-flight{0%,100%{translate:0 0;rotate:-2deg}24%{translate:19px -12px;rotate:5deg}51%{translate:7px -22px;rotate:-4deg}77%{translate:-13px -7px;rotate:2deg}}
+.home-shell[data-motion-paused=true] .world-pirpir,.home-shell[data-motion-paused=true] .world-pirpir-sprite,.story-scene[data-story-paused=true] .world-pirpir,.story-scene[data-story-paused=true] .world-pirpir-sprite{animation-play-state:paused!important}
+body.writing-focus .world-pirpir{display:none}
+@media(max-width:700px){.home-island-art>.world-pirpir{width:60px;left:59%;top:28%}.story-scene-stage>.world-pirpir{width:65px;left:78%;top:42%}}
+@media(prefers-reduced-motion:reduce){.world-pirpir,.world-pirpir-sprite{animation:none!important;translate:none;rotate:none}.world-pirpir-sprite{background-position:100% 0}}

@@ -1,4 +1,40 @@
-# Sürüm 5.1 kontrol kaydı — 26 Ekim 2026
+# Ses, kutlama ve telefon düzeni — 26 Ekim 2026
+
+Uygulama kaynağı 5.2.0; sürüm numarası çocuk arayüzünde gösterilmez.
+
+- **74/74 JavaScript mantık testi** geçti. Noktalı tek kelimenin hazır kayda
+  dönmesi, tam cümle eşleşmesinin korunması ve `1.` işaretinin sessizce `1`
+  sayılmaması için iki yeni ses regresyonu var.
+- **26/26 öğrenme tablet senaryosu** geçti. Tam turda macera kartı gerçekten
+  açılır; orijinal kart görseli yüklenir, kendi kendine yeni hikâye başlamaz,
+  Özetime bak ile kart kapanır ve sonraki hikâye elle seçilir.
+- **32/32 önceki bölüm tablet senaryosu** geçti: 58 harf, heceler, kelimeler,
+  okuma, cümle, sayılar, Türkçe kayıtlar, yeni v2 efekt dosyaları, tek tebrik,
+  dokunma/kaydırma korumaları ve modal devam/Escape davranışı kapsanır.
+- **10/10 Chromium telefon senaryosu** ve **10/10 gerçek Linux WebKit 26.0
+  telefon senaryosu** geçti. Görünümler 360×800, 390×844, 393×852, 430×932 ve
+  844×390. Her görünümde ana sayfa/dört durak/öğretmen formu/altı eski bölüm;
+  ayrıca gerçek sekiz görevlik tur, çizim, rotasyon, kaydırma kilidi ve son kart sınandı.
+- Dekorun önde görünmesi ve iPhone güvenli alanlarının son CSS düzenlemesinden
+  sonra 390×844 ve 844×390 tekrarlandı: Chromium **4/4**, WebKit **4/4** geçti.
+  Kontrol, dekorun ada resminin dışında body katmanında olduğunu ve dokunmayı
+  engellemediğini ayrıca doğrular. Son görsel kırpma, karakteri telefon ekranında tutar.
+- Chromium çizimleri CDP dokunma ve yerel kaydırma jesti kullanır. WebKit kontrolleri
+  dokunma tap'i, çizimleri pointer kullanır. Linux WebKit gerçek motordur; fiziksel
+  iPhone veya iOS Chrome çalıştırılmış değildir. Gerçek çentik ve tarayıcı çubuğu
+  hareketi de fiziksel cihazda ayrıca değerlendirilmelidir.
+- Yeni dört PCM16 stereo efekt üretimi tekrarlanabilir; kırpılma yoktur. Yeni
+  `al`, cümle, kısa tebrik ve macera kartı MP3'leri ffprobe ile açıldı. Tebrik
+  2,448 saniye; macera kartı tebriki 4,968 saniye. Bunlar insan dinleme kanıtı değildir.
+- Pages ve Laravel Vite derlemeleri geçti. Backend değişmedi; önceki PHP kanıtı
+  alt kayıttadır. Bu değişiklik VPS yayını değildir.
+
+Canlı kanıt, yeni kod yayımlandıktan sonra bu bölüme eklenir. Eski workflow veya
+5.1 turunu 5.2 yayını diye sunma. Geçerli ses kaynağı aynı EmelNeural'dır;
+ChatGPT Voice dışa aktarımı yapılmadı.
+
+## Önceki sürüm 5.1 kontrol kaydı
+
 
 - JavaScript: **72/72** geçti (ses 7, macera 11, ada 12, öğrenme modeli 28,
   eşitleme 10, hikâye 4). Bağlamdan devam, değişen görev dizisi, üç hikâyenin

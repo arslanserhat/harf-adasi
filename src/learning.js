@@ -6,6 +6,7 @@ import {
 } from './learning-model.js';
 import { renderStoryScene, mountStoryScene, getStoryBeat, STORY_TITLE } from './story-scene.js';
 import './world-learning.css';
+import { showCelebration, hideCelebration } from './celebration.js';
 
 const SKILL_NAMES = {
   listen: 'Dinleyip tanıma', syllables: 'Heceleri birleştirme', build: 'Harflerle kurma',
@@ -37,7 +38,7 @@ const control = (action, label, attributes = '', className = '') =>
 export function createLearning({
   root, getState, setState, getLetters, speak, stopSpeech = () => {},
   isMuted = () => false, onHome = () => {}, onPracticeLetter = () => {},
-  onOpenSettings = () => {}, getSyncStatus = () => '', playEffect = () => {},
+  onOpenSettings = () => {}, getSyncStatus = () => '', playEffect = () => {}, effectsEnabled = () => true,
 }) {
   if (!root || !getState || !setState || !getLetters) throw new Error('Learning host is incomplete');
   let listening = false;
@@ -50,6 +51,7 @@ export function createLearning({
   let speechEpoch = 0;
   let parentDraft = null;
   let advancing = false;
+  let celebratedSession = '';
 
   const worldFor = kind => ({ listen: 0, syllables: 1, build: 1, recall: 2, write: 1, meaning: 3, sentence: 4 }[kind] ?? 0);
 
@@ -60,6 +62,7 @@ export function createLearning({
     return state;
   }
   function stop() {
+    hideCelebration();
     speechEpoch += 1;
     stopSpeech();
     writingCleanup?.();
@@ -558,6 +561,22 @@ export function createLearning({
     root.innerHTML = `<section id="learning" class="learning" data-screen="summary">${nav()}${sceneMarkup('complete', session)}<div id="learningSummary" class="learn-summary"><span class="learn-eyebrow">Bugünkü küçük yolculuk tamam</span><h1>Birlikte yeni adımlar attık!</h1><p>${results.length} görevde ${texts.map(escape).join(', ')} kelimeleriyle çalıştın.</p><div class="learn-summary-cards"><div><b>${independent}</b><span>Örneksiz ve yardımsız tamamlanan görev</span></div><div><b>${results.length - independent}</b><span>Birlikte veya ipucuyla tamamlanan görev</span></div></div><p>Bu kelimeler sonraki günlerde yeni görevlerle geri gelecek. Sıradaki hikâyede yeni kelimeleri, daha önce çalıştıklarınla birlikte kullanacağız.</p><div class="learn-actions">${control('home', 'Adama dön', '', 'primary')}${control('parent', 'Birlikte gelişimimize bakalım', '', 'quiet')}${control('new-session', `${nextStory.series || 'Yeni bir macera'} →`, '', 'primary')}</div></div></section>`;
     mountScene();
     window.scrollTo(0, 0);
+    if (session?.tasks?.length && session.index >= session.tasks.length
+      && session.tasks.every(task => session.results?.[task.id]?.correct)
+      && celebratedSession !== session.id) {
+      celebratedSession = session.id;
+      const artBase = document.querySelector('meta[name="harf-backend"]')?.content === 'laravel' ? '/' : import.meta.env.BASE_URL;
+      const finishedStory = getStoryBeat({ phase: 'complete', episode: session.storyEpisode || 0 });
+      showCelebration({
+        mode: 'journey', final: true, title: 'Tebrikler, başardın!',
+        message: `${results.length} görevi tamamladın. Hazırladığın kelimeler maceranın bir parçası oldu.`,
+        voiceText: 'Tebrikler, başardın! Macera kartın açıldı.',
+        continueLabel: 'Sonraki macera', returnLabel: 'Özetime bak',
+        reward: { title: finishedStory.series || STORY_TITLE,
+          image: `${artBase}art/${session.storyEpisode === 1 ? 'harf-garden.webp' : session.storyEpisode === 2 ? 'harf-island.webp' : 'harf-post.webp'}` },
+        effects: effectsEnabled(), onContinue: () => startFresh(),
+      });
+    }
   }
   function reportRows(state) {
     const list = activeList(state);

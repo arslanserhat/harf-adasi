@@ -1,0 +1,171 @@
+/* Phone layouts are deliberately separate from the tablet playfield. Art
+   remains a world behind real objects; controls flow instead of overlapping. */
+@media (max-width: 700px) {
+  html { scroll-padding-top: 12px; }
+  body { min-width: 0; }
+  body > header { gap: 8px; padding: 13px 14px 10px; }
+  body > header .logo { min-width: 0; gap: 8px; font-size: 23px; }
+  body > header .logo small { font-size: 6px; letter-spacing: .65px; }
+  body > header .mark { flex-shrink: 0; width: 38px; height: 42px; font-size: 33px; border-radius: 14px; }
+  body > header nav { flex-shrink: 0; gap: 5px; }
+  body > header .pill { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; padding: 9px; border-radius: 13px; }
+  body > header .pill svg { width: 19px; height: 19px; }
+  body > header .hide-phone { display: none; }
+  body > .status { gap: 8px; padding: 0 16px; font-size: 11px; }
+  body > .status > :last-child { max-width: 53%; text-align: right; }
+  body > main { padding: 15px 13px 28px; min-width: 0; }
+  body > footer { padding: 15px 16px; font-size: 12px; line-height: 1.6; }
+  body > footer button { min-height: 44px; font-size: 12px; }
+  .home-shell .home-kicker-row { margin: 0 3px 13px; }
+  .home-shell .home-greeting { font-size: 13px; }
+  .home-shell .home-island-hero { border-radius: 23px; }
+  .home-shell .home-hero-copy { padding: 22px 22px 10px; }
+  .home-shell .home-hero-copy > .home-eyebrow { margin-bottom: 12px; font-size: 9px; letter-spacing: 1px; }
+  .home-shell .home-hero-copy h1 { max-width: 100%; margin-bottom: 12px; font-size: clamp(29px, 8.5vw, 36px); line-height: 1.1; letter-spacing: -1.2px; }
+  .home-shell .home-hero-copy p { margin-bottom: 17px; max-width: none; font-size: 14px; line-height: 1.65; }
+  .home-shell .home-primary { justify-content: space-between; width: 100%; min-height: 52px; padding: 12px 17px; font-size: 15px; }
+  .home-shell .home-hero-note { margin-top: 12px; font-size: 12px; }
+  .home-shell .home-island-art { aspect-ratio: 1672 / 1000; }
+  .home-shell .home-island-art > img { object-fit: cover; }
+  .home-shell .home-map-stop { min-height: 44px; min-width: 44px; }
+  .home-shell .home-art-label { bottom: 8px; right: 9px; padding: 6px 9px; font-size: 10px; }
+  .home-shell .home-motion-toggle { top: 7px; right: 7px; }
+  .home-shell .home-parent-tile { margin-top: 15px; padding: 15px; gap: 12px; }
+  .home-shell .home-parent-copy > small { font-size: 9px; letter-spacing: .7px; }
+  .home-shell .home-parent-copy > b { font-size: 16px; }
+  .home-shell .home-parent-copy > span { font-size: 12px; }
+  .home-shell .home-parent-symbol { width: 44px; height: 48px; }
+  .home-shell .home-section-heading { margin: 28px 2px 15px; }
+  .home-shell .home-section-heading .home-eyebrow { font-size: 10px; letter-spacing: 1px; }
+  .home-shell .home-section-heading h2 { font-size: 24px; }
+  .home-shell .home-games { gap: 11px; }
+  .home-shell .home-game-card.card { min-height: 173px; padding: 15px 13px; }
+  .home-shell .home-game-card b { font-size: 18px; }
+  .home-shell .home-game-card small { font-size: 12px; line-height: 1.45; }
+  .home-shell .home-card-top { min-height: 83px; }
+  .home-shell .home-game-card .pic, .home-shell .home-game-card .pic .illustration { width: 61px; height: 63px; }
+  .home-shell .home-card-number { font-size: 10px; }
+  .home-shell .home-explore-card b { font-size: 17px; }
+  .home-shell .home-explore-card small, .home-shell .home-bottom-note { font-size: 12px; }
+  .home-shell .home-letter-row { padding: 15px; }
+  .home-shell .home-letter-row small { font-size: 10px; }
+  .home-shell .home-letter-row b { font-size: 14px; }
+  .home-shell .home-letter-all { font-size: 12px; }
+
+  .learning .learn-nav { flex-wrap: nowrap; gap: 8px; margin-bottom: 13px; }
+  .learning .learn-nav > span { display: none; }
+  .learning .learn-nav .learn-button { min-height: 44px; font-size: 12px; padding: 9px 11px; }
+  .learning .learn-intro { margin: 16px 2px; }
+  .learning .learn-intro h1 { font-size: 28px; line-height: 1.15; overflow-wrap: anywhere; }
+  .learning .learn-intro p { font-size: 14px; line-height: 1.6; }
+  .learning .learn-actions { gap: 12px; margin: 19px 0; }
+  .learning .learn-actions .learn-button { min-height: 48px; font-size: 14px; }
+  .learning .learn-intro-plan { margin: 16px 0; padding: 17px; }
+  .learning .learn-intro-plan p { font-size: 13px; }
+  .learning .learn-parent-grid { grid-template-columns: minmax(0, 1fr); }
+  .learning .learn-panel { min-width: 0; padding: 18px 16px; }
+  .learning .learn-panel input, .learning .learn-panel select, .learning .learn-panel textarea { max-width: 100%; width: 100%; min-height: 44px; font-size: 16px; }
+  .learning .learn-parent-grid .learn-button { max-width: 100%; white-space: normal; }
+  .learning .learn-skill-grid { grid-template-columns: minmax(0, 1fr); }
+  .learning .learn-word-report summary { flex-wrap: wrap; }
+  .learning .learn-word-report summary > span { font-size: 12px; }
+  .learning .learn-known-letters { overflow-wrap: anywhere; }
+
+  .learning.learn-world-frame .learn-task-header { display: block; margin: 0 2px 10px; }
+  .learning.learn-world-frame .learn-task-header h1 { max-width: none; margin: 0 0 6px; font-size: 21px; line-height: 1.25; }
+  .learning.learn-world-frame .learn-task-header p { max-width: none; text-align: left; font-size: 12px; line-height: 1.5; }
+  .learning.learn-world-frame .learn-session-track { flex-wrap: wrap; margin-bottom: 12px; }
+  .learning.learn-world-frame .learn-session-track small { font-size: 12px; }
+  .learning.learn-world-frame .story-scene.story-scene-world { border-radius: 22px; border-width: 2px; }
+  .learning.learn-world-frame .story-scene.story-scene-world .story-scene-stage { display: flex; flex-direction: column; height: auto; min-height: 0; aspect-ratio: auto; padding: 0 0 17px; }
+  .learning.learn-world-frame .story-world-backdrop { object-position: 10% 50%; }
+  .learning.learn-world-frame .story-scene.story-scene-world .story-scene-dialogue { position: relative; top: auto; left: auto; right: auto; width: auto; max-width: none; margin: 52px 12px 0; padding: 12px; }
+  .learning.learn-world-frame .story-scene.story-scene-world .story-scene-dialogue h2 { font-size: 15px !important; }
+  .learning.learn-world-frame .story-scene.story-scene-world .story-scene-caption { font-size: 13px !important; line-height: 1.5 !important; }
+  .learning.learn-world-frame .story-scene-world .story-dialogue-next { min-height: 44px; margin-top: 3px; font-size: 12px; }
+  .learning.learn-world-frame .story-scene-world .story-dialogue-listen { min-width: 44px; min-height: 44px; }
+  .learning.learn-world-frame .story-scene-world .story-scene-tools { top: auto; right: 12px; left: auto; bottom: auto; margin-top: 13px; position: relative; align-self: flex-end; }
+  .learning.learn-world-frame .story-scene-world .story-scene-tools button { min-width: 44px; min-height: 44px; }
+  .learning.learn-world-frame .story-scene-world .story-interaction-dock.has-interaction { position: relative; left: auto; right: auto; bottom: auto; width: auto; margin: 104px 10px 0; padding: 0; }
+  .learning.learn-world-frame .story-scene-world .story-scene-tools + .world-pirpir-flight { top: 31%; }
+  .learning.learn-world-frame .learn-scene-task { padding: 0; }
+  .learning.learn-world-frame .learn-mission-title { padding: 12px; margin-bottom: 12px; }
+  .learning.learn-world-frame .learn-mission-title > span { font-size: 17px; }
+  .learning.learn-world-frame .learn-mission-title > small { font-size: 12px; line-height: 1.5; }
+  .learning.learn-world-frame .learn-task-controls { gap: 9px; margin: 8px 0 10px; }
+  .learning.learn-world-frame .learn-task-controls .learn-button { min-height: 46px; padding: 9px 12px; font-size: 13px; }
+  .learning.learn-world-frame .learn-adult-audio { margin-bottom: 10px; }
+  .learning.learn-world-frame .learn-adult-audio .learn-button { min-height: 44px; padding: 7px 12px; font-size: 12px; line-height: 1.4; }
+  .learning.learn-world-frame .learn-choices { display: flex; gap: 9px; flex-wrap: wrap; margin: 13px 0; }
+  .learning.learn-world-frame .learn-choices .learn-button.word-choice { flex: 1 1 78px; min-width: 0; min-height: 77px; max-width: 100%; padding: 10px 7px; font-size: clamp(22px, 6vw, 26px); overflow-wrap: anywhere; }
+  .learning.learn-world-frame .learn-choices .meaning-choice { min-width: 0; min-height: 90px; max-width: 100%; flex: 1 1 110px; padding: 12px; font-size: 18px; overflow-wrap: anywhere; }
+  .learning.learn-world-frame .learn-whole-word { max-width: 100%; font-size: 29px; overflow-wrap: anywhere; }
+  .learning.learn-world-frame .learn-slots { padding: 8px; gap: 6px; }
+  .learning.learn-world-frame .learn-slot { min-width: 35px; min-height: 46px; height: auto; padding: 5px 8px; font-size: 23px; }
+  .learning.learn-world-frame .learn-bank { gap: 9px; }
+  .learning.learn-world-frame .learn-bank .learn-tile { min-width: 46px; min-height: 48px; height: auto; padding: 7px 11px; font-size: 26px; }
+  .learning.learn-world-frame[data-kind=sentence] .learn-bank .learn-tile, .learning.learn-world-frame[data-kind=sentence] .learn-slot { max-width: 100%; overflow-wrap: anywhere; font-size: 20px; }
+  .learning.learn-world-frame .learn-feedback { min-height: 39px; padding: 8px 10px; font-size: 12px; line-height: 1.45; }
+  .learning.learn-world-frame .learn-next-row { margin-top: 12px; }
+  .learning.learn-world-frame .learn-next-row .learn-button { min-height: 48px; padding: 10px 16px; font-size: 14px; }
+  .learning.learn-world-frame .learn-letter-help .learn-button { min-height: 44px; font-size: 12px; }
+  .learning .learn-summary { padding: 23px 17px; }
+  .learning .learn-summary h1 { font-size: 28px; }
+  .learning .learn-summary p { font-size: 14px; line-height: 1.6; }
+  .learning .learn-summary-cards { grid-template-columns: minmax(0, 1fr); }
+  .learning .learn-summary-cards span { font-size: 13px; }
+  .learning .learn-pause { padding: 14px; }
+  .learning .learn-pause > div { max-height: calc(100dvh - 28px); overflow-y: auto; padding: 23px 18px; }
+  .learning .learn-pause p { font-size: 14px; }
+  .learning .learn-pause .learn-button { min-height: 48px; }
+
+  body.writing-focus #main { padding: max(7px, env(safe-area-inset-top)) max(9px, env(safe-area-inset-right)) max(7px, env(safe-area-inset-bottom)) max(9px, env(safe-area-inset-left)); }
+  .writing-focus .learning.learning-writing > .learn-nav { min-height: 44px; }
+  .writing-focus .learning.learning-writing .learn-task-header h1 { font-size: 20px; }
+  .writing-focus .learning.learning-writing .learn-task-header p { font-size: 12px; }
+  .writing-focus .learning.learning-writing .learn-task-controls { gap: 7px; }
+  .writing-focus .learning.learning-writing .learn-task-controls .learn-button { min-height: 44px; font-size: 12px; padding: 6px 9px; }
+  .writing-focus .learning.learning-writing .learn-writing-controls { gap: 7px; }
+  .writing-focus .learning.learning-writing .learn-writing-controls .learn-button { min-height: 44px; padding: 7px 9px; font-size: 12px; }
+  .writing-focus .learning.learning-writing .learn-notebook { min-height: 90px; }
+  .writing-focus .learning.learning-writing .learn-writing-note { font-size: 11px; }
+  .writing-focus .learning.learning-writing .learn-feedback { font-size: 12px; }
+  .writing-focus .learning.learning-writing .learn-next-row .learn-button { min-height: 44px; }
+  .writing-focus .learning.learning-writing .learn-review { left: 7px; right: 7px; bottom: 7px; max-height: calc(100dvh - 100px); overflow-y: auto; padding: 15px 12px; }
+  .writing-focus .learning.learning-writing .learn-review .learn-button { min-height: 44px; margin: 5px 2px; }
+  #dialog { max-width: calc(100vw - 24px); max-height: calc(100dvh - 24px); overflow-y: auto; padding: 20px 17px; }
+  #dialog .actions, #dialog .controls { gap: 9px; }
+  #dialog button { min-height: 44px; }
+  #celebrationDialog { width: calc(100vw - 24px); max-width: calc(100vw - 24px); max-height: calc(100dvh - 24px); overflow-y: auto; border-width: 3px; border-radius: 25px; }
+  #celebrationDialog .celebration-content { padding: 15px 18px 23px; }
+  #celebrationDialog #celebrationContinue { min-height: 52px; font-size: 18px; }
+  #celebrationDialog #celebrationReturn { min-height: 44px; }
+  #celebrationDialog #celebrationMessage { font-size: 15px; }
+}
+
+/* A rotated phone gets a compact notebook rather than clipping its footer. */
+@media (max-height: 500px) and (min-width: 600px) {
+  body.writing-focus #main { padding: max(5px, env(safe-area-inset-top)) max(9px, env(safe-area-inset-right)) max(5px, env(safe-area-inset-bottom)) max(9px, env(safe-area-inset-left)); }
+  .writing-focus .learning.learning-writing > .learn-task-header { display: none; }
+  .writing-focus .learning.learning-writing > .learn-nav { min-height: 44px; margin-bottom: 5px; }
+  .writing-focus .learning.learning-writing > .learn-workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto minmax(72px, 1fr) auto auto; gap: 3px 9px; padding: 6px 9px; }
+  .writing-focus .learning.learning-writing .learn-task-controls { grid-column: 1; grid-row: 1; justify-content: flex-start; align-self: center; margin: 0; }
+  .writing-focus .learning.learning-writing .learn-whole-word { grid-column: 2; grid-row: 1; align-self: center; text-align: center; margin: 0; font-size: 26px; }
+  .writing-focus .learning.learning-writing .learn-notebook { grid-column: 1 / -1; grid-row: 2; min-height: 72px; height: 100%; margin: 0; }
+  .writing-focus .learning.learning-writing .learn-feedback { grid-column: 1 / -1; grid-row: 3; min-height: 24px; margin: 0; padding: 3px 7px; font-size: 11px; }
+  .writing-focus .learning.learning-writing .learn-writing-controls { grid-column: 1; grid-row: 4; justify-content: flex-start; margin: 0; gap: 7px; }
+  .writing-focus .learning.learning-writing .learn-next-row { grid-column: 2; grid-row: 4; justify-content: flex-end; margin: 0; }
+  .writing-focus .learning.learning-writing .learn-writing-note { display: none; }
+  .writing-focus .learning.learning-writing .learn-task-controls .learn-button, .writing-focus .learning.learning-writing .learn-writing-controls .learn-button, .writing-focus .learning.learning-writing .learn-next-row .learn-button { min-height: 44px; padding: 6px 10px; font-size: 12px; }
+  .writing-focus .learning.learning-writing .learn-review { max-height: calc(100dvh - 90px); overflow-y: auto; }
+  #celebrationDialog { max-height: calc(100dvh - 20px); }
+  #celebrationDialog .celebration-content { padding: 10px 20px 17px; }
+}
+
+/* Keep the iPhone safe area after the size-specific shorthands. */
+@media(max-width:700px),(max-height:500px) and (orientation:landscape){
+  body>header{padding-top:max(13px,env(safe-area-inset-top));padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}
+  body>main{padding-left:max(13px,env(safe-area-inset-left));padding-right:max(13px,env(safe-area-inset-right));padding-bottom:max(28px,env(safe-area-inset-bottom))}
+  body>.status{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
+  body>footer{padding-bottom:max(16px,env(safe-area-inset-bottom))}
+}

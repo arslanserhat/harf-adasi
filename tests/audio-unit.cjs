@@ -133,5 +133,27 @@ test('mute stops narration and prevents both speech and sound effects', async ()
   assert.equal(clip.stopCount, 1);
   assert.equal(await app.audio.speak('nine'), false);
   app.audio.playEffect('correct');
-  assert.equal(app.players.filter(player => player.options.src[0].endsWith('fx-correct.wav'))[0].playCount, 0);
+  assert.equal(app.players.filter(player => player.options.src[0].endsWith('fx-correct-v2.wav'))[0].playCount, 0);
+});
+
+test('a final stop on a single Turkish word uses its existing recording before device speech', async () => {
+  const app = createAudio({ manifest: { phrases: { al: 'al.mp3' } }, voices: [{ lang: 'tr-TR', name: 'Device Turkish' }] });
+  const finished = app.audio.speak('al.');
+  await tick();
+  const clip = app.players.find(player => player.options.src[0].endsWith('al.mp3'));
+  assert.ok(clip, 'a punctuation mark does not send a recorded learning word to the device voice');
+  assert.equal(app.spoken.length, 0);
+  clip.emit('end');
+  assert.equal(await finished, true);
+});
+
+test('exact punctuation and sentence recordings take precedence; number dots are not word aliases', async () => {
+  const app = createAudio({ manifest: { phrases: { al: 'word.mp3', 'al.': 'exact.mp3', 'anne nane al.': 'sentence.mp3', '1': 'one.mp3' } } });
+  for (const [text, file] of [['al.', 'exact.mp3'], ['Anne nane al.', 'sentence.mp3']]) {
+    const finished = app.audio.speak(text); await tick();
+    const clip = app.players.find(player => player.options.src[0].endsWith(file));
+    assert.ok(clip); clip.emit('end'); assert.equal(await finished, true);
+  }
+  assert.equal(await app.audio.speak('1.'), false, 'ordinal punctuation cannot silently become a cardinal number recording');
+  assert.equal(app.players.some(player => player.options.src[0].endsWith('one.mp3')), false);
 });

@@ -1,5 +1,24 @@
 # Ses kayıtları ve ChatGPT Voice isteğinin durumu
 
+## Son geri bildirim düzeltmesi
+
+Noktalı `al.` anahtarı bulunmadığı halde noktasız `al` kaydı vardı. İstemci artık
+tam eşleşmeden sonra yalnız Türkçe tek kelimenin son noktalamasız kaydını arar.
+`1.` veya bütün cümleler bu eşlemeye girmez. Bu gerçek bir kayıt seçimi hatasıydı;
+bildirilen bütün telaffuz sorunlarının tek nedeni olduğu varsayılmaz.
+
+`scripts/refresh-feedback-speech.py` aynı Emel sesiyle kısa ve yeni geri bildirim
+kayıtlarını üretir; bütün manifesti sıfırlamaz. `al` kaydı `Anne nane al.` cümlesinin
+WordBoundary zamanlarından alınır (0,765–1,480 saniye); hece tahminiyle kesilmez.
+Eski ~6,8 saniyelik tebrik + devam zinciri tek 2,448 saniyelik tebrikle değişti.
+Yolculuk kartının ayrı 4,968 saniyelik kaydı vardır. Bunlar yeni bir ses oyuncusu
+veya ChatGPT Voice değildir; ses kalitesi insan tarafından dinlenmiş sayılmaz.
+
+Güncel manifest 579 anahtar / 448 aktif MP3 içerir; gerekli 77 sabit metnin kaydı
+korunur. Dört yeni v2 WAV efekti ayrı dosyalardır: ahşap dokunuş, yumuşak vurmalı
+onay, kâğıt fırçalaması ve kısa akustik kutlama. `generate-soft-effects.py` yerel
+üretir; eski nota dizisi kullanılmaz. Özel öğretmen kelimeleri dışarı gönderilmedi.
+
 ChatGPT Voice sesini bu oturumdan dışa aktaramıyoruz veya aynı sesi API ile
 kullanabildiğimizi varsayamıyoruz. Sürüm 5.1 kayıtlarında mevcut Türkçe
 `tr-TR-EmelNeural` kullanıldı; bunlar ChatGPT sesli sohbet kayıtları değildir.

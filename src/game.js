@@ -17,17 +17,18 @@ import { createLearning } from './learning.js';
 import { createLearningStore } from './learning-sync.js';
 import { recordAttempt, planSession } from './learning-model.js';
 import { createIcons, Volume2, VolumeX, Settings2, Star, ArrowLeft, Play, Pause, Check, RotateCcw, CheckCircle2, ArrowRight, X } from 'lucide';
+import './mobile.css';
 
 const UI_ICONS = { Volume2, VolumeX, Settings2, Star, ArrowLeft, Play, Pause, Check, RotateCcw, CheckCircle2, ArrowRight, X };
 function refreshIcons() { if (document.querySelector('i[data-lucide]')) createIcons({ icons: UI_ICONS }); }
 new MutationObserver(refreshIcons).observe(document.body, { childList: true, subtree: true });
 mountVisuals(document.body);
-mountWorldAmbience(document.body);
+mountWorldAmbience({ root: document.body });
 document.addEventListener('pointerdown', () => audio.unlock(), { passive: true });
 document.addEventListener('keydown', () => audio.unlock(), { passive: true });
 
 'use strict';
-window.HARF_ADASI_READY=false;window.HARF_ADASI_VERSION='5.1.0';
+window.HARF_ADASI_READY=false;window.HARF_ADASI_VERSION='5.2.0';
 function report(e){document.getElementById('error').hidden=false;document.getElementById('errorText').textContent=String(e&&e.message||e);document.getElementById('ready').textContent='Başlatma sorunu';}
 window.addEventListener('error',e=>report(e.error||e.message));window.addEventListener('unhandledrejection',e=>report(e.reason));
 (()=>{try{
@@ -103,6 +104,7 @@ learning=createLearning({
   root:$('#main'),getState:learningStore.getState,setState:learningStore.setState,getLetters:()=>state.letters,
   speak,stopSpeech:()=>audio.stopSpeech(),isMuted:()=>state.muted,
   playEffect:name=>{if(state.effects)audio.playEffect(name)},
+  effectsEnabled:()=>state.effects,
   onHome:()=>go(),onPracticeLetter:c=>letter(c),onOpenSettings:()=>settings(),getSyncStatus:learningStore.getSyncStatus,
 });
 function observeLegacyStep(){

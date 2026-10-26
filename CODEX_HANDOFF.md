@@ -1,5 +1,37 @@
 # Harf Adası — güncel devir notu
 
+## 26 Ekim 2026 — ses, kutlama ve iPhone revizyonu
+
+Güncel kaynak `5.2.0`; görünür sürüm etiketi ekleme. Kullanıcı yeni ada tasarımını
+beğendi. Son talepleri: kötü `al.` telaffuzu, uzun/robotik tebrik, Atari benzeri
+efektler, hareketin yalnız ada resminde kalması, bölüm sonu kartının olmaması ve
+mobil uyumsuzluk. Cihazı **iPhone Chrome**; Chromium emülasyonunu fiziksel iPhone
+testi diye sunma.
+
+- `audio.js`: tam kayıt eşleşmesi önceliklidir. Noktalı tek Türkçe kelime için
+  `al.` → `al` kaydı aranır; sayılar ve bütün cümleler bu kuralla değiştirilmez.
+- `refresh-feedback-speech.py`: aynı Emel anlatıcıyla dört hedef kayıt yenilendi;
+  `al`, Türkçe cümlenin servis kelime sınırlarıyla ayrılan bölümüdür. Kısa tebrik
+  tek kayıt; ChatGPT Voice veya yeni bir oyuncu sesi değildir. Manifest korunur.
+- `generate-soft-effects.py`: dört yumuşak v2 ahşap/kâğıt/vurmalı WAV. Çalma
+  kodu `fx-*-v2.wav` kullanır; eski dosyalar çalınmaz. Numerik temizlik, insanın
+  ses kalitesini dinlediği anlamına gelmez.
+- `world-ambience.js/css`: logo, menü, kartlar, başlıklar ve sayfa kenarlarında
+  hareket; tıklamada sınırlı parçacıklar. Katman ada dışındadır, `pointer-events`
+  kapalıdır. Pırpır korunur. Yazı sırasında dekor kapatılır; hareket tercihi ve
+  azaltılmış hareket uygulanır. Opak kart arkasında kaybolmaması için katman öndedir.
+- `celebration.js/css`: gerçek tam yolculuk bitişinde açılan macera kartı,
+  tek tebrik kaydı, Özetime bak / Sonraki macera. Dokunma korumaları ve manuel
+  devam korunur. Animasyon seyretmek veya kart açılması öğrenme kaydı üretmez.
+- `mobile.css` ve `tests/mobile.spec.cjs`: 360/390/393/430 genişlik ve 844×390
+  yatay görünüm; okunabilir metin, 44px hedefler, iOS düzenleyicide 16px, güvenli
+  ekran alanları, kayan araç çubukları, dönünce yazı kilidi ve kart içi kaydırma.
+
+Yerel WebKit 26.0 gerçek motoru çalıştırıldı; bağımlılıklar yalnız workspace'e
+açıldı, sunucu/sistem uygulaması değiştirilmedi. WebKit testinde dokunma tap'i ve
+pointer çizimi; Chromium'da CDP dokunma ve kaydırma jestleri kullanılır. Fiziksel
+iPhone ve duyulan ses kalitesi ayrıca doğrulanmalıdır. Son kanıt `docs/QA.md` başında.
+
 ## 26 Ekim 2026 — sürüm 5.1 revizyonu
 
 Kullanıcının son görsel tercihi: oyun ekranında sürüm numarası/etiketi gösterme.

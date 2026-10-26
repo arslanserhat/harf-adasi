@@ -24,6 +24,17 @@
       "rate": "+6%",
       "spoken": "Aferin! Çok güzel çalıştın!"
     },
+    "al": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+0%",
+      "spoken": "al",
+      "profile": "clear-short-feedback",
+      "source_phrase": "Anne nane al.",
+      "source_range_seconds": [
+        0.765,
+        1.48
+      ]
+    },
     "ali lale al.": {
       "voice": "tr-TR-EmelNeural",
       "rate": "-5%",
@@ -68,6 +79,12 @@
       "voice": "tr-TR-EmelNeural",
       "rate": "+1%",
       "spoken": "Alparslan üç küçük kart hazırlıyor. Bildiğin harfleri bulup kendi kartını tamamlayalım."
+    },
+    "anne nane al.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+0%",
+      "spoken": "Anne nane al.",
+      "profile": "clear-short-feedback"
     },
     "arkadaşımıza bir cevap mektubu gönderelim.": {
       "voice": "tr-TR-EmelNeural",
@@ -546,18 +563,26 @@
     },
     "tebrikler!": {
       "voice": "tr-TR-EmelNeural",
-      "rate": "+6%",
-      "spoken": "Tebrikler! Harika gidiyorsun!"
+      "rate": "+0%",
+      "spoken": "Tebrikler, başardın!",
+      "profile": "clear-short-feedback"
     },
     "tebrikler, başardın!": {
       "voice": "tr-TR-EmelNeural",
-      "rate": "+6%",
-      "spoken": "Tebrikler! Başardın!"
+      "rate": "+0%",
+      "spoken": "Tebrikler, başardın!",
+      "profile": "clear-short-feedback"
     },
     "tebrikler, başardın! adım adım öğrendin.": {
       "voice": "tr-TR-EmelNeural",
       "rate": "+6%",
       "spoken": "Tebrikler! Birlikte başardık! Adım adım ilerliyorsun."
+    },
+    "tebrikler, başardın! macera kartın açıldı.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+0%",
+      "spoken": "Tebrikler, başardın! Macera kartın açıldı.",
+      "profile": "clear-short-feedback"
     },
     "teşekkür kartına bir parça daha ekledin. pırpır kartını göndermek için sabırsızlanıyor.": {
       "voice": "tr-TR-EmelNeural",
@@ -759,7 +784,7 @@
     "adım adım, birlikte.": "voice-211e9af115be24ddd67e.mp3",
     "aferin! çok güzel çalıştın.": "voice-5840f0545936c904ac0b.mp3",
     "ak": "voice-a583ce9114a5d772b8b1.mp3",
-    "al": "voice-19f04789276c51061130.mp3",
+    "al": "voice-ff5b0d109104b86f0d93.mp3",
     "ali gel.": "voice-61b4a283733580899a11.mp3",
     "ali lale al.": "voice-a2e4e1b98c6a9aa28ee1.mp3",
     "ali ve ela oynadı.": "voice-6d177ff5730d790b5a81.mp3",
@@ -784,7 +809,7 @@
     "altı": "voice-267a4d71f11e1e655938.mp3",
     "an": "voice-ed25d29a2681e96c76db.mp3",
     "anne": "voice-a7ea6359846be5cbef79.mp3",
-    "anne nane al.": "voice-4a53db557be0138ac9eb.mp3",
+    "anne nane al.": "voice-af0008489fb2cfd43571.mp3",
     "ar": "voice-fe67b7487b3d77e77897.mp3",
     "araba": "voice-27a58838ec7e1606cb5e.mp3",
     "arkadaşımıza bir cevap mektubu gönderelim.": "voice-a0076108c1f96dccf580.mp3",
@@ -1128,9 +1153,10 @@
     "tavuk": "voice-6a76117faba4e6f07c09.mp3",
     "te": "voice-3bad2002d5b4b26ff17a.mp3",
     "te harfini bul.": "voice-1afb5448db971fae446a.mp3",
-    "tebrikler!": "voice-c7d17597a7c04bb0f20d.mp3",
-    "tebrikler, başardın!": "voice-8f2a537f677ad25145fd.mp3",
+    "tebrikler!": "voice-5c6c7ed9a7547d4461d7.mp3",
+    "tebrikler, başardın!": "voice-5c6c7ed9a7547d4461d7.mp3",
     "tebrikler, başardın! adım adım öğrendin.": "voice-b8e923a0554186a58041.mp3",
+    "tebrikler, başardın! macera kartın açıldı.": "voice-1c35fc37462b8bebce8a.mp3",
     "teşekkür kartına bir parça daha ekledin. pırpır kartını göndermek için sabırsızlanıyor.": "voice-a64a8081750e41c7c5a1.mp3",
     "ti": "voice-42b898e9c82f49062aac.mp3",
     "tilki": "voice-5e776a0c564091564b89.mp3",
@@ -1227,5 +1253,6 @@
     "şenliğin yol tabelası burada hazırlanacak. parçaları birleştirmeye başlayalım.": "voice-e1cbcc424340e6352211.mp3",
     "şimdi paketi mama kabına koy.": "voice-594f297e69eb3435fd22.mp3",
     "şimdi sıra sende.": "voice-154a823584623179d70e.mp3"
-  }
+  },
+  "feedback_profile": "clear-short-feedback"
 }

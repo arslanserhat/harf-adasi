@@ -45,6 +45,7 @@
     "sha256": "0c765f662886e27537915b52aa735914efe43f4d52a9983e861c0e094aa0c5fd",
     "duration": 1.959156,
     "changes": "Unmodified source MP3; playback gain only.",
-    "user_selected": false
+    "user_selected": true,
+    "selection_note": "User requested Level Complete by title; the implementation selected Universfield 143022 from the supplied Pixabay source."
   }
 }

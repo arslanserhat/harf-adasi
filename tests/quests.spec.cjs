@@ -4,8 +4,14 @@ const { assert, getPlaywright, startServer, touch, stroke, assertClean } = requi
 
 const browserName = process.env.TEST_BROWSER || 'chromium';
 const kinds = ['letters', 'syllables', 'words', 'reading', 'sentences', 'numbers'];
-const viewports = [{ width: 390, height: 660 }, { width: 1366, height: 768 }]
-  .filter(viewport => !process.env.TEST_VIEWPORT || process.env.TEST_VIEWPORT === `${viewport.width}x${viewport.height}`);
+const viewports = process.env.TEST_VIEWPORT
+  ? process.env.TEST_VIEWPORT.split(',').map(value => {
+    assert.match(value, /^\d+x\d+$/, 'viewport uses WIDTHxHEIGHT');
+    const [width, height] = value.split('x').map(Number);
+    assert.ok(width >= 320 && height >= 320, 'viewport remains within supported phone dimensions');
+    return { width, height };
+  })
+  : [{ width: 390, height: 660 }, { width: 1366, height: 768 }];
 const artifacts = process.env.TEST_ARTIFACT_DIR || path.resolve(__dirname, '../test-results/quests');
 const matchingChromium = '/workspace/.browser-cache/chromium_headless_shell-1200/chrome-headless-shell-linux64/chrome-headless-shell';
 
@@ -297,9 +303,32 @@ async function solve(app, task, { wrongAndHint = false, resumeWriting = false } 
           assert.ok(totals.hints >= 1);
           assert.equal(corrected.independent, false, 'wrong and assisted attempts cannot become independent success');
         }
-        await assertClean(page, errors); passed++;
-        console.log(`PASS ${browserName} ${viewport.width}x${viewport.height} ${kind}: six real stages, viewport fit, explicit continuation and persisted completion`);
         await photo(app, `${kind}-summary`);
+        const nextWorld = page.locator('[data-quest="next-world"]');
+        const contrast = await nextWorld.evaluate(button => {
+          const style = getComputedStyle(button);
+          const luminance = color => {
+            const channels = color.match(/[\d.]+/g).slice(0, 3).map(Number).map(channel => {
+              const value = channel / 255;
+              return value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4;
+            });
+            return channels[0] * .2126 + channels[1] * .7152 + channels[2] * .0722;
+          };
+          const foreground = luminance(style.color), background = luminance(style.backgroundColor);
+          return (Math.max(foreground, background) + .05) / (Math.min(foreground, background) + .05);
+        });
+        assert.ok(contrast >= 4.5, 'the next-world label has readable contrast on its actual computed background');
+        await press(app, nextWorld);
+        await page.locator('#quest[data-screen="task"]').waitFor();
+        const nextAdventure = await active(page);
+        assert.notEqual(nextAdventure.kind, kind, 'continue opens a different available world instead of replaying the completed one');
+        assert.notEqual(nextAdventure.plan.id, plan.id, 'the next world owns a new actual plan');
+        assert.equal(nextAdventure.index, 0);
+        assert.equal((await snapshot(page)).runs.length, 1, 'starting the next world creates no extra completion');
+        assert.equal(await page.locator('#questNext').isEnabled(), false, 'the next world waits for its own actual answer');
+        await fits(page);
+        await assertClean(page, errors); passed++;
+        console.log(`PASS ${browserName} ${viewport.width}x${viewport.height} ${kind}: six real stages, viewport fit, persisted completion and a different next world`);
       } catch (error) {
         console.error(`FAIL ${browserName} ${viewport.width}x${viewport.height} ${kind}\n${error.stack}`);
         fs.mkdirSync(artifacts, { recursive: true });

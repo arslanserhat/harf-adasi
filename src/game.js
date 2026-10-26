@@ -173,7 +173,7 @@ function home(){
   const butterfly=`<svg viewBox="0 0 32 28" aria-hidden="true"><g class="home-butterfly-wings"><path d="M15 13C-2-8-6 16 13 17 4 30 21 30 16 16" fill="#e8ad78"/><path d="M17 13C34-8 38 16 19 17 28 30 11 30 16 16" fill="#f6cd91"/></g><path d="M16 9v13m0-11-3-5m3 5 3-5" fill="none" stroke="#927356" stroke-width="1.5" stroke-linecap="round"/></svg>`;
   const mapStops=[['post','Postane','Dinle ve kelimeyi bul',50,50],['workshop','Atölye','Harflerle kelimeler kur',78,22],['bridge','Köprü','Öğrendiklerini yeniden hatırla',65,55],['garden','Bahçe','Kelimelerin anlamını keşfet',86,62]];
   $('#main').innerHTML=`<div class="home-shell" data-motion-paused="${motionPaused}">
-    <div class="home-kicker-row"><span class="home-greeting">Hoş geldin, Alparslan</span><span class="home-version" aria-label="Harf Adası sürüm 5.1">v5.1</span></div>
+    <div class="home-kicker-row"><span class="home-greeting">Hoş geldin, Alparslan</span></div>
     <section class="home-island-hero" aria-labelledby="homeAdventureTitle">
       <div class="home-hero-copy"><span class="home-eyebrow"><span></span>HER GÜN YENİ BİR KEŞİF</span><h1 id="homeAdventureTitle">Küçük kelimeler.<br><em>Kocaman maceralar.</em></h1><p>Alparslan ile adayı keşfet.<br>Dinle, kelimeleri birleştir, hikâyenin bir parçası ol.</p>
       <button class="home-primary" data-do="learning">${continuing?'Maceraya devam et':'Maceraya başla'}<i data-lucide="arrow-right"></i></button>

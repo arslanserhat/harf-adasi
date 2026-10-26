@@ -2,6 +2,10 @@
 
 ## 26 Ekim 2026 — sürüm 5.1 revizyonu
 
+Kullanıcının son görsel tercihi: oyun ekranında sürüm numarası/etiketi gösterme.
+Sağ üstteki v5.1 kaldırıldı. Test için `window.HARF_ADASI_VERSION` korunur;
+teknik sürüm bilgisi çocuk arayüzüne geri eklenmez.
+
 Kullanıcı sürüm 5'in tasarımını ve küçük banner üstündeki alıştırma yapısını
 reddetti. Yeni kaynak `5.1.0`dır; önceki 5.0 canlı kanıtını bu sürümün kanıtı
 olarak kullanma. Güncel yayın kaydı `docs/QA.md` başına eklenir.

@@ -1,4 +1,49 @@
-# Sürüm 5 kontrol kaydı — 26 Ekim 2026
+# Sürüm 5.1 kontrol kaydı — 26 Ekim 2026
+
+- JavaScript: **72/72** geçti (ses 7, macera 11, ada 12, öğrenme modeli 28,
+  eşitleme 10, hikâye 4). Bağlamdan devam, değişen görev dizisi, üç hikâyenin
+  sırası ve yeniden yüklemede bölümün korunması ayrıca sınandı.
+- Laravel: **28 feature testi / 209 assertion** geçti. Yeni storyEpisode alanının
+  geri yüklenmesi ve 0..2 dışındaki değerin reddedilmesi kapsanır.
+- Yeni arayüz: son derlemede **26/26** dokunmatik Chromium senaryosu geçti;
+  768×1024 ve 1024×768. Dört gerçek harita girişi, yüklenmiş resimler, dünya
+  içindeki kontroller, gerçek animasyonların durdurulması, yalnız doğru parçayla
+  köprü yapımı, bitirilen eski kelimeden yeni plana geçiş ve iki ardışık yolculuk
+  kontrol edildi. Tam tur sonrası Pırpır’ın Bahçe Pazarı açıldı ve görev dizisi değişti.
+- Eski bölümler: ilk geniş turda **28/32** geçti. Ana sayfada kaldırılan hızlı harf
+  alanını bekleyen ayar ve kısa macera senaryoları iki görünümde başarısızdı.
+  Alan geri kondu; etkilenen **4/4** senaryo yeniden geçti. Son durumda 32 senaryonun
+  tamamı kapsandı; hata gizlenmedi veya doğrulama kaldırılmadı.
+- Yazıda kaydırma kilidi, gerçek çizim, yetişkin onayı, 58 harfin kılavuzu,
+  hece/kelime/okuma/cümle/sayı bölümleri ve altı bölüm arasında gezinme korundu.
+- Yeni ses paketi: **578 anahtar / 448 aktif MP3**. Gerekli **77/77** sabit metnin
+  kaydı var; 69 yeni dosya eklendi. 77 dosyanın biçimi ve pozitif süresi ffprobe
+  ile denetlendi (1,87–13,15 saniye). İnsan tarafından duyulan kalite doğrulanmadı.
+- Pages ve Laravel üretim derlemeleri geçti. Fiziksel iPad ve Safari/WebKit
+  kullanılmadı; bu sonuçlar Chromium dokunma emülasyonudur.
+
+## Sürüm 5.1 canlı tur kanıtı
+
+Uygulama kodu `b68f9d18ad4331a06e83b1c31bfbfd976c24b717`,
+[workflow 40308955962](https://github.com/arslanserhat/harf-adasi/actions/runs/40308955962)
+başarılı. Gerçek [HTTPS adreste](https://arslanserhat.github.io/harf-adasi/?v=5.1.0)
+**12/12 canlı senaryo** geçti: iki tablet görünümünde tam sekiz görevli tur,
+ikinci hikâyeye geçiş, sahne denetimleri, dört ayrı ada durağı, hareket durdurma,
+köprü yapımı ve eski kelime çalışmasından bağlamlı devam. Başarı veya tamamlama
+uygulamaya enjekte edilmedi; gerçek dokunma kontrolleri kullanıldı.
+
+Canlı JS `index-B-0XA0QT.js` yerel derlemeyle bayt bayt aynıydı;
+SHA-256 `2557cc08e1da0b2ca3c85aeb3fafd97799ca207caf8c1d24b50eda9ffe2570a3`.
+Canlı ses manifesti de yerel dosyayla aynı doğrulandı. Ekran görüntüleri ve sonuç
+kaydı çalışma alanındaki `scratch/harf-v51-live-*` dosyalarında tutulur.
+
+Kullanıcının sonraki talebiyle görünür v5.1 etiketi kaldırıldı; bu değişiklik oyun
+mantığını değiştirmez. Teknik sürüm bilgisi arayüz dışında tutulur. Sonraki
+belge/etiket güncellemesini yeni öğrenme motoru veya VPS yayını olarak sunma.
+Pages statik sürümdür; Laravel API yerelde sınandı, bu oturumdan VPS güncellenmedi.
+
+## Önceki sürüm 5 kontrol kaydı
+
 
 - JavaScript: **64 mantık testi geçti**. Ses 7, eski macera 11, ada modeli 12,
   uyarlama modeli 21, kayıt/eşitleme 10 ve özgün hikâye 3 test içerir.

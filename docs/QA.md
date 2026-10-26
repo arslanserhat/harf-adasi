@@ -29,9 +29,28 @@ Uygulama kaynağı 5.2.0; sürüm numarası çocuk arayüzünde gösterilmez.
 - Pages ve Laravel Vite derlemeleri geçti. Backend değişmedi; önceki PHP kanıtı
   alt kayıttadır. Bu değişiklik VPS yayını değildir.
 
-Canlı kanıt, yeni kod yayımlandıktan sonra bu bölüme eklenir. Eski workflow veya
-5.1 turunu 5.2 yayını diye sunma. Geçerli ses kaynağı aynı EmelNeural'dır;
-ChatGPT Voice dışa aktarımı yapılmadı.
+## Canlı yayın kanıtı
+
+Uygulama kodu `2a99b7b740dd1ec68e927b80e51c379aab6420e6`,
+[workflow 40318291199](https://github.com/arslanserhat/harf-adasi/actions/runs/40318291199)
+başarılı. [Gerçek HTTPS adresinde](https://arslanserhat.github.io/harf-adasi/?yenile=2)
+390×844 dokunmatik Chromium ile **2/2 telefon senaryosu** geçti: dört ada
+durağı, öğretmen formu, altı eski bölüm; ayrıca gerçek sekiz görev, yazı/rotasyon,
+kaydırma kilidi ve sesli macera kartı.
+
+Testin ikinci turunda öğretmen formundan gerçekten `al` ve `anne` girildi.
+Gerçek HTMLMediaElement `ended` olayları izlenerek hem bağlamdan üretilen `al`
+MP3'ünün hem macera kartının yeni tebrik kaydının sonuna kadar çalındığı doğrulandı.
+İzleme gerçek `play()` çağrısını korur; doğru cevap veya tamamlama enjekte etmez.
+Bu medya oynatımı kanıtıdır, insan tarafından duyulan telaffuz/ses kalitesi kanıtı değildir.
+
+Canlı `index-DyJUKld8.js` yerel üretim çıktısıyla aynı;
+SHA-256 `15253e3ae0bb489680e3adb53030f39727caa4c7fdb6d3cc613cbd3ccf66805b`.
+Canlı ses manifesti de yerel dosyayla aynı. Kanıt ve ekran görüntüleri
+`scratch/harf-v52-live-*` dosyalarında. Görünür sürüm etiketi yoktur.
+
+Geçerli anlatıcı aynı EmelNeural'dır; ChatGPT Voice dışa aktarımı yapılmadı.
+Fiziksel iPhone/iOS Chrome ve VPS yayını bu kontrollerle doğrulanmış değildir.
 
 ## Önceki sürüm 5.1 kontrol kaydı
 

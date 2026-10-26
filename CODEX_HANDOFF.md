@@ -2,6 +2,12 @@
 
 ## 26 Ekim 2026 — ses, kutlama ve iPhone revizyonu
 
+Pages'te `2a99b7b` uygulama kodu yayımlandı; workflow `40318291199` başarılı.
+Gerçek HTTPS adreste 390×844 ile 2/2 telefon kontrolü ve tam tur geçti; `al`
+kaydı ve kartın tebrik kaydının gerçek medya `ended` olayları doğrulandı.
+`docs/QA.md` en üstündeki kanıtı kullan. Sonraki belge güncellemesi uygulama
+kodunu veya bu yayının kapsamını değiştirmez. Görünür sürüm etiketi ekleme.
+
 Güncel kaynak `5.2.0`; görünür sürüm etiketi ekleme. Kullanıcı yeni ada tasarımını
 beğendi. Son talepleri: kötü `al.` telaffuzu, uzun/robotik tebrik, Atari benzeri
 efektler, hareketin yalnız ada resminde kalması, bölüm sonu kartının olmaması ve

@@ -34,6 +34,7 @@ jobs:
           node tests/adventures-unit.cjs
           node tests/island-unit.cjs
           node tests/learning-unit.cjs
+          node tests/quest-model-unit.cjs
           node tests/learning-sync-unit.cjs
           node tests/story-unit.cjs
           npm run build

@@ -149,7 +149,7 @@ test('mute stops narration and prevents both speech and sound effects', async ()
   assert.equal(await app.audio.speak('nine'), false);
   app.audio.playEffect('correct');
   assert.equal(app.players.length, 1, 'only the requested narration player was created');
-  assert.equal(app.players.some(player => /fx-.*\.wav$/.test(player.options.src[0])), false);
+  assert.equal(app.players.some(player => /\/fx-/.test(player.options.src[0])), false);
 });
 
 test('saved effects opt-out prevents effect players and remains separate from speech mute', async () => {
@@ -172,7 +172,7 @@ test('saved effects opt-out prevents effect players and remains separate from sp
   assert.deepEqual(app.scheduledTimers, [], 'no deferred effect or notification is scheduled');
 });
 
-test('only requested acoustic-v3 cues are created lazily and no old effect URLs are reused', async () => {
+test('only requested Pixabay-v4 files are loaded lazily without any retired-cue fallback', async () => {
   const app = createAudio();
   await app.audio.preload();
   app.audio.unlock();
@@ -181,17 +181,18 @@ test('only requested acoustic-v3 cues are created lazily and no old effect URLs 
   for (const name of ['tap', 'correct', 'retry', 'complete']) {
     app.audio.playEffect(name);
     const player = app.players.at(-1);
-    assert.equal(player.options.src[0], `/harf-adasi/audio/fx-${name}-acoustic-v3.wav`);
+    assert.equal(player.options.src[0], `/harf-adasi/audio/fx-${name}-pixabay-v4.mp3`);
     assert.equal(player.options.preload, false);
-    assert.ok(player.currentVolume > 0 && player.currentVolume <= 0.25, 'acoustic cues have conservative volume');
+    assert.ok(player.currentVolume > 0 && player.currentVolume <= 0.40, 'feedback has bounded volume');
     assert.equal(player.loadCount, 1, 'the first request explicitly starts loading the cue');
     assert.equal(player.playCount, 0, 'a loading cue is not queued for unconditional replay');
     assert.equal(player.queuedPlayCount, 0);
     player.emit('load');
     assert.equal(player.playCount, 1);
+    player.emit('end');
   }
   assert.equal(app.players.length, 4);
-  assert.equal(app.players.some(player => /-v2\.wav$|fx-(tap|correct|retry|complete)\.wav$/.test(player.options.src[0])), false);
+  assert.equal(app.players.some(player => /-v2\.wav$|-acoustic-v3\.wav$|fx-(tap|correct|retry|complete)\.wav$/.test(player.options.src[0])), false);
 });
 
 test('rapid taps and repeated completion calls cannot overlap a running cue', () => {
@@ -215,6 +216,62 @@ test('rapid taps and repeated completion calls cannot overlap a running cue', ()
   assert.equal(complete.playCount, 2, 'a later completed task can play its cue after the first ended');
 });
 
+test('correct and retry replace a loading tap without reviving it when its file arrives', () => {
+  for (const response of ['correct', 'retry']) {
+    const app = createAudio();
+    app.audio.playEffect('tap');
+    const tap = app.players[0];
+    app.audio.playEffect(response);
+    const feedback = app.players[1];
+    assert.equal(tap.queuedStopCount, 0, 'superseding a loading tap never queues a delayed stop');
+    tap.emit('load');
+    assert.equal(tap.playCount, 0, 'the obsolete generic tap remains silent after its load');
+    feedback.emit('load');
+    assert.equal(feedback.playCount, 1);
+    app.audio.playEffect('tap');
+    assert.equal(tap.playCount, 0, 'another generic tap cannot layer over active answer feedback');
+    assert.equal(app.players.length, 2);
+  }
+});
+
+test('an answer stops an already playing tap and a corrected answer replaces retry', () => {
+  const app = createAudio();
+  app.audio.playEffect('tap');
+  const tap = app.players[0]; tap.emit('load');
+  app.audio.playEffect('retry');
+  assert.equal(tap.stopCount, 1);
+  const retry = app.players[1]; retry.emit('load');
+  app.audio.playEffect('correct');
+  assert.equal(retry.stopCount, 1, 'a correct answer replaces the previous retry reaction');
+  const correct = app.players[2]; correct.emit('load');
+  assert.equal(correct.playCount, 1);
+  assert.equal(tap.playCount, 1, 'the replaced tap is not played a second time');
+});
+
+test('completion replaces lower-priority feedback and stays exclusive while loading or playing', () => {
+  const app = createAudio();
+  app.audio.playEffect('correct');
+  const correct = app.players[0];
+  app.audio.playEffect('complete');
+  const complete = app.players[1];
+  for (const response of ['tap', 'correct', 'retry', 'complete']) app.audio.playEffect(response);
+  assert.equal(app.players.length, 2, 'lower-priority cues are not even loaded over a pending completion');
+  assert.equal(complete.loadCount, 1);
+  correct.emit('load');
+  assert.equal(correct.playCount, 0, 'superseded answer feedback cannot play after completing its load');
+  complete.emit('load');
+  for (const response of ['tap', 'correct', 'retry', 'complete']) app.audio.playEffect(response);
+  assert.equal(complete.playCount, 1, 'completion is neither layered with other cues nor restarted');
+  assert.equal(app.players.length, 2);
+  complete.emit('end');
+  app.audio.playEffect('retry');
+  assert.equal(app.players.length, 3, 'a new answer can receive feedback once completion has ended');
+  const retry = app.players[2]; retry.emit('load');
+  app.audio.playEffect('complete');
+  assert.equal(retry.stopCount, 1, 'completion also stops an already playing lower-priority reaction');
+  assert.equal(complete.playCount, 2);
+});
+
 test('mute and disabling effects stop active cues without allowing queued replays', () => {
   const app = createAudio();
   app.audio.playEffect('correct');
@@ -233,7 +290,7 @@ test('mute and disabling effects stop active cues without allowing queued replay
   assert.equal(correct.playCount, 2);
 });
 
-test('acoustic feedback ducks during recorded speech and restores afterwards', async () => {
+test('feedback ducks during recorded speech and restores afterwards', async () => {
   const app = createAudio({ manifest: { nine: 'nine.mp3' } });
   app.audio.playEffect('correct');
   const effect = app.players[0];

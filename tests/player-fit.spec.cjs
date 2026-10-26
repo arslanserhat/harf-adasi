@@ -35,7 +35,7 @@ async function open(browser, url, viewport) {
       }
     });
     page.on('response', response => {
-      const name = response.url().match(/fx-(tap|correct|retry|complete)-acoustic-v3\.wav(?:\?|$)/)?.[1];
+      const name = response.url().match(/fx-(tap|correct|retry|complete)-pixabay-v4\.mp3(?:\?|$)/)?.[1];
       if (name) acousticResponses.set(name, { status: response.status(), type: response.headers()['content-type'] });
     });
   }
@@ -237,8 +237,8 @@ async function screenshot(app, label) {
             const response = app.acousticResponses.get(name);
             assert.ok(response && [200, 206].includes(response.status) && /^audio\//.test(response.type), `${name} downloaded as actual published audio`);
           }
-          assert.ok(await app.page.evaluate(() => window.__playedAcoustic.length > 3), 'real acoustic Web Audio sources reached their ended events');
-          console.log('Browser audio: all four acoustic cues fetched; real instrument sources and recorded journey congratulations reached ended events. Human listening remains separate.');
+          assert.ok(await app.page.evaluate(() => window.__playedAcoustic.length > 3), 'real Pixabay Web Audio sources reached their ended events');
+          console.log('Browser audio: all four Pixabay cues fetched; real audio sources and recorded journey congratulations reached ended events. Human listening remains separate.');
         }
         await screenshot(app, 'completion');
         await press(app, '#celebrationReturn');

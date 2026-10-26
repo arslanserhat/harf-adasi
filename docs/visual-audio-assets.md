@@ -1,5 +1,22 @@
 # Original illustrated animals and acoustic cues
 
+## Current selection: Pixabay effects and six adventure scenes
+
+The user explicitly rejected the v3 piano cues. They are retired; do not restore
+them as the active notification set. Runtime uses `fx-*-pixabay-v4.mp3`:
+miraclei's `sample_confirm_success03` (360151) for correct answers,
+Universfield's `Level Complete` (143022) for completion and `Soft UI Click`
+(147352) for tap/quiet retry. The supplied MP3s are unchanged. Their licence is
+the Pixabay Content License, not CC0 or the application's code licence.
+Attribution/source hashes ship in `public/audio/LICENSE-pixabay-v4.txt` and
+`public/audio/pixabay-v4.sources.json`. The app is not a standalone sound pack.
+
+The six `public/art/quest-*.webp` backgrounds are original game scenery generated
+for this project on 26 October 2026. Active objects/actors and task progress are
+rendered separately; the background image does not determine an answer.
+
+## Earlier assets
+
 The five `public/art/pet-*.webp` images were generated for Harf Adası on
 26 October 2026. Each is a transparent 2×2 pose atlas. The existing original
 `pirpir-flight.webp` supplies the bird. Characters animate in reserved interface

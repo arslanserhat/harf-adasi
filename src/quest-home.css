@@ -1,0 +1,72 @@
+/* Illustrated destinations open actual six-stage adventures, not worksheets. */
+.home-shell .games.quest-destinations{display:block;min-width:0;margin:0;color:#284a3e}
+.home-shell .quest-map-heading{margin-bottom:14px}
+.home-shell .quest-map-heading h2{font-size:clamp(23px,2.5vw,31px);letter-spacing:-.8px}
+.home-shell .quest-map-heading>p{max-width:230px;font-size:12px;line-height:1.6;text-align:right}
+.quest-map-intro{display:flex;align-items:center;gap:17px;padding:0 3px 22px}
+.quest-map-intro>p{flex:1;margin:0;color:#6b7c6e;font-size:13px;line-height:1.7}
+.quest-map-intro>p strong{font-weight:750;color:#4c6957}
+.quest-map-stops{color:#75856b;font-size:11px;font-weight:750;white-space:nowrap}
+.quest-map-path{position:relative;display:flex;align-items:center;justify-content:space-between;flex:0 0 64px;height:30px}
+.quest-map-path:before{position:absolute;content:'';left:3px;right:3px;top:14px;border-top:2px dashed #c9c9a3}
+.quest-map-path>i{z-index:1;width:12px;height:12px;background:#e7c982;border:3px solid #fffaf0;border-radius:50%;box-shadow:0 0 0 1px #d7c59b}
+.quest-map-path>i:nth-child(2){background:#89a879;transform:translateY(-7px)}
+.quest-portal-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px 21px;min-width:0}
+.home-shell .quest-world-portal{position:relative;display:flex;flex-direction:column;min-width:0;width:100%;padding:0;text-align:left;border:1px solid #e0e3d0;border-radius:25px;background:#fffef6;color:#2d5142;box-shadow:0 6px 0 #e3e4d4,0 15px 25px #3f593512;overflow:hidden;isolation:isolate;transition:transform .18s ease,box-shadow .18s ease}
+.home-shell .quest-world-portal:hover{transform:translateY(-4px);box-shadow:0 9px 0 #dce0c9,0 19px 31px #3f593519}
+.home-shell .quest-world-portal:active{transform:translateY(2px);box-shadow:0 3px 0 #dce0c9,0 8px 17px #3f593512}
+.home-shell .quest-world-portal:focus-visible{outline:3px solid #dc8c48;outline-offset:5px}
+.quest-portal-picture{position:relative;display:block;width:100%;height:clamp(178px,15vw,225px);min-height:178px;overflow:hidden;background:#c6d6ac;border-bottom:3px solid #f9ebc9;isolation:isolate}
+.quest-portal-picture>img{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center;pointer-events:none;user-select:none;-webkit-user-drag:none;transition:transform .6s ease}
+.quest-world-portal:hover .quest-portal-picture>img,.quest-world-portal:focus-visible .quest-portal-picture>img{transform:scale(1.045)}
+.quest-portal-shade{position:absolute;inset:0;background:linear-gradient(#233c443d,transparent 40%,#25422a12);pointer-events:none}
+.quest-portal-place{position:absolute;top:15px;left:14px;display:inline-flex;max-width:calc(100% - 78px);padding:6px 10px;border:1px solid #ffffff70;border-radius:100px;background:#fff9e8eb;box-shadow:0 3px 9px #2c432318;color:#5f6b46;font-size:8px;font-weight:900;letter-spacing:1.35px;line-height:1.4;z-index:2}
+.quest-portal-number{position:absolute;top:14px;right:14px;display:grid;place-items:center;width:30px;height:31px;border:1px solid #fff9e8b3;border-radius:10px;background:#fff9e8e8;color:#7c7048;font-size:11px;font-weight:900;box-shadow:0 2px 0 #6a674322;z-index:2}
+.quest-portal-path{position:absolute;left:12%;right:12%;bottom:14px;height:4px;border-top:2px dashed #fff9c59c;transform:rotate(-5deg);pointer-events:none;opacity:.55}
+.quest-portal-copy{display:flex;flex:1;flex-direction:column;min-width:0;padding:19px 19px 18px;background:linear-gradient(#fffef7,#fff9ec)}
+.quest-portal-copy>strong{display:block;margin:0 0 8px;color:#315442;font-size:23px;line-height:1.15;font-weight:900;letter-spacing:-.55px}
+.quest-portal-description{display:block;min-height:42px;color:#6c7c65;font-size:12px;line-height:1.65}
+.quest-portal-actions{display:flex;gap:5px;flex-wrap:wrap;margin:13px 0 17px;align-items:center}
+.quest-portal-actions>span{display:inline-flex;padding:4px 7px;border:1px solid #e5e5ce;border-radius:7px;background:#f5f5e8;color:#6c7c58;font-size:9px;line-height:1.4;font-weight:800}
+.quest-portal-bottom{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-top:auto;padding-top:14px;border-top:1px solid #e9e6d4}
+.quest-portal-status{display:flex;flex-direction:column;gap:6px;min-width:0;font-size:9px;color:#809074;line-height:1.3}
+.quest-portal-dots{display:flex;gap:4px;align-items:center;height:8px}
+.quest-portal-dots>i{display:block;width:11px;height:5px;border-radius:5px;background:#dedfcb}
+.quest-portal-dots>i.is-complete{background:#86a87b}
+.quest-portal-dots>i.is-current{background:#e3a465;box-shadow:0 0 0 2px #f4e7c2}
+.quest-portal-enter{display:inline-flex;align-items:center;justify-content:center;gap:7px;flex-shrink:0;min-height:36px;padding:7px 10px;border:1px solid #d77a4e;border-radius:11px;background:#e58c5d;color:#fffdf2;box-shadow:0 3px 0 #bf6e45;font-size:11px;font-weight:850;line-height:1.3}
+.quest-portal-enter>svg{width:14px;height:14px}
+.quest-world-portal.is-resuming{border-color:#b7ca9c;box-shadow:0 6px 0 #d3ddbe,0 15px 25px #3f593512}
+.quest-world-portal.is-resuming .quest-portal-enter{background:#5a856b;border-color:#4a7259;box-shadow:0 3px 0 #3e654f}
+.quest-portal-prop{position:absolute;display:block;z-index:1;pointer-events:none;filter:drop-shadow(0 4px 3px #43553626)}
+.quest-portal-prop>svg{display:block;width:100%;height:100%}
+.quest-portal-beacon{width:36px;height:36px;right:19%;top:38%;filter:none}
+.quest-portal-lamp{position:absolute;inset:7px;border-radius:50%;background:#ffedbb;box-shadow:0 0 18px 5px #ffdf7a63;animation:quest-home-lantern 5.5s ease-in-out infinite}
+.quest-portal-beam{position:absolute;left:-53px;top:-5px;width:130px;height:45px;transform-origin:68% 50%;clip-path:polygon(70% 41%,0 0,0 100%,70% 59%);background:linear-gradient(90deg,#ffe9a300,#ffe9a33b);animation:quest-home-beam 9s ease-in-out infinite}
+.quest-portal-train{width:45%;height:auto;left:20%;bottom:14%;transform-origin:50% 90%;animation:quest-home-train 12s ease-in-out infinite}
+.quest-portal-parcel{width:45px;height:45px;right:13%;bottom:20%;animation:quest-home-parcel 7s ease-in-out infinite}
+.quest-portal-fireflies{inset:0;filter:none}
+.quest-portal-fireflies>span{position:absolute;width:4px;height:4px;border-radius:50%;background:#fff1b2;box-shadow:0 0 9px 3px #ffe5a752;animation:quest-home-firefly 7s ease-in-out infinite}
+.quest-portal-fireflies>span:nth-child(1){left:32%;top:55%}.quest-portal-fireflies>span:nth-child(2){left:68%;top:34%;animation-delay:-2.3s}.quest-portal-fireflies>span:nth-child(3){left:77%;top:72%;animation-delay:-4.7s}
+.quest-portal-letter{width:45px;height:35px;right:19%;top:45%;animation:quest-home-letter 10s ease-in-out infinite}
+.quest-portal-sprout{width:44px;height:47px;right:17%;bottom:16%;transform-origin:50% 92%;animation:quest-home-sprout 7.5s ease-in-out infinite}
+.quest-practice-library{display:flex;gap:25px;align-items:center;justify-content:space-between;margin:31px 0 0;padding:23px 25px;border:1px solid #e2e6d3;border-radius:21px;background:#f5f5e9}
+.quest-practice-library>div:first-child{flex:0 1 35%;min-width:0}
+.quest-practice-label{display:block;font-size:8px;letter-spacing:1.15px;font-weight:900;color:#8b9574;margin-bottom:6px}
+.quest-practice-library h3{margin:0 0 6px;color:#4b654c;font-size:19px;letter-spacing:-.4px}
+.quest-practice-library p{margin:0;color:#7d8b71;font-size:11px;line-height:1.65}
+.quest-practice-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;flex:1;min-width:0}
+.home-shell .quest-practice-links>button{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;min-height:44px;padding:10px 12px;border:1px solid #e3e6d6;border-radius:11px;background:#fffdf4;color:#5b7555;font-size:11px;font-weight:800;text-align:left;box-shadow:0 2px 0 #dfe5d2}
+.quest-practice-links>button svg{width:14px;height:14px;flex-shrink:0}
+.home-shell .quest-practice-links>button:hover{background:#f0f4e5}
+@keyframes quest-home-lantern{0%,100%{opacity:.65;scale:.92}50%{opacity:1;scale:1.08}}
+@keyframes quest-home-beam{0%,100%{rotate:-10deg;opacity:.4}50%{rotate:12deg;opacity:.8}}
+@keyframes quest-home-train{0%,12%,100%{translate:-9% 0}48%,64%{translate:14% 0}}
+@keyframes quest-home-parcel{0%,100%{translate:0 0;rotate:-3deg}50%{translate:0 -5px;rotate:3deg}}
+@keyframes quest-home-firefly{0%,100%{translate:0 0;opacity:.4}50%{translate:5px -9px;opacity:1}}
+@keyframes quest-home-letter{0%,100%{translate:0 0;rotate:-7deg}50%{translate:-13px -8px;rotate:3deg}}
+@keyframes quest-home-sprout{0%,100%{rotate:-3deg}50%{rotate:4deg}}
+body[data-motion-paused=true] .quest-portal-prop,body[data-motion-paused=true] .quest-portal-prop *,body[data-ambience-hidden=true] .quest-portal-prop,body[data-ambience-hidden=true] .quest-portal-prop *{animation-play-state:paused!important}
+@media(max-width:1000px){.quest-portal-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 18px}.quest-portal-picture{height:215px}.quest-map-stops{font-size:10px}.quest-practice-library{gap:20px}.quest-practice-links{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.home-shell .quest-map-heading{margin-bottom:13px}.home-shell .quest-map-heading h2{font-size:25px}.home-shell .quest-map-heading>p{display:none}.quest-map-intro{flex-wrap:wrap;gap:12px;padding-bottom:19px}.quest-map-path{flex-basis:48px}.quest-map-intro>p{font-size:11px}.quest-map-stops{width:100%;padding-left:60px;font-size:10px}.quest-portal-grid{grid-template-columns:minmax(0,1fr);gap:23px}.home-shell .quest-world-portal{border-radius:23px}.quest-portal-picture{height:205px;min-height:190px}.quest-portal-copy{padding:18px 19px}.quest-portal-copy>strong{font-size:25px}.quest-portal-description{min-height:0;font-size:12px}.quest-portal-actions{gap:6px;margin:12px 0 15px}.quest-portal-actions>span{font-size:10px;padding:4px 7px}.quest-portal-status{font-size:10px}.quest-portal-enter{min-height:40px;font-size:12px;padding:8px 13px}.quest-practice-library{display:block;margin-top:28px;padding:21px 18px}.quest-practice-library>div:first-child{margin-bottom:17px}.quest-practice-library h3{font-size:20px}.quest-practice-library p{font-size:11px}.quest-practice-links{gap:9px}.home-shell .quest-practice-links>button{font-size:11px;padding:10px;min-height:46px}}
+@media(prefers-reduced-motion:reduce){.quest-world-portal,.quest-portal-picture>img{transition:none!important}.quest-world-portal:hover,.quest-world-portal:active,.quest-world-portal:hover .quest-portal-picture>img,.quest-world-portal:focus-visible .quest-portal-picture>img{transform:none!important}.quest-portal-prop,.quest-portal-prop *{animation:none!important}}

@@ -1,0 +1,25 @@
+Harf Adası notification effects, Pixabay selection (26 October 2026)
+
+These sound effects are incorporated into the Harf Adası game under the
+Pixabay Content License. They are not CC0 and are not relicensed under the
+application code's licence. This application is not a standalone sound library.
+
+Licence summary: https://pixabay.com/service/license-summary/
+Full licence: https://pixabay.com/service/terms/
+
+Correct answer: miraclei — sample_confirm_success03_kofi_by_miraclei
+https://pixabay.com/sound-effects/film-special-effects-sample-confirm-success03-kofi-by-miraclei-360151/
+Explicitly selected by the user as the confirmation sound.
+
+Level completed: Universfield — Level Complete
+https://pixabay.com/sound-effects/film-special-effects-level-complete-143022/
+Selected for the user's requested Level Complete cue.
+
+Tap / gentle retry: Universfield — Soft UI Click
+https://pixabay.com/sound-effects/film-special-effects-soft-ui-click-147352/
+
+Original MP3 files are used unchanged; runtime gain is adjusted. The retry
+uses the same quiet click without a separate error buzzer. Exact asset hashes,
+download URLs and durations are in pixabay-v4.sources.json.
+
+Do not offer these files as a standalone sound pack or download catalogue.

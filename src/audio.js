@@ -4,9 +4,15 @@ import { Howl, Howler } from 'howler';
 // device actually supplies a Turkish voice; lang='tr-TR' alone is insufficient.
 const BASE = typeof document !== 'undefined' && document.querySelector('meta[name="harf-backend"]')?.content === 'laravel' ? '/' : (import.meta.env?.BASE_URL || '/');
 const AUDIO_BASE = `${BASE.endsWith('/') ? BASE : `${BASE}/`}audio/`;
-// These are recorded acoustic cues, loaded only when a user action requests one.
-// Versioned names prevent a cached synthetic effect being reused after upgrade.
-const EFFECT_LEVELS = { tap: 0.10, correct: 0.22, retry: 0.08, complete: 0.25 };
+// Explicit versioned files keep retired cues out of playback and the cache.
+// Loading still starts only when a user action requests the corresponding cue.
+const EFFECT_FILES = {
+  tap: 'fx-tap-pixabay-v4.mp3',
+  correct: 'fx-correct-pixabay-v4.mp3',
+  retry: 'fx-retry-pixabay-v4.mp3',
+  complete: 'fx-complete-pixabay-v4.mp3',
+};
+const EFFECT_LEVELS = { tap: 0.18, correct: 0.35, retry: 0.10, complete: 0.40 };
 const effects = new Map();
 const activeEffects = new Set();
 // Keep the live HTML5 clip cache within Safari's unlocked audio pool.
@@ -273,16 +279,20 @@ function stopEffects() {
 }
 
 function playEffect(name) {
-  if (muted || !effectsEnabled || !Object.hasOwn(EFFECT_LEVELS, name)) return;
+  if (muted || !effectsEnabled || !Object.hasOwn(EFFECT_FILES, name)) return;
   const now = Date.now();
   if (name === 'tap' && now - lastTapAt < 100) return;
   if (activeEffects.has(name)) return;
+  // An answer or completion replaces a generic tap, even while it is loading.
+  // A later tap must not play over feedback or a still-loading completion.
+  if ((name === 'tap' && activeEffects.size > 0) || (name !== 'complete' && activeEffects.has('complete'))) return;
+  for (const previous of [...activeEffects]) if (previous !== name) stopEffect(previous);
   if (name === 'tap') lastTapAt = now;
   unlock();
   let effect = effects.get(name);
   if (!effect) {
     effect = new Howl({
-      src: [`${AUDIO_BASE}fx-${name}-acoustic-v3.wav`],
+      src: [`${AUDIO_BASE}${EFFECT_FILES[name]}`],
       preload: false,
       volume: volume * EFFECT_LEVELS[name],
     });

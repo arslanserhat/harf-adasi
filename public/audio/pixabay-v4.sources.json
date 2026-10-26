@@ -1,0 +1,50 @@
+{
+  "tap": {
+    "file": "fx-tap-pixabay-v4.mp3",
+    "title": "Soft UI Click by Universfield | Royalty-free Sound Effects",
+    "author": "Universfield",
+    "page": "https://pixabay.com/sound-effects/film-special-effects-soft-ui-click-147352/",
+    "download": "https://cdn.pixabay.com/download/audio/2023/04/23/audio_fe24ce0581.mp3?filename=universfield-soft-ui-click-147352.mp3",
+    "license": "https://pixabay.com/service/license-summary/",
+    "sha256": "b4c15c383ed6efb57ff160b1ebe2d64ef56f768c8156fa91ec43a091488274e6",
+    "duration": 1.044875,
+    "changes": "Unmodified source MP3; playback gain only.",
+    "user_selected": false
+  },
+  "retry": {
+    "file": "fx-retry-pixabay-v4.mp3",
+    "title": "Soft UI Click by Universfield | Royalty-free Sound Effects",
+    "author": "Universfield",
+    "page": "https://pixabay.com/sound-effects/film-special-effects-soft-ui-click-147352/",
+    "download": "https://cdn.pixabay.com/download/audio/2023/04/23/audio_fe24ce0581.mp3?filename=universfield-soft-ui-click-147352.mp3",
+    "license": "https://pixabay.com/service/license-summary/",
+    "sha256": "b4c15c383ed6efb57ff160b1ebe2d64ef56f768c8156fa91ec43a091488274e6",
+    "duration": 1.044875,
+    "changes": "Unmodified source MP3; playback gain only.",
+    "user_selected": false
+  },
+  "correct": {
+    "file": "fx-correct-pixabay-v4.mp3",
+    "title": "sample_confirm_success03_kofi_by_miraclei by miraclei | Telifsiz Ses Efektleri",
+    "author": "miraclei",
+    "page": "https://pixabay.com/tr/sound-effects/film-ve-%C3%B6zel-efektler-sample-confirm-success03-kofi-by-miraclei-360151/",
+    "download": "https://cdn.pixabay.com/download/audio/2025/06/14/audio_3ac54700a7.mp3?filename=miraclei-sample_confirm_success03_kofi_by_miraclei-360151.mp3",
+    "license": "https://pixabay.com/service/license-summary/",
+    "sha256": "1a52aec85b5574fb32f78bdfaacd6364668f4844af8f0d158010dbd05b003495",
+    "duration": 1.593469,
+    "changes": "Unmodified source MP3; playback gain only.",
+    "user_selected": true
+  },
+  "complete": {
+    "file": "fx-complete-pixabay-v4.mp3",
+    "title": "Level Complete by Universfield | Royalty-free Sound Effects",
+    "author": "Universfield",
+    "page": "https://pixabay.com/sound-effects/film-special-effects-level-complete-143022/",
+    "download": "https://cdn.pixabay.com/download/audio/2023/03/18/audio_9b98a3c314.mp3?filename=universfield-level-complete-143022.mp3",
+    "license": "https://pixabay.com/service/license-summary/",
+    "sha256": "0c765f662886e27537915b52aa735914efe43f4d52a9983e861c0e094aa0c5fd",
+    "duration": 1.959156,
+    "changes": "Unmodified source MP3; playback gain only.",
+    "user_selected": false
+  }
+}

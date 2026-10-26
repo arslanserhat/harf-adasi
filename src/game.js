@@ -19,6 +19,9 @@ import { recordAttempt, planSession } from './learning-model.js';
 import { createIcons, Volume2, VolumeX, Settings2, Star, ArrowLeft, Play, Pause, Check, RotateCcw, CheckCircle2, ArrowRight, X } from 'lucide';
 import './mobile.css';
 import { mountPlayerViewport } from './player-viewport.js';
+import { createQuests } from './quests.js';
+import { recommendQuestKind } from './quest-model.js';
+import { renderQuestDestinations } from './quest-home.js';
 
 const UI_ICONS = { Volume2, VolumeX, Settings2, Star, ArrowLeft, Play, Pause, Check, RotateCcw, CheckCircle2, ArrowRight, X };
 function refreshIcons() { if (document.querySelector('i[data-lucide]')) createIcons({ icons: UI_ICONS }); }
@@ -30,7 +33,7 @@ document.addEventListener('pointerdown', () => audio.unlock(), { passive: true }
 document.addEventListener('keydown', () => audio.unlock(), { passive: true });
 
 'use strict';
-window.HARF_ADASI_READY=false;window.HARF_ADASI_VERSION='5.3.0';
+window.HARF_ADASI_READY=false;window.HARF_ADASI_VERSION='5.4.0';
 function report(e){document.getElementById('error').hidden=false;document.getElementById('errorText').textContent=String(e&&e.message||e);document.getElementById('ready').textContent='Başlatma sorunu';}
 window.addEventListener('error',e=>report(e.error||e.message));window.addEventListener('unhandledrejection',e=>report(e.reason));
 (()=>{try{
@@ -71,13 +74,17 @@ document.body.dataset.motionPaused=String(state.motionPaused);
 configureAudio({onStatus:message=>toast(message),muted:state.muted,volume:state.volume,effects:state.effects});audio.preload();
 let progressEpoch=0;
 const freshProgress=new Set();
-let view='home',filter='all',caps=false,numMode='trace',game=null,raf=0,timer=0,learning=null;
+let view='home',filter='all',caps=false,numMode='trace',game=null,raf=0,timer=0,learning=null,quests=null;
+const QUEST_STORE='harf-adasi-quests-v1';
+let questHistory={version:1,runs:[],active:null};
+try{const raw=localStorage.getItem(QUEST_STORE);const parsed=raw&&raw.length<2000000?JSON.parse(raw):null;if(parsed&&typeof parsed==='object'&&!Array.isArray(parsed))questHistory={version:1,runs:Array.isArray(parsed.runs)?parsed.runs.slice(-100):[],active:parsed.active&&typeof parsed.active==='object'?parsed.active:null}}catch{}
+function saveQuestHistory(next){questHistory=next;try{localStorage.setItem(QUEST_STORE,JSON.stringify(next))}catch{toast('Macera bu oturumda açık kalacak; bu tarayıcı kaydı saklayamıyor.')}}
 const esc=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function shuffle(xs){let a=xs.slice();for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function toast(t){$('#toast').textContent=t;$('#toast').hidden=false;clearTimeout(timer);timer=setTimeout(()=>$('#toast').hidden=true,4300)}
-function header(){$('#badge').textContent=Math.min(rewards.length,state.done.length);$('#sound').innerHTML=state.muted?'<i data-lucide="volume-x"></i>':'<i data-lucide="volume-2"></i>';audio.setMuted(state.muted);audio.setVolume(state.volume);audio.setEffectsEnabled(state.effects);$('#sound').setAttribute('aria-label',state.muted?'Sesi aç':'Sesi kapat');$('#sound').setAttribute('aria-pressed',String(!state.muted))}
+function header(){$('#badge').textContent=Math.min(rewards.length,state.done.length+questHistory.runs.filter(run=>run?.completed===true&&run.completedStages===6).length);$('#sound').innerHTML=state.muted?'<i data-lucide="volume-x"></i>':'<i data-lucide="volume-2"></i>';audio.setMuted(state.muted);audio.setVolume(state.volume);audio.setEffectsEnabled(state.effects);$('#sound').setAttribute('aria-label',state.muted?'Sesi aç':'Sesi kapat');$('#sound').setAttribute('aria-pressed',String(!state.muted))}
 function save(){try{localStorage.setItem(STORE,JSON.stringify(state))}catch(_){toast('İlerleme kaydedilemiyor. Oynamaya devam edebilirsin.')}header()}
-function stop(){island?.destroy();if(learning?.screen)learning.destroy();hideCelebration();cancelAnimationFrame(raf);raf=0;game?.trace?.stopDemo?.();audio.stopSpeech()}
+function stop(){island?.destroy();quests?.destroy();if(learning?.screen)learning.destroy();hideCelebration();cancelAnimationFrame(raf);raf=0;game?.trace?.stopDemo?.();audio.stopSpeech()}
 function speak(t){if(state.muted){toast('Ses kapalı. Hoparlöre dokunabilirsin.');return}return audio.speak(String(t))}
 const island=createIsland({
   root:$('#main'),getLetters:()=>state.letters,getCompleted:()=>state.done,
@@ -98,7 +105,7 @@ const island=createIsland({
   onExit:()=>go(),
 });
 const learningStore=createLearningStore({onRemoteChange:(_snapshot,reason)=>{
-  if(reason==='reset'&&(view==='learning'||view==='learning-parent')){go();toast('Öğrenme kaydı başka bir pencerede sıfırlandı.');return}
+  if(reason==='reset'){quests?.destroy();saveQuestHistory({version:1,runs:[],active:null});if(view==='learning'||view==='learning-parent'||view==='quest'){go();toast('Öğrenme kaydı başka bir pencerede sıfırlandı.');return}}
   if(reason==='merged'&&(view==='learning'||view==='learning-parent'))learning?.resume?.();
   if(view==='home')home();
 }});
@@ -110,6 +117,16 @@ learning=createLearning({
   onToggleSound:()=>{state.muted=!state.muted;save();if(state.muted)audio.stopSpeech()},
   onHome:()=>go(),onPracticeLetter:c=>letter(c),onOpenSettings:()=>settings(),getSyncStatus:learningStore.getSyncStatus,
 });
+quests=createQuests({
+  root:$('#main'),getLearningState:learningStore.getState,getLetters:()=>state.letters,
+  getHistory:()=>questHistory,saveHistory:saveQuestHistory,
+  onAttempt:attempt=>learningStore.setState(recordAttempt(learningStore.getState(),attempt)),
+  onComplete:()=>header(),onHome:()=>go(),onParent:()=>go('learning-parent'),
+  speak,stopSpeech:()=>audio.stopSpeech(),isMuted:()=>state.muted,
+  onToggleSound:()=>{state.muted=!state.muted;save();if(state.muted)audio.stopSpeech()},
+  playEffect:name=>{if(state.effects)audio.playEffect(name)},getLetterPaths:text=>P[text]||[],
+});
+function openQuest(kind){releaseWritingGuard();stop();close(false);game=null;view='quest';filter='all';header();quests.start(kind);window.scrollTo(0,0)}
 function observeLegacyStep(){
   const s=game?.steps[game.i],observation=game?.observation;
   const observedWord=s?.text?.normalize('NFC').toLocaleLowerCase('tr-TR');
@@ -143,6 +160,7 @@ async function resetProgress(){
   }
   if(result?.learning_revision!==undefined)learningStore.acceptReset(result.learning_revision);
   else if(!await learningStore.reset()){toast('Öğrenme kaydı sıfırlanamadı. Yeniden deneyebilirsin.');if(control)control.disabled=false;return}
+  quests?.destroy();saveQuestHistory({version:1,runs:[],active:null});
   state.done=[];freshProgress.clear();save();go();
 }
 function openIsland(zone){go('island');if(zone)island.start(zone)}
@@ -169,6 +187,8 @@ function render(){header();if(view==='home')home();else if(view==='island')islan
 function home(){
   const learner=learningStore.getState();
   const session=learner.session;
+  const activeQuest=questHistory.active?.kind;
+  const questKind=['letters','syllables','words','reading','sentences','numbers'].includes(activeQuest)?activeQuest:recommendQuestKind({learningState:learner,letters:state.letters,history:questHistory,now:Date.now()});
   const continuing=Boolean(session?.tasks?.length&&session.index<session.tasks.length);
   const list=learner.lists.find(item=>item.id===learner.activeListId)||learner.lists[0];
   const assetBase=document.querySelector('meta[name="harf-backend"]')?.content==='laravel'?'/':import.meta.env.BASE_URL;
@@ -181,8 +201,8 @@ function home(){
     <div class="home-kicker-row"><span class="home-greeting">Hoş geldin, Alparslan</span></div>
     <section class="home-island-hero" aria-labelledby="homeAdventureTitle">
       <div class="home-hero-copy"><span class="home-eyebrow"><span></span>HER GÜN YENİ BİR KEŞİF</span><h1 id="homeAdventureTitle">Küçük kelimeler.<br><em>Kocaman maceralar.</em></h1><p>Alparslan ile adayı keşfet.<br>Dinle, kelimeleri birleştir, hikâyenin bir parçası ol.</p>
-      <button class="home-primary" data-do="learning">${continuing?'Maceraya devam et':'Maceraya başla'}<i data-lucide="arrow-right"></i></button>
-      <div class="home-hero-note"><span class="home-tiny-check"><i data-lucide="check"></i></span>${continuing?`${session.index+1}. görevden, kaldığın yerden devam.`:'Kendi hızında, adım adım, birlikte.'}</div></div>
+      <button class="home-primary" data-do="quest-start" data-quest-kind="${esc(questKind)}">${activeQuest?'Maceraya devam et':'Maceraya başla'}<i data-lucide="arrow-right"></i></button>
+      <div class="home-hero-note"><span class="home-tiny-check"><i data-lucide="check"></i></span>${activeQuest?`${Math.min(6,(questHistory.active.index||0)+1)}. görevden, kendi dünyandan devam.`:'Bir dünya seç, adada kendi izini bırak.'}</div></div>
       <div class="home-island-art"><img src="${esc(assetBase)}art/harf-island.webp" alt="Alparslan ve arkadaşlarının seni beklediği yemyeşil bir macera adası" width="1672" height="941" fetchpriority="high" decoding="async">
       <div class="home-map-life" aria-hidden="true"><span class="home-sea-ripple home-sea-ripple-one"></span><span class="home-sea-ripple home-sea-ripple-two"></span><span class="home-drifting-cloud home-drifting-cloud-one"></span><span class="home-drifting-cloud home-drifting-cloud-two"></span><span class="home-map-butterfly home-map-butterfly-one">${butterfly}</span><span class="home-map-butterfly home-map-butterfly-two">${butterfly}</span>${['a','n','e'].map((letter,index)=>`<span class="home-floating-letter home-floating-letter-${index+1}">${letter}</span>`).join('')}${[[57,18],[91,35],[46,76],[73,79]].map(([x,y],index)=>`<span class="home-map-sparkle" style="--sparkle-x:${x}%;--sparkle-y:${y}%;--sparkle-delay:${index*1.4}s"></span>`).join('')}</div>
       <div class="home-map-stops" aria-label="Adada gidebileceğin yerler">${mapStops.map(([world,label,description,x,y])=>`<button class="home-map-stop home-map-stop-${world}" data-do="learning-world" data-world="${world}" style="--stop-x:${x}%;--stop-y:${y}%" aria-label="${label}: ${description}" title="${description}"><span class="home-map-stop-icon">${mapIcon(world)}</span><span class="home-map-stop-label">${label}</span></button>`).join('')}</div>
@@ -190,8 +210,8 @@ function home(){
       <span class="home-art-label"><span></span>Bir yere dokun, keşfe çık</span></div>
     </section>
     <button class="home-parent-tile" data-do="learning-parent"><span class="home-parent-symbol" aria-hidden="true"><i data-lucide="settings-2"></i></span><span class="home-parent-copy"><small>BİRLİKTE HAZIRLAYALIM</small><b>Öğretmenimin kelimeleri</b><span>${listWords.length?`${esc(list?.title||'Kelime listem')} · ${listWords.map(esc).join(', ')}`:'Öğretmenin verdiği kelimelerle kendi listeni oluştur.'}</span></span><span class="home-parent-link">Listeyi düzenle<i data-lucide="arrow-right"></i></span></button>
-    <div class="home-section-heading"><div><span class="home-eyebrow">OYUN ATÖLYELERİ</span><h2>Bugün ne keşfedelim?</h2></div><p>Birlikte deneyelim, kendimiz yapalım.</p></div>
-    <section class="games home-games" aria-label="Öğrenme oyunları">${modes.map(([id,emoji,title,sub],index)=>`<button class="card home-game-card" data-do="catalog" data-view="${id}"><span class="home-card-top"><span class="pic" aria-hidden="true">${emoji}</span><span class="home-card-number">0${index+1}</span></span><span class="home-card-bottom"><span><b>${title}</b><small>${sub}</small></span><span class="home-card-arrow" aria-hidden="true"><i data-lucide="arrow-right"></i></span></span></button>`).join('')}</section>
+    <button class="home-parent-tile home-story-route" data-do="learning"><span class="home-parent-symbol" aria-hidden="true">${mapIcon('post')}</span><span class="home-parent-copy"><small>BİRLİKTE BİR HİKÂYE</small><b>${continuing?'Mektup hikâyeme devam et':'Alparslan ve Kayıp Bahçe Mektubu'}</b><span>Öğretmeninin kelimeleriyle birbirine bağlı sekiz görev.</span></span><span class="home-parent-link">Hikâyeyi aç<i data-lucide="arrow-right"></i></span></button>
+    ${renderQuestDestinations({assetBase,history:questHistory})}
     <div class="home-section-heading home-explore-heading"><div><span class="home-eyebrow">ADANIN DİĞER KÖŞELERİ</span><h2>Biraz da keşfe çıkalım</h2></div></div>
     <section class="home-explore-grid" aria-label="Adadaki diğer oyunlar"><button class="home-explore-card" data-do="island"><span class="home-explore-picture" aria-hidden="true">🏝️</span><span><b>Adayı keşfet</b><small>Hayvan dostları, hece treni ve hazine yolları.</small></span><i data-lucide="arrow-right"></i></button><button class="home-explore-card" data-do="adventure"><span class="home-explore-picture" aria-hidden="true">📖</span><span><b>Kısa hikâyeler</b><small>Bildiğin harflerle küçük bir yolculuğa çık.</small></span><i data-lucide="arrow-right"></i></button></section>
     <section class="home-letter-row" aria-label="Okulda öğrendiğim harfler"><div><small>BİLDİĞİM HARFLER</small><b>Küçük bir harf molası</b></div><div class="mini">${state.letters.slice(0,8).map(letter=>button('letter',esc(letter),`data-letter="${esc(letter)}" aria-label="${esc(letter)} harfini çalış"`,'home-letter-key')).join('')}</div>${button('catalog','Tüm harfler →','data-view="letters"','home-letter-all')}</section>
@@ -275,18 +295,18 @@ function complete(){
   window.scrollTo(0,0);
 }
 function stickerPage(){$('#main').innerHTML=bar()+`<div class="heading"><h1>⭐ Çıkartma hazinen</h1><p>Her yeni alıştırma bir keşif. ${state.done.length} farklı alıştırmayı tamamladın.</p></div><div class="stickers">${rewards.map(([emoji,title],i)=>`<div class="sticker ${i>=state.done.length?'locked':''}"><span>${emoji}</span><h3>${title}</h3><small>${i<state.done.length?'Senin oldu!':(i+1)+'. keşifte'}</small></div>`).join('')}</div>`}
-function modal(title,body){stop();const d=$('#dialog');d.innerHTML=`<div class="dialog-head"><h2 id="dialogTitle">${title}</h2>${button('close','✕','aria-label="Kapat"','close')}</div>`+body;if(!d.open)d.showModal()}
+function modal(title,body){stop();const d=$('#dialog');d.innerHTML=`<div class="dialog-head"><h2 id="dialogTitle">${title}</h2>${button('close','','aria-label="Kapat"','close')}</div>`+body;if(!d.open)d.showModal()}
 let refreshOnDialogClose=true;
 function close(refresh=true){let d=$('#dialog');if(d.open){refreshOnDialogClose=refresh;d.close()}}
 $('#dialog').addEventListener('close',()=>{const refresh=refreshOnDialogClose;refreshOnDialogClose=true;if(!refresh)return;if(view==='home')home();else if(view==='island')island.renderMap();else if(view==='learning'||view==='learning-parent')learning.resume?.();else if(modes.some(m=>m[0]===view))catalog();game?.trace?.stopDemo?.()});
 function settings(){modal('Birlikte öğrenelim',`<div class="controls">${button('learning-parent','Öğretmenimin kelimeleri ve gelişim','','tool')}</div><h3>Okulda öğrendiğimiz harfler</h3><p>Öğretmeninizin işlediği harfleri seçin. Kısa maceralar yalnızca bu harflerle hazırlanır. Serbest oyunlardan diğer harflere de ulaşabilirsiniz.</p><div class="settings">${A.map(l=>button('select-letter',l,`data-letter="${l}" aria-pressed="${state.letters.includes(l)}"`,state.letters.includes(l)?'selected':'')).join('')}</div><div class="controls">${button('all-letters','Tümünü seç','','')}${button('first-letters','İlk harfler: a n e t i l','','')}</div><label class="setting">İpucu başlangıçta görünsün<input id="hint-setting" type="checkbox" ${state.hint?'checked':''}></label><label class="setting">Ses açık<input id="sound-setting" type="checkbox" ${!state.muted?'checked':''}></label><label class="setting">Kısa oyun sesleri<input id="effects-setting" type="checkbox" ${state.effects?'checked':''}></label><div class="controls" aria-label="Oyun seslerini dene">${button('effect-preview','Dokunuş','data-effect="tap"','tool')}${button('effect-preview','Doğru cevap','data-effect="correct"','tool')}${button('effect-preview','Macera sonu','data-effect="complete"','tool')}</div><label class="setting">Ses düzeyi<input id="voice-volume" type="range" min="0" max="1" step="0.05" value="${state.volume}" aria-label="Ses düzeyi"></label><p class="info">İlerleme bu tarayıcıda saklanır. Bu oyun el yazısını, çocuğun zekâsını veya bir öğrenme güçlüğünü değerlendirmez. Harflerin cihaz sesi, öğretmenin verdiği ses çalışmasının yerine geçmez.</p>${button('reset','İlerlemeyi sıfırla','','danger')}`)}
 function review(paper=false){if(!game)return;if(!paper&&!game.trace?.hasInk()){feedback('Önce yazı alanına yazmayı dene.','nudge');return}modal('Birlikte kontrol edelim',`<p>Yazdığın <strong>${esc(game.steps[game.i].text)}</strong> örneğe benziyor mu? Bir büyüğünle birlikte bak.</p><div class="actions">${button('approve','Birlikte kontrol ettik ✓')}${button('close','Bir daha deneyeceğim','','btn secondary')}</div>`)}
 document.addEventListener('change',e=>{if(e.target.id==='effects-setting'){state.effects=e.target.checked;save()}if(e.target.id==='voice-volume'){state.volume=Number(e.target.value);save()}if(e.target.id==='hint-setting'){state.hint=e.target.checked;save()}if(e.target.id==='sound-setting'){state.muted=!e.target.checked;save();if(state.muted){audio.stopSpeech();hideCelebration()}}});
-document.addEventListener('click',e=>{const b=e.target.closest('[data-do]');if(!b||b.disabled)return;if(state.effects&&b.dataset.do!=='effect-preview')audio.playEffect('tap');let a=b.dataset.do,s=game?.steps[game.i];if(a==='home-motion')toggleHomeMotion(b);else if(a==='learning-world'){const entryKinds={post:'listen',workshop:'build',bridge:'recall',garden:'meaning'};if(Object.hasOwn(entryKinds,b.dataset.world))openLearningContext({entryKind:entryKinds[b.dataset.world]})}else if(a==='learning-continue')openLearningContext({focusText:b.dataset.focusText||'',focusSkill:b.dataset.focusSkill||''});else if(a==='learning'){go('learning');learning.start()}else if(a==='learning-parent')go('learning-parent');else if(a==='home')go();else if(a==='catalog')go(b.dataset.view);else if(a==='stickers')go('stickers');else if(a==='island')openIsland();else if(a==='island-zone')openIsland(b.dataset.zone);else if(a==='adventure')adventure();else if(a==='letter')letter(b.dataset.letter);else if(a==='word')word(b.dataset.text);else if(a==='sentence'){let text=sentences[Number(b.dataset.index)];begin('sentence',b.dataset.index,text,[buildStep(text,[text],'🌈',true),{kind:'free',text}])}else if(a==='number')number(Number(b.dataset.number));else if(a==='tab'){if(b.dataset.key==='caps')caps=b.dataset.value==='upper';else if(b.dataset.key==='num')numMode=b.dataset.value;else filter=b.dataset.value;catalog()}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-do]');if(!b||b.disabled)return;if(state.effects&&b.dataset.do!=='effect-preview')audio.playEffect('tap');let a=b.dataset.do,s=game?.steps[game.i];if(a==='home-motion')toggleHomeMotion(b);else if(a==='learning-world'){const entryKinds={post:'listen',workshop:'build',bridge:'recall',garden:'meaning'};if(Object.hasOwn(entryKinds,b.dataset.world))openLearningContext({entryKind:entryKinds[b.dataset.world]})}else if(a==='learning-continue')openLearningContext({focusText:b.dataset.focusText||'',focusSkill:b.dataset.focusSkill||''});else if(a==='learning'){go('learning');learning.start()}else if(a==='learning-parent')go('learning-parent');else if(a==='home')go();else if(a==='quest-start')openQuest(b.dataset.questKind);else if(a==='catalog')go(b.dataset.view);else if(a==='stickers')go('stickers');else if(a==='island')openIsland();else if(a==='island-zone')openIsland(b.dataset.zone);else if(a==='adventure')adventure();else if(a==='letter')letter(b.dataset.letter);else if(a==='word')word(b.dataset.text);else if(a==='sentence'){let text=sentences[Number(b.dataset.index)];begin('sentence',b.dataset.index,text,[buildStep(text,[text],'🌈',true),{kind:'free',text}])}else if(a==='number')number(Number(b.dataset.number));else if(a==='tab'){if(b.dataset.key==='caps')caps=b.dataset.value==='upper';else if(b.dataset.key==='num')numMode=b.dataset.value;else filter=b.dataset.value;catalog()}
 else if(a==='sound'){state.muted=!state.muted;save();if(state.muted){audio.stopSpeech();hideCelebration()}else speak('Merhaba! Birlikte oynayalım.')}else if(a==='effect-preview'){if(state.muted||!state.effects)toast('Dinlemek için sesi ve kısa oyun seslerini açabilirsin.');else audio.playEffect(b.dataset.effect)}else if(a==='speak'){if(game?.steps[game.i]?.kind==='read'&&game.observation)game.observation.hints++;speak(b.dataset.text)}else if(a==='settings')settings();else if(a==='close')close();else if(a==='select-letter'){let l=b.dataset.letter;if(state.letters.includes(l)){if(state.letters.length===1){toast('En az bir harf seçili kalsın.');return}state.letters=state.letters.filter(x=>x!==l)}else state.letters.push(l);save();b.classList.toggle('selected',state.letters.includes(l));b.setAttribute('aria-pressed',String(state.letters.includes(l)))}else if(a==='all-letters'||a==='first-letters'){state.letters=a==='all-letters'?[...A]:['a','n','e','t','i','l'];save();settings()}
 else if(a==='reset')modal('İlerleme silinsin mi?',`<p>Tamamlanan alıştırmalar, çıkartmalar ve öğrenme gözlemleri silinecek. Öğretmen kelime listeleri korunacak. Bu işlem geri alınamaz.</p><div class="actions">${button('confirm-reset','Evet, sıfırla')}${button('close','Vazgeç','','btn secondary')}</div>`);else if(a==='confirm-reset')resetProgress()
 else if(a==='pause')modal('Küçük bir mola 🌿',`<p>Kalemini bırak. Ellerini dinlendir. Hazır olunca kaldığın yerden devam et.</p><div class="actions">${button('close','Oyuna dön')}${button('home','Oyun bahçesi','','btn secondary')}</div>`);
-else if(a==='notes')modal('Kendi hızında',`<p>Kısa bir oyun seçin. Önce gösterin, sonra birlikte deneyin. Çocuk bitirmeden sonraki adıma geçmeyin. Yanlışta acele ettirmeden ipucuna dönün; yorulunca mola verin.</p><p>Çizim oyunu yalnızca kılavuzun izlenmesini kontrol eder. Serbest yazıyı birlikte değerlendirin. Hazır Türkçe kayıt bulunmayan metinlerde cihazın Türkçe sesi kullanılır. İnternet bağlantısı sayfanın ilk açılışı için gereklidir.</p><p>Oyun sesleri: Alexander Holm, Salamander Grand Piano; CC BY 3.0. Kayıtlar kısaltılıp düzenlenmiştir. <a href="audio/LICENSE-acoustic-effects-v3.txt" target="_blank" rel="noopener">Kaynak ve lisans</a>.</p>`);
+else if(a==='notes')modal('Kendi hızında',`<p>Kısa bir oyun seçin. Önce gösterin, sonra birlikte deneyin. Çocuk bitirmeden sonraki adıma geçmeyin. Yanlışta acele ettirmeden ipucuna dönün; yorulunca mola verin.</p><p>Çizim oyunu yalnızca kılavuzun izlenmesini kontrol eder. Serbest yazıyı birlikte değerlendirin. Hazır Türkçe kayıt bulunmayan metinlerde cihazın Türkçe sesi kullanılır. İnternet bağlantısı sayfanın ilk açılışı için gereklidir.</p><p>Oyun sesleri: Pixabay üzerinden miraclei ve Universfield. <a href="audio/LICENSE-pixabay-v4.txt" target="_blank" rel="noopener">Kaynak ve lisans</a>.</p>`);
 else if(a==='match'&&game&&!game.ready){if(b.dataset.value===s.text){b.classList.add('ok');$$('.choice').forEach(x=>x.disabled=true);ready('Aynısını buldun! Hazırsan devam edebilirsin.')}else feedback('Bir daha bakalım. Yukarıdaki işarete dikkat et.','nudge')}
 else if(a==='read'&&game&&!game.ready){let w=game.options[Number(b.dataset.index)];if(w.text===s.text){b.classList.add('ok');$$('.choice').forEach(x=>x.disabled=true);ready('Kelime ve resim eşleşti!')}else feedback('Kelimeye yeniden bakalım. Okurken yardım alabilirsin.','nudge')}
 else if(a==='count'&&game&&!game.ready){if(Number(b.dataset.number)===s.n){b.classList.add('ok');$$('.choice').forEach(x=>x.disabled=true);ready('Saydın ve buldun!')}else feedback('Elmaları bir daha, tek tek sayalım.','nudge')}
@@ -296,6 +316,6 @@ else if(a==='restart'&&game&&s.kind==='build'){game.selected=[];game.bank=shuffl
 else if(a==='hint'&&game){game.hint=!game.hint;if(game.hint&&game.observation)game.observation.hints++;$('#buildPrompt').innerHTML=game.hint?s.parts.map(x=>'<span>'+esc(x)+'</span>').join(''):'?';b.textContent=game.hint?'İpucunu gizle':'İpucunu göster'}
 else if(a==='hide'&&game){let p=$('#freePrompt');p.textContent=p.textContent==='?'?s.text:'?'}else if(a==='clear'&&game)game.trace?.clear();else if(a==='demo'&&game)game.trace?.demo();else if(a==='review')review();else if(a==='paper')review(true);else if(a==='approve'&&game){game.writingReviewed=true;close();ready('Birlikte kontrol ettiniz. Hazırsan devam edebilirsin.')}
 else if(a==='next'){advance()}else if(a==='repeat'&&game){const previous=game;begin(previous.type,previous.key,previous.text,previous.steps,{adventure:previous.adventure})}});
-document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();else if(view==='island')island.renderMap();else if(view==='learning'||view==='learning-parent')learning.resume?.()});$('#dialog').addEventListener('click',e=>{if(e.target===$('#dialog')){let r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)close()}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();else if(view==='quest'){const kind=questHistory.active?.kind;if(kind)quests.start(kind);else go()}else if(view==='island')island.renderMap();else if(view==='learning'||view==='learning-parent')learning.resume?.()});$('#dialog').addEventListener('click',e=>{if(e.target===$('#dialog')){let r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)close()}});
 render();refreshIcons();void learningStore.initialize();window.addEventListener('online',()=>{void learningStore.flush()});window.addEventListener('pagehide',()=>{void learningStore.flush()});const initialProgressEpoch=progressEpoch;loadServerProgress().then(progress=>{if(initialProgressEpoch!==progressEpoch||!Array.isArray(progress?.completed_items))return;const restored=progress.completed_items.map(x=>x.item_key).filter(x=>typeof x==='string'&&/^(letter|digit|count|number|syllable|word|sentence|reading|adventure|island):/.test(x));const changed=item=>freshProgress.has(normalizeIslandCompletion(item)||item);const recent=state.done.filter(changed);state.done=mergeCompletions([...state.done.filter(item=>!changed(item)),...restored.filter(item=>!changed(item)),...recent]);freshProgress.clear();save();if(view==='home')home();else if(view==='island'&&$('#island')?.dataset.islandScene==='map')island.renderMap();else if(view==='stickers')stickerPage()});$('#ready').textContent='🟢 Oyun hazır';window.HARF_ADASI_READY=true;
 }catch(e){report(e)}})();

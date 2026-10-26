@@ -99,7 +99,8 @@ scenario('writing studio: native touch gestures cannot scroll; controls fit and 
   await home(page);
   assert.equal(await page.locator('body').evaluate(body => body.classList.contains('writing-focus')), false);
   assert.notEqual(await page.locator('body').evaluate(body => getComputedStyle(body).position), 'fixed');
-  assert.equal(await page.locator('.card').count(), 6);
+  assert.equal(await page.locator('.quest-world-portal').count(), 6, 'all six adventure worlds remain reachable after writing');
+  assert.equal(await page.locator('.quest-practice-links [data-do="catalog"]').count(), 6, 'all six original practice catalogs remain available');
 });
 
 scenario('regression slots: empty taps preserve work, filled taps undo from the tapped position', async ({ page }) => {
@@ -316,7 +317,7 @@ scenario('Turkish audio: nine and every word have bundled recordings; celebratio
   assert.ok(phrases.nine, 'nine does not depend on an English default browser voice');
   const celebration = Object.keys(phrases).find(text => /tebrikler.*başardın/.test(text));
   assert.ok(celebration, 'spoken congratulation is included');
-  const filenames = [phrases.nine, phrases[celebration], ...['tap', 'correct', 'retry', 'complete'].map(name => `fx-${name}-acoustic-v3.wav`)];
+  const filenames = [phrases.nine, phrases[celebration], ...['tap', 'correct', 'retry', 'complete'].map(name => `fx-${name}-pixabay-v4.mp3`)];
   for (const filename of filenames) {
     assert.equal(/^(https?:|\/\/|\.\.)/.test(filename), false, 'sound assets are bundled with the game');
   }
@@ -444,7 +445,7 @@ scenario('first grade: guided three-step adventure uses selected letters, real s
   await playAdventure(new Set(['a', 'n', 'e', 't', 'i', 'l']), true);
   assert.equal(Number(await page.locator('#badge').innerText()), initialBadges + 1, 'completed guided adventure earns a reward');
   await home(page);
-  assert.equal(await page.locator('.games .card').count(), 6, 'the six original games remain available');
+  assert.equal(await page.locator('.quest-practice-links [data-do="catalog"]').count(), 6, 'the six original games remain available');
   await page.reload();
   await page.locator('#ready').filter({ hasText: 'Oyun hazır' }).waitFor();
   assert.equal(Number(await page.locator('#badge').innerText()), initialBadges + 1, 'adventure reward survives reload');

@@ -127,7 +127,7 @@ export function mountWritingGuard(svg) {
   // Keyboard activation and gestures starting on the notebook stay native.
   listen(document, 'pointerdown', event => {
     clearTimeout(actionTimer); actionTimer = 0; pendingAction = null;
-    const button = event.target instanceof Element ? event.target.closest('#main button[data-do], #main button[data-learning]') : null;
+    const button = event.target instanceof Element ? event.target.closest('#main button[data-do], #main button[data-learning], #main button[data-quest]') : null;
     actionContact = button && !button.disabled && !isDialogEvent(event) && event.button === 0
       && event.isPrimary !== false && touchIds.size === 0 && pointerIds.size === 0
       ? { button, pointerId: event.pointerId, x: event.clientX, y: event.clientY, moved: false } : null;

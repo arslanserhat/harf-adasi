@@ -35,8 +35,27 @@ kelime paketinin toplam 33 metninden 25'inde hazır kayıt yoktur; gerçek Türk
 cihaz sesi veya açık yetişkin desteği kullanılır. Bu kayıtlar ChatGPT Voice ile
 yeniden seslendirilmiş değildir. Ayrıntı: [ses geçiş planı](voice-plan.md).
 
-Bu sayılar yerel kontrollerdir. Canlı yayında yeni varlıklar ve gerçek oyun turu
-ayrıca doğrulanmalıdır; workflow veya HTTP 200 bu doğrulamanın yerine geçmez.
+## Canlı yayın doğrulaması — 26 Ekim 2026, 09:23 UTC
+
+- Uygulama kodu: `15ca41e36631245e6039f8f752c17679257c6389`, sürüm `5.0.0`.
+- [Pages workflow 40298881520](https://github.com/arslanserhat/harf-adasi/actions/runs/40298881520)
+  başarılı; [gerçek HTTPS adresi](https://arslanserhat.github.io/harf-adasi/) açıldı.
+- Canlı JavaScript `index-BrTYCwgB.js` yerel üretim çıktısıyla bayt bayt aynı:
+  SHA-256 `b33404c56d227240130caa6ac8ee2e45e5b793ee49ea495b51e10d145fa44f37`.
+  Çalışan sayfanın `HARF_ADASI_VERSION` değeri de `5.0.0` doğrulandı.
+- Gerçek HTTPS sayfasında 768×1024 ve 1024×768 dokunmatik görünümlerinde **2/2
+  bağlı öğrenme turu** tamamlandı: yanlış cevap, ipucu, ayrı çift `n` kartları,
+  dinleme, heceleme, kelime kurma, örneksiz hatırlama, gerçek çizim hareketi,
+  yetişkin onayı ve sekiz görev sonrası özet. Uygulama başarı durumuna veri enjekte
+  edilmedi; gerçek kontroller kullanıldı. Sonuçlar tarayıcı kaydından yalnız okundu.
+- Yazma hareketi sayfayı kaydırmadı; tur bitişinde kilit kalktı; hata konsolu,
+  yatay taşma ve uygulama hata ekranı kontrolü geçti. Her iki turun ekran görüntüleri
+  çalışma alanındaki `scratch/harf-v5-live-*` dosyalarında tutuldu.
+- Bu doğrulama statik Pages yayınıdır. Laravel API yerel sunucuda sınandı; bu
+  oturumdan VPS sürüm 5 yayını yapılmadı. Pages'teki kayıt bu tarayıcıya aittir.
+
+Fiziksel iPad, Safari/WebKit ve duyulan ses kalitesi bu canlı turla doğrulanmış
+değildir. Yeni hikâye kayıtlarının eksikleri yukarıdaki ses envanterinde geçerlidir.
 
 ## Önceki sürüm 4 kontrol kaydı
 

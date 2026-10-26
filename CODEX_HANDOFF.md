@@ -44,6 +44,15 @@ Ada için ayrıca `node tests/island-unit.cjs` ve derlemeden sonra `node tests/i
 
 ## Yayın ve doğruluk
 
+26 Ekim 2026 09:23 UTC: sürüm 5 uygulama kodu `15ca41e` main'e gönderildi.
+Pages workflow `40298881520` başarılı; gerçek
+`https://arslanserhat.github.io/harf-adasi/` adresinde iki tablet görünümünde
+sekiz görevlik iki tam tur doğrulandı. Canlı JS varlığı yerel derlemeyle aynı;
+ayrıntılar ve hash `docs/QA.md` içindedir. 64 JS testi, 28 PHP testi / 205 assertion,
+18 yeni öğrenme ve 32 eski bölüm tablet senaryosu geçti. Bu yayın statiktir;
+Pages'te Laravel API veya sunucu kaydı çalışmaz. Sonraki belge güncellemesi
+uygulama kodunu değiştirmez. VPS'nin yeni sürümle güncellendiğini varsayma.
+
 Sürüm 5'in bu bulut oturumunda GitHub erişimi doğrulandı. Güncel ağ durumu yeniden
 okundu ve SSH denemesi tekrar `Connection refused` verdi; önceki başka cihazdan
 yapılmış VPS yayını bu yeni kodun orada yayımlandığı anlamına gelmez. Aynı SSH

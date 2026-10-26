@@ -4,11 +4,13 @@ import './world-ambience.css';
 // the coordinates of a letter/card a child is actively trying to select.
 const MAX_PARTICLES = 20;
 const REVEAL_TARGETS = '.home-game-card, .home-parent-tile, .home-explore-card, .home-section-heading, .learn-journey-card, .learn-preview-grid > div, .learn-panel, .island-continuation';
-const PIRPIR_HOSTS = '.home-island-art, .story-scene-stage';
+const PET_HOSTS = '.home-kicker-row, .home-section-heading, body > footer, .learning[data-screen="task"] > .learn-nav';
+const PET_ASSETS = {
+  lion: 'pet-lion.webp', rabbit: 'pet-rabbit.webp', fox: 'pet-fox.webp',
+  squirrel: 'pet-squirrel.webp', turtle: 'pet-turtle.webp', bird: 'pirpir-flight.webp',
+};
 const ASSET_BASE = document.querySelector('meta[name="harf-backend"]')?.content === 'laravel' ? '/' : (import.meta.env?.BASE_URL || '/');
 let currentMount = null;
-
-const butterfly = `<svg viewBox="0 0 44 36" aria-hidden="true"><g class="world-butterfly-wings"><path d="M20 17C4-6-7 13 15 23 4 41 25 35 22 21" fill="#e3b977"/><path d="M24 17C40-6 51 13 29 23 40 41 19 35 22 21" fill="#edcf9f"/></g><path d="M22 12v16m0-13-4-6m4 6 4-6" fill="none" stroke="#8c7957" stroke-width="1.8" stroke-linecap="round"/></svg>`;
 
 /** Mount once for this page; the returned cleanup is safe to call repeatedly. */
 export function mountWorldAmbience({ root = document.body } = {}) {
@@ -23,13 +25,14 @@ export function mountWorldAmbience({ root = document.body } = {}) {
   const queuedNodes = new Set();
   const waitingElements = new Set();
   const revealedElements = new Set();
-  const pirpirBirds = new Map();
+  const petPerches = new Map();
+  const navResize = typeof ResizeObserver === 'function' ? new ResizeObserver(() => updateNavPets()) : null;
   const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)');
   const sky = document.createElement('div');
   sky.className = 'world-ambience-sky';
   sky.dataset.worldAmbienceOwned = 'true';
   sky.setAttribute('aria-hidden', 'true');
-  sky.innerHTML = `<span class="world-cloud-wisp world-cloud-wisp-one"></span><span class="world-cloud-wisp world-cloud-wisp-two"></span><span class="world-background-butterfly world-background-butterfly-one">${butterfly}</span><span class="world-background-butterfly world-background-butterfly-two">${butterfly}</span><span class="world-background-butterfly world-background-butterfly-three">${butterfly}</span><span class="world-background-orbit world-background-orbit-one"></span><span class="world-background-orbit world-background-orbit-two"></span>${Array.from({ length: 7 }, (_, index) => `<span class="world-firefly world-firefly-${index + 1}"></span>`).join('')}`;
+  sky.innerHTML = `<span class="world-cloud-wisp world-cloud-wisp-one"></span><span class="world-background-orbit world-background-orbit-one"></span>${[1, 2, 4, 5].map(index => `<span class="world-firefly world-firefly-${index}"></span>`).join('')}`;
   const effects = document.createElement('div');
   effects.className = 'world-ambience-effects';
   effects.dataset.worldAmbienceOwned = 'true';
@@ -97,28 +100,64 @@ export function mountWorldAmbience({ root = document.body } = {}) {
       for (const entry of entries) if (entry.isIntersecting) reveal(entry.target);
     }, { threshold: 0.08, rootMargin: '0px 0px -12px 0px' }) : null;
 
-  function mountPirpir(node) {
-    const hosts = [...(node.matches(PIRPIR_HOSTS) ? [node] : []), ...node.querySelectorAll(PIRPIR_HOSTS)];
+  function mountSitePets(node) {
+    const hosts = [...(node.matches(PET_HOSTS) ? [node] : []), ...node.querySelectorAll(PET_HOSTS)];
     for (const host of hosts) {
-      if (pirpirBirds.has(host) || [...host.children].some(child => child.classList.contains('world-pirpir'))) continue;
-      const bird = document.createElement('span');
-      bird.className = 'world-pirpir';
-      bird.dataset.worldAmbienceOwned = 'true';
-      bird.setAttribute('aria-hidden', 'true');
-      bird.style.setProperty('--pirpir-sprite', `url("${ASSET_BASE}art/pirpir-flight.webp")`);
-      const sprite = document.createElement('span');
-      sprite.className = 'world-pirpir-sprite';
-      bird.appendChild(sprite);
-      host.classList.add('world-pirpir-host');
-      host.appendChild(bird);
-      pirpirBirds.set(host, bird);
+      if (host.closest('.home-island-art, .home-island-hero, .story-scene-stage, .story-scene')) continue;
+      if (petPerches.has(host) || [...host.children].some(child => child.classList.contains('world-pet-perch'))) continue;
+      const kind = host.matches('.home-kicker-row') ? 'home' : host.matches('body > footer') ? 'footer' : host.matches('.learn-nav') ? 'nav' : 'section';
+      const home = host.closest('.home-shell');
+      if (kind === 'section' && !home) continue;
+      const headingIndex = kind === 'section' ? [...home.querySelectorAll('.home-section-heading')].indexOf(host) : 0;
+      const species = kind === 'home' ? ['lion', 'bird'] : kind === 'footer' ? ['squirrel', 'turtle'] : kind === 'nav' ? ['bird'] : [headingIndex % 2 ? 'fox' : 'rabbit'];
+      const perch = document.createElement('span');
+      perch.className = `world-pet-perch world-pet-perch-${kind}`;
+      perch.dataset.worldAmbienceOwned = 'true';
+      perch.setAttribute('aria-hidden', 'true');
+      for (const animal of species) {
+        const pet = document.createElement('span');
+        pet.className = `world-site-pet world-site-pet-${animal}`;
+        pet.dataset.species = animal;
+        pet.style.setProperty('--pet-atlas', `url("${ASSET_BASE}art/${PET_ASSETS[animal]}")`);
+        const sprite = document.createElement('span');
+        sprite.className = 'world-site-pet-sprite';
+        pet.appendChild(sprite); perch.appendChild(pet);
+      }
+      const hostClass = `world-pet-host-${kind}`;
+      host.classList.add(hostClass); host.appendChild(perch);
+      petPerches.set(host, { perch, hostClass });
+      if (kind === 'nav') navResize?.observe(host);
     }
-    for (const [host, bird] of pirpirBirds) if (!host.isConnected || !bird.isConnected) pirpirBirds.delete(host);
+    for (const [host, { perch }] of petPerches) if (!host.isConnected || !perch.isConnected) {
+      navResize?.unobserve(host); petPerches.delete(host);
+    }
+  }
+  function updateNavPets() {
+    if (destroyed) return;
+    for (const [host, { perch, hostClass }] of petPerches) {
+      if (hostClass !== 'world-pet-host-nav' || !host.isConnected) continue;
+      const bird = perch.querySelector('.world-site-pet-bird');
+      if (!bird) continue;
+      const rect = host.getBoundingClientRect();
+      const width = parseFloat(getComputedStyle(bird).width) || (innerWidth <= 700 ? 38 : 48);
+      // Include the hover's small horizontal drift, keeping the bird entirely
+      // outside both the Home button and the sound/pause controls.
+      const left = rect.x + rect.width / 2 - width / 2 - 6;
+      const right = rect.x + rect.width / 2 + width / 2 + 6;
+      const top = rect.y;
+      const bottom = rect.y + 43;
+      const overlaps = [...host.querySelectorAll('button, a, input, select')].some(control => {
+        const box = control.getBoundingClientRect();
+        return box.width > 0 && box.height > 0 && box.left < right && box.right > left && box.top < bottom && box.bottom > top;
+      });
+      bird.hidden = rect.width <= 0 || rect.height < 40 || overlaps;
+      host.dataset.petGap = String(!bird.hidden);
+    }
   }
 
   function scan(node = root) {
     if (destroyed || !(node instanceof Element) || node.closest('[data-world-ambience-owned]')) return;
-    mountPirpir(node);
+    mountSitePets(node);
     const targets = [...(node.matches(REVEAL_TARGETS) ? [node] : []), ...node.querySelectorAll(REVEAL_TARGETS)];
     for (const element of targets) {
       if (element.dataset.worldReveal || element.closest('.writing-focus, .learning-writing')) continue;
@@ -136,6 +175,7 @@ export function mountWorldAmbience({ root = document.body } = {}) {
     scanFrame = 0;
     for (const node of queuedNodes) if (node.isConnected) scan(node);
     queuedNodes.clear();
+    updateNavPets();
   }
   function updateActivity() {
     if (destroyed) return;
@@ -168,22 +208,24 @@ export function mountWorldAmbience({ root = document.body } = {}) {
   else reduceMotion?.addListener?.(updateActivity);
   updateActivity();
   scan();
+  updateNavPets();
+  document.fonts?.ready.then(() => { if (!destroyed) updateNavPets(); });
 
   const controller = {
     root,
     destroy() {
       if (destroyed) return;
       destroyed = true;
-      observer.disconnect(); intersection?.disconnect(); cancelAnimationFrame(scanFrame);
+      observer.disconnect(); intersection?.disconnect(); navResize?.disconnect(); cancelAnimationFrame(scanFrame);
       document.removeEventListener('click', burst, true);
       document.removeEventListener('visibilitychange', updateActivity);
       if (reduceMotion?.removeEventListener) reduceMotion.removeEventListener('change', updateActivity);
       else reduceMotion?.removeListener?.(updateActivity);
       clearParticles(); queuedNodes.clear(); waitingElements.clear();
-      for (const [host, bird] of pirpirBirds) {
-        bird.remove(); host.classList.remove('world-pirpir-host');
+      for (const [host, { perch, hostClass }] of petPerches) {
+        perch.remove(); host.classList.remove(hostClass);
       }
-      pirpirBirds.clear();
+      petPerches.clear();
       for (const element of revealedElements) delete element.dataset.worldReveal;
       revealedElements.clear();
       root.querySelectorAll('[data-world-reveal]').forEach(element => delete element.dataset.worldReveal);

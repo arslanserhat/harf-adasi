@@ -39,6 +39,7 @@ export function createLearning({
   root, getState, setState, getLetters, speak, stopSpeech = () => {},
   isMuted = () => false, onHome = () => {}, onPracticeLetter = () => {},
   onOpenSettings = () => {}, getSyncStatus = () => '', playEffect = () => {}, effectsEnabled = () => true,
+  onToggleSound = () => {},
 }) {
   if (!root || !getState || !setState || !getLetters) throw new Error('Learning host is incomplete');
   let listening = false;
@@ -129,6 +130,9 @@ export function createLearning({
   }
   function nav(extra = '') {
     return `<div class="learn-nav">${control('home', '← Adaya dön', '', 'quiet')}<span>Kendi hızında, birlikte</span>${extra || control('parent', 'Listeler ve gelişim', '', 'quiet')}</div>`;
+  }
+  function taskTools() {
+    return `<div class="learn-nav-tools">${control('toggle-sound', `<i data-lucide="${isMuted() ? 'volume-x' : 'volume-2'}"></i>`, `aria-label="${isMuted() ? 'Sesi aç' : 'Sesi kapat'}" aria-pressed="${!isMuted()}"`, 'quiet learn-sound-toggle')}${control('pause', 'Mola ver', '', 'quiet')}</div>`;
   }
   function feedback(message, tone = '') {
     const element = root.querySelector('#learningFeedback');
@@ -350,7 +354,7 @@ export function createLearning({
     let html = `<div class="learn-task-controls">${control('listen', `<i data-lucide="volume-2"></i>${audioLabel}`, '', task.kind === 'listen' ? 'listen-primary' : 'quiet')}`;
     if (task.kind !== 'meaning' && task.kind !== 'listen') html += control('show-model', taskUi.model ? 'Örneği kapat' : 'Örneği göster', '', 'quiet');
     html += '</div>';
-    if (task.kind === 'listen') html += `<div class="learn-adult-audio">${control('adult-read', 'Bir büyüğümle kelimeyi okuyalım', '', 'quiet')}</div>`;
+    if (task.kind === 'listen') html += `<div class="learn-adult-audio">${control('adult-read', 'Birlikte oku', 'aria-label="Bir büyüğümle kelimeyi okuyalım"', 'quiet')}</div>`;
     if (task.kind === 'meaning') {
       html += `<div class="learn-whole-word">${escape(task.word)}</div>`;
     } else if (task.kind !== 'listen') {
@@ -396,7 +400,7 @@ export function createLearning({
     }
     const controls = `<div class="learn-scene-task"><div class="learn-mission-title"><span>${escape(TITLES[task.kind] || 'Birlikte keşfedelim')}</span><small>${escape(instructions(task))}</small></div>${taskBody(task, state)}<div id="learningFeedback" class="learn-feedback" role="status" aria-live="polite">${result.correct ? 'Bu adım kaydedildi. Hazır olduğunda devam et.' : 'Hazır olduğunda başlayabilirsin.'}</div><div class="learn-next-row">${control('next', state.session.index + 1 === state.session.tasks.length ? 'Mektubu gönder →' : 'Yola devam →', `id="learningNext" ${result.correct ? '' : 'disabled'}`, 'primary')}</div></div>`;
     root.innerHTML = `<section id="learning" class="learning learning-task${task.kind === 'write' ? ' learning-writing lesson' : ' learn-world-frame'}" data-screen="task" data-kind="${escape(task.kind)}" data-word="${escape(task.word)}" data-task-id="${escape(task.id)}">
-      ${nav(control('pause', 'Mola ver', '', 'quiet'))}
+      ${nav(taskTools())}
       <div class="learn-task-header"><span class="learn-eyebrow">${task.kind === 'recall' ? 'Hatırlama postası' : 'Alparslan ile ada macerası'}</span><h1>${escape(TITLES[task.kind] || 'Birlikte keşfedelim')}</h1><p>${escape(['listen', 'recall'].includes(task.kind) ? (task.reason || instructions(task)).replace(/\p{L}+/gu, token => token.toLocaleLowerCase('tr-TR') === task.word ? 'bu kelime' : token) : task.reason || instructions(task))}</p></div>
       <div class="learn-session-track" aria-label="${state.session.index + 1}. görev, toplam ${state.session.tasks.length}">${state.session.tasks.map((_, index) => `<span class="${index < state.session.index ? 'past' : index === state.session.index ? 'current' : ''}"></span>`).join('')}<small>${state.session.index + 1} / ${state.session.tasks.length}</small></div>
       ${task.kind === 'write' ? `<div class="learn-workspace exercise">${controls}</div>` : sceneMarkup(result.correct ? 'success' : 'task', state.session, controls)}
@@ -689,6 +693,12 @@ export function createLearning({
     const action = button.dataset.learning;
     playEffect('tap');
     if (action === 'home') { destroy(); onHome(); }
+    else if (action === 'toggle-sound') {
+      onToggleSound();
+      button.innerHTML = `<i data-lucide="${isMuted() ? 'volume-x' : 'volume-2'}"></i>`;
+      button.setAttribute('aria-label', isMuted() ? 'Sesi aç' : 'Sesi kapat');
+      button.setAttribute('aria-pressed', String(!isMuted()));
+    }
     else if (action === 'parent') renderParent();
     else if (action === 'start') start();
     else if (action === 'begin-tasks') {

@@ -1,0 +1,110 @@
+/* The player owns the usable visual viewport; long text scrolls inside it. */
+body[data-player-screen=intro],body[data-player-screen=task]{overflow:hidden;overscroll-behavior:none}
+body[data-player-screen=intro]>footer,body[data-player-screen=task]>footer{display:none}
+body[data-player-screen=intro]:not(.writing-focus)>main,body[data-player-screen=task]:not(.writing-focus)>main{position:fixed;top:var(--player-chrome-height,110px);left:0;right:0;width:100%;max-width:1280px;height:calc(min(var(--player-viewport-height,100vh),100svh) - var(--player-chrome-height,110px));min-height:0;margin:0 auto;padding:10px max(14px,env(safe-area-inset-right)) max(9px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));overflow:hidden}
+body[data-player-screen=intro] #learning{height:100%;min-height:0;display:flex;flex-direction:column;gap:9px;max-width:1180px}
+body[data-player-screen=intro] #learning>.learn-nav{flex:0 0 44px;margin:0;min-height:44px}
+body[data-player-screen=intro] #learning>.learn-intro{flex:0 0 auto;margin:0 2px}
+body[data-player-screen=intro] #learning>.learn-intro h1{font-size:clamp(22px,3vw,32px);margin:2px 0 0;line-height:1.15}
+body[data-player-screen=intro] #learning>.learn-intro p,body[data-player-screen=intro] .learn-intro-plan{display:none}
+body[data-player-screen=intro] #learning>.learn-intro .learn-eyebrow{font-size:11px}
+body[data-player-screen=intro] #learning>#learningStory{flex:1 1 0;min-height:0;margin:0}
+body[data-player-screen=intro] .story-scene.story-scene-world{height:100%;min-height:0;border-radius:24px}
+body[data-player-screen=intro] .story-scene.story-scene-world .story-scene-stage{display:grid;grid-template-rows:minmax(70px,1fr) auto;height:100%;min-height:0;aspect-ratio:auto;padding:0}
+body[data-player-screen=intro] .story-scene-world .story-world-backdrop{position:relative;grid-row:1;width:100%;height:100%;min-height:0;object-fit:contain;object-position:center;animation:none;transform:none}
+body[data-player-screen=intro] .story-scene-world .story-scene-dialogue{position:relative;grid-row:2;top:auto;left:auto;right:auto;width:auto;max-width:none;margin:0;padding:10px 14px;border:0;border-radius:0;box-shadow:none;min-height:0}
+body[data-player-screen=intro] .story-scene-world .story-scene-dialogue:after,body[data-player-screen=intro] .story-scene-topline,body[data-player-screen=intro] .story-interaction-dock,body[data-player-screen=intro] .story-world-physical-props,body[data-player-screen=intro] .world-pirpir-flight{display:none}
+body[data-player-screen=intro] .story-scene-world .story-scene-dialogue h2{font-size:15px!important}
+body[data-player-screen=intro] .story-scene-world .story-scene-caption{font-size:12px!important;line-height:1.4!important}
+body[data-player-screen=intro] .story-scene-world .story-dialogue-next{min-height:32px;margin:0;font-size:11px}
+body[data-player-screen=intro] .story-scene-world .story-speaker-mark{display:none}
+body[data-player-screen=intro] .story-scene-world .story-scene-tools{position:absolute;top:10px;bottom:auto;left:auto;right:10px;z-index:10}
+body[data-player-screen=intro] #learning>.learn-actions{flex:0 0 auto;display:flex;gap:10px;flex-wrap:nowrap;justify-content:center;margin:0;padding:2px 0 5px}
+body[data-player-screen=intro] #learning>.learn-actions .learn-button{min-height:46px;font-size:14px;padding:9px 15px}
+body[data-player-screen=task] #learning.learn-world-frame{height:100%;min-height:0;display:flex;flex-direction:column;gap:6px;max-width:1224px}
+body[data-player-screen=task] .learn-world-frame>.learn-nav{flex:0 0 44px;min-height:44px;margin:0}
+.learn-nav-tools{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-width:0}
+.learn-nav-tools .learn-sound-toggle{display:grid;place-items:center;min-width:44px;min-height:44px;padding:9px}
+body[data-player-screen=task] .learn-world-frame>.learn-task-header{flex:0 0 auto;margin:0 2px}
+body[data-player-screen=task] .learn-world-frame>.learn-task-header h1{font-size:18px;margin:0}
+body[data-player-screen=task] .learn-world-frame>.learn-task-header p{font-size:11px;line-height:1.35}
+body[data-player-screen=task] .learn-world-frame>.learn-session-track{flex:0 0 auto;margin:1px 2px 5px}
+body[data-player-screen=task] .learn-world-frame>#learningStory{flex:1 1 0;min-height:0;margin:0}
+body[data-player-screen=task] .learn-world-frame .story-scene.story-scene-world{height:100%;min-height:0}
+body[data-player-screen=task] .learn-world-frame .story-scene.story-scene-world .story-scene-stage{height:100%;min-height:0;aspect-ratio:auto}
+body[data-player-screen=task] .learn-world-frame>.learn-letter-help{display:none}
+@media(max-width:700px),(max-height:500px){
+ body[data-player-screen=task]>header,body[data-player-screen=task]>.status{display:none}
+ body[data-player-screen=task]:not(.writing-focus)>main{top:0;height:min(var(--player-viewport-height,100vh),100svh);padding:6px max(9px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(9px,env(safe-area-inset-left))}
+ body[data-player-screen=task] .learn-world-frame>.learn-task-header{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+ body[data-player-screen=task] .learn-world-frame>.learn-nav{flex-basis:44px;min-height:44px}
+ body[data-player-screen=task] .learn-world-frame>.learn-nav>span{display:none}
+ body[data-player-screen=task] .learn-world-frame>.learn-nav .learn-button{min-height:44px;padding:7px 10px;font-size:12px}
+ body[data-player-screen=task] .learn-world-frame>.learn-session-track{margin:0 2px 3px;gap:5px}
+ body[data-player-screen=task] .learn-world-frame>.learn-session-track>span{height:5px;width:18px}
+ body[data-player-screen=task] .learn-world-frame>.learn-session-track small{font-size:10px}
+ body[data-player-screen=task] .learn-world-frame .story-scene.story-scene-world{border-radius:20px;border-width:2px}
+ body[data-player-screen=task] .learn-world-frame .story-scene.story-scene-world .story-scene-stage{display:grid;grid-template-rows:minmax(88px,28%) minmax(0,1fr);height:100%;min-height:0;padding:0;overflow:hidden}
+ body[data-player-screen=task] .learn-world-frame .story-world-backdrop{position:relative;grid-row:1;width:100%;height:100%;min-height:0;object-fit:contain;object-position:center;animation:none;transform:none}
+ body[data-player-screen=task] .learn-world-frame .story-scene-dialogue,body[data-player-screen=task] .learn-world-frame .story-scene-topline{display:none!important}
+ body[data-player-screen=task] .learn-world-frame .story-scene-world .story-interaction-dock.has-interaction{position:relative;grid-row:2;top:auto;left:auto;right:auto;bottom:auto;width:100%;height:100%;min-height:0;margin:0;padding:0;overflow:hidden;background:#fff8e8f2;border-top:1px solid #e8d3aa}
+ body[data-player-screen=task] .learn-world-frame .learn-scene-task{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto auto minmax(44px,1fr) auto auto;gap:5px;height:100%;min-height:0;padding:7px 10px;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scroll-padding-bottom:62px}
+ body[data-player-screen=task] .learn-world-frame .learn-mission-title{grid-column:1/-1;grid-row:1;margin:0;padding:4px 7px;border:0;background:transparent;box-shadow:none}
+ body[data-player-screen=task] .learn-world-frame .learn-mission-title>span{font-size:15px;line-height:1.25}
+ body[data-player-screen=task] .learn-world-frame .learn-mission-title>small{display:none}
+ body[data-player-screen=task] .learn-world-frame .learn-task-controls{flex:0 0 auto;gap:7px;justify-content:center;margin:0}
+ body[data-player-screen=task] .learn-world-frame .learn-task-controls .learn-button{min-height:44px;padding:7px 10px;font-size:12px}
+ body[data-player-screen=task] .learn-world-frame .learn-mission-title + .learn-task-controls{grid-column:1;grid-row:2;justify-content:flex-start}
+ body[data-player-screen=task] .learn-world-frame .learn-adult-audio{position:relative;top:auto;right:auto;grid-column:2;grid-row:2;width:106px;margin:0}
+ body[data-player-screen=task] .learn-world-frame .learn-adult-audio .learn-button{width:100%;min-height:44px;padding:6px 7px;font-size:11px;line-height:1.2;white-space:normal}
+ body[data-player-screen=task] .learn-world-frame .learn-whole-word{grid-column:2;grid-row:2;max-width:140px;min-height:0;margin:1px auto;padding:3px 9px;font-size:24px;line-height:1.1}
+ body[data-player-screen=task] .learn-world-frame .learn-choices{grid-column:1/-1;grid-row:3/5;align-items:center;justify-content:center;gap:8px;margin:3px 0}
+ body[data-player-screen=task] .learn-world-frame .learn-choices .learn-button.word-choice{min-height:65px;max-height:none;min-width:0;padding:8px 5px;font-size:24px}
+ body[data-player-screen=task] .learn-world-frame .learn-choices .meaning-choice{min-height:65px;padding:6px;font-size:17px}
+ body[data-player-screen=task] .learn-world-frame .learn-choices .meaning-choice .illustration{width:54px;height:54px}
+ body[data-player-screen=task] .learn-world-frame .learn-slots{grid-column:1/-1;grid-row:3;min-height:0;margin:2px 0;padding:5px;gap:5px}
+ body[data-player-screen=task] .learn-world-frame .learn-slot{min-height:36px;height:auto;min-width:30px;padding:4px 7px;font-size:22px}
+ body[data-player-screen=task] .learn-world-frame .learn-bank{grid-column:1/-1;grid-row:4;align-items:center;align-content:center;gap:8px;margin:3px 0}
+ body[data-player-screen=task] .learn-world-frame .learn-bank + .learn-task-controls{grid-column:1;grid-row:6;justify-content:flex-start;align-self:end;gap:5px}
+ body[data-player-screen=task] .learn-world-frame .learn-bank + .learn-task-controls .learn-button{padding:6px 7px;font-size:10px}
+ body[data-player-screen=task] .learn-world-frame .learn-bank .learn-tile{min-width:43px;min-height:44px;height:auto;padding:6px 9px;font-size:24px}
+ body[data-player-screen=task] .learn-world-frame .learn-feedback{grid-column:1/-1;grid-row:5;min-height:25px;margin:2px 0;padding:4px 7px;font-size:11px;line-height:1.3}
+ body[data-player-screen=task] .learn-world-frame .learn-next-row{position:sticky;grid-column:2;grid-row:6;bottom:-7px;z-index:15;display:flex;justify-content:flex-end;margin:0 0 -7px;padding:7px 0 9px;min-height:0;background:#fff8e8}
+ body[data-player-screen=task] .learn-world-frame .learn-next-row .learn-button{min-height:44px;padding:8px 15px;font-size:13px}
+ body[data-player-screen=task] .learn-world-frame .story-scene-world .story-scene-tools{position:absolute;top:8px;right:8px;left:auto;bottom:auto;margin:0;z-index:14}
+ body[data-player-screen=task] .learn-world-frame .story-scene-world .story-scene-tools button{min-height:44px;min-width:44px;padding:7px}
+ body[data-player-screen=task] .learn-world-frame .world-pirpir-flight{width:58px;height:44px;top:8%;left:73%}
+ body[data-player-screen=task] .learn-world-frame .story-world-envelope{width:43px;top:8%;left:50%}
+ body[data-player-screen=task] .learn-world-frame .story-world-bridge{top:20%;height:18px}
+ body[data-player-screen=task] .learn-world-frame .story-world-plank{height:17px}
+ body[data-player-screen=task] .learn-world-frame .story-world-sprout{top:15%;height:37px;width:27px}
+ body[data-player-screen=task] .learn-world-frame .story-world-delivery-stamp{top:14%;width:33px;height:33px}
+ body[data-player-screen=task] .learn-world-frame[data-kind=sentence] .learn-scene-task{display:flex;flex-direction:column}
+ body[data-player-screen=task] .learn-world-frame[data-kind=sentence] .learn-whole-word{max-width:100%}
+ body[data-player-screen=task] .learn-world-frame[data-kind=sentence] .learn-next-row{margin-top:auto}
+ body[data-player-screen=intro] #learning>.learn-nav>span{display:none}
+ body[data-player-screen=intro] #learning>.learn-intro h1{font-size:24px}
+ body[data-player-screen=intro] #learning>.learn-actions{gap:7px}
+ body[data-player-screen=intro] #learning>.learn-actions .learn-button{font-size:12px;padding:8px 10px;min-height:44px}
+ body[data-player-screen=intro] .story-scene-world .story-scene-caption{font-size:11px!important}
+}
+@media(max-height:500px){
+ body[data-player-screen=intro]>header,body[data-player-screen=intro]>.status{display:none}
+ body[data-player-screen=intro]:not(.writing-focus)>main{top:0;height:min(var(--player-viewport-height,100vh),100svh);padding-top:5px}
+ body[data-player-screen=intro] #learning{gap:5px}
+ body[data-player-screen=intro] #learning>.learn-intro .learn-eyebrow{display:none}
+ body[data-player-screen=intro] #learning>.learn-intro h1{font-size:20px}
+ body[data-player-screen=intro] .story-scene-world .story-scene-dialogue{padding:5px 10px}
+ body[data-player-screen=intro] .story-scene-world .story-scene-caption{display:none}
+ body[data-player-screen=intro] .story-scene-world .story-dialogue-next{min-height:30px}
+ body[data-player-screen=task] .learn-world-frame .story-scene.story-scene-world .story-scene-stage{grid-template-columns:minmax(180px,35%) minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+ body[data-player-screen=task] .learn-world-frame .story-world-backdrop{grid-column:1;grid-row:1}
+ body[data-player-screen=task] .learn-world-frame .story-scene-world .story-interaction-dock.has-interaction{grid-column:2;grid-row:1;border-top:0;border-left:1px solid #e8d3aa}
+ body[data-player-screen=task] .learn-world-frame .learn-mission-title{display:none}
+ body[data-player-screen=task] .learn-world-frame .learn-adult-audio{top:7px}
+ body[data-player-screen=task] .learn-world-frame .learn-scene-task{gap:3px;padding-top:6px}
+ body[data-player-screen=task] .learn-world-frame .learn-feedback{font-size:10px;min-height:22px}
+ body[data-player-screen=task] .learn-world-frame .learn-next-row{padding-top:4px}
+ body[data-player-screen=task] .learn-world-frame .learn-task-controls .learn-button{font-size:11px}
+ body[data-player-screen=task] .learn-world-frame .story-scene-world .story-scene-tools{right:auto;left:8px}
+}

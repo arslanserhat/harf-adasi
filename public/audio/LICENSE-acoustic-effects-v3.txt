@@ -1,0 +1,18 @@
+Harf Adası acoustic notification effects (v3)
+
+Instrument recordings: Salamander Grand Piano, by Alexander Holm.
+Licensed under Creative Commons Attribution 3.0 Unported (CC BY 3.0).
+https://creativecommons.org/licenses/by/3.0/
+
+Source collection and original licence/author statement:
+https://github.com/Tonejs/audio/tree/master/salamander
+https://raw.githubusercontent.com/Tonejs/audio/master/salamander/README
+
+Recordings used: C4.mp3, A4.mp3, C5.mp3.
+https://tonejs.github.io/audio/salamander/
+
+Adaptations by Harf Adası: decoded to PCM, trimmed, low-pass filtered,
+faded, gain adjusted and layered into tap, correct, retry and complete cues.
+These adaptations do not imply endorsement by the original author.
+See acoustic-effects-v3.sources.json for exact source URLs and SHA-256 hashes.
+Reproduction script: scripts/build-acoustic-effects.py in the application repo.

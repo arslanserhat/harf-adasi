@@ -4,20 +4,14 @@ body.world-ambience-enabled{isolation:isolate}
 body.world-ambience-enabled>header{position:relative;z-index:3}
 .world-ambience-sky *,.world-ambience-effects *{pointer-events:none!important}
 .world-ambience-effects{position:fixed;inset:0;z-index:440;overflow:hidden;pointer-events:none;contain:strict;user-select:none;-webkit-user-select:none}
-.world-background-butterfly{position:absolute;display:block;width:34px;height:30px;opacity:.52;animation:world-background-flight 12s ease-in-out infinite;filter:drop-shadow(0 2px 3px #756b3e10)}
-.world-background-butterfly svg{display:block;width:100%;height:100%}
-.world-butterfly-wings{transform-origin:22px 19px;animation:world-wing-flutter .7s ease-in-out infinite alternate}
-.world-background-butterfly-one{left:.5%;top:23%;rotate:-13deg}
-.world-background-butterfly-two{right:.7%;top:63%;width:27px;height:25px;rotate:18deg;animation-duration:14.6s;animation-delay:-5s;filter:hue-rotate(26deg)}
-.world-background-butterfly-three{left:.8%;top:87%;width:23px;height:22px;rotate:-8deg;opacity:.35;animation-duration:17s;animation-delay:-9s}
 .world-cloud-wisp{position:absolute;display:block;width:180px;height:18px;opacity:.47;background:linear-gradient(90deg,transparent,#fffdf0b3 35%,#fff9d370 70%,transparent);border-radius:50%;filter:blur(3px);animation:world-cloud-sail 28s ease-in-out infinite}
 .world-cloud-wisp:before,.world-cloud-wisp:after{content:'';position:absolute;border-radius:50%;background:inherit;bottom:0;width:43%;height:170%;left:23%;filter:blur(1px)}
 .world-cloud-wisp:after{left:52%;height:130%;width:30%}
-.world-cloud-wisp-one{left:-35px;top:8%;rotate:-6deg}.world-cloud-wisp-two{right:-55px;top:78%;width:220px;rotate:6deg;animation-duration:35s;animation-delay:-12s}
+.world-cloud-wisp-one{left:-85px;top:8%;rotate:-6deg;opacity:.15}.world-cloud-wisp-two{right:-55px;top:78%;width:220px;rotate:6deg;animation-duration:35s;animation-delay:-12s}
 .world-background-orbit{position:absolute;display:block;width:170px;height:170px;border:1px solid #bdcda019;border-radius:50%;box-shadow:0 0 0 28px #d8d2b309;animation:world-orbit-breathe 15s ease-in-out infinite}
 .world-background-orbit-one{left:-95px;top:52%}.world-background-orbit-two{right:-100px;top:17%;width:200px;height:200px;animation-delay:-7s}
 .world-firefly{position:absolute;display:block;width:4px;height:4px;border-radius:50%;background:#d5b478;box-shadow:0 0 9px 3px #e4c58e25;opacity:.35;animation:world-firefly-drift 10s ease-in-out infinite}
-.world-firefly-1{left:2%;top:47%}.world-firefly-2{right:6%;top:12%;animation-delay:-3.2s}.world-firefly-3{left:15%;top:70%;width:3px;height:3px;animation-delay:-5.4s}.world-firefly-4{right:2%;top:84%;animation-delay:-8.7s}.world-firefly-5{left:8%;top:9%;width:3px;height:3px;animation-delay:-7.2s}.world-firefly-6{right:12%;top:44%;width:3px;height:3px;animation-delay:-1.9s}.world-firefly-7{left:23%;top:95%;animation-delay:-6.2s}
+.world-firefly-1{left:5px;top:47%}.world-firefly-2{right:7px;top:12%;animation-delay:-3.2s}.world-firefly-3{left:15%;top:70%;width:3px;height:3px;animation-delay:-5.4s}.world-firefly-4{right:5px;top:84%;animation-delay:-8.7s}.world-firefly-5{left:8px;top:9%;width:3px;height:3px;animation-delay:-7.2s}.world-firefly-6{right:12%;top:44%;width:3px;height:3px;animation-delay:-1.9s}.world-firefly-7{left:23%;top:95%;animation-delay:-6.2s}
 .world-ambience-enabled .logo .mark{transform-origin:50% 70%;animation:world-logo-greeting 7s ease-in-out infinite}
 .world-ambience-enabled .logo:hover .mark{animation-duration:2.6s}
 .world-ambience-enabled header nav .pill>svg,.world-ambience-enabled header nav .pill>.illustration{transform-origin:50% 65%;animation:world-menu-bob 7.8s ease-in-out infinite}
@@ -37,8 +31,6 @@ body.world-ambience-enabled>header{position:relative;z-index:3}
 .world-click-spark{position:absolute;display:block;width:8px;height:10px;margin:-5px -4px;background:var(--world-spark-color,#d9ad6f);clip-path:polygon(50% 0,62% 37%,100% 50%,62% 63%,50% 100%,38% 63%,0 50%,38% 37%);animation:world-click-scatter .7s cubic-bezier(.12,.6,.32,1) both}
 .world-click-spark-dot{width:4px;height:4px;margin:-2px;border-radius:50%;clip-path:none}
 .home-shell .home-version{display:none}
-@keyframes world-background-flight{0%,100%{translate:0 0;rotate:-3deg}30%{translate:8px -12px;rotate:8deg}65%{translate:-6px -21px;rotate:-6deg}}
-@keyframes world-wing-flutter{from{scale:.65 1}to{scale:1 1}}
 @keyframes world-cloud-sail{0%,100%{translate:-9px 0;opacity:.3}50%{translate:18px -4px;opacity:.5}}
 @keyframes world-orbit-breathe{0%,100%{scale:.94;opacity:.45}50%{scale:1.06;opacity:.8}}
 @keyframes world-firefly-drift{0%,100%{translate:0 0;opacity:.25}50%{translate:5px -11px;opacity:.6}}
@@ -56,16 +48,41 @@ body[data-motion-paused=true].world-ambience-enabled [data-world-reveal],body[da
 body.writing-focus.world-ambience-enabled .world-ambience-sky{display:none}
 body.writing-focus.world-ambience-enabled .world-ambience-sky *,body.writing-focus.world-ambience-enabled .world-ambience-sky *:before,body.writing-focus.world-ambience-enabled .world-ambience-sky *:after{animation-play-state:paused!important}
 body.writing-focus .world-ambience-effects,body[data-motion-paused=true] .world-ambience-effects,body[data-ambience-hidden=true] .world-ambience-effects{display:none}
-@media(max-width:700px){.world-background-butterfly{width:24px;height:22px;opacity:.33}.world-background-butterfly-one{left:1%;top:42%}.world-background-butterfly-two{right:1%;top:77%;width:21px;height:20px}.world-background-butterfly-three,.world-cloud-wisp-two,.world-background-orbit-two{display:none}.world-cloud-wisp-one{width:120px;left:-55px;top:16%;opacity:.3}.world-firefly{width:3px;height:3px;opacity:.25}.world-firefly-3,.world-firefly-6{display:none}.world-ambience-enabled .home-section-heading h2:after{right:-11px;width:4px;height:4px}.world-ambience-enabled .home-game-card .pic>.illustration{animation-duration:8.8s}}
+@media(max-width:700px){.world-cloud-wisp-two,.world-background-orbit-two{display:none}.world-cloud-wisp-one{width:120px;left:-85px;top:16%;opacity:.15}.world-firefly{width:3px;height:3px;opacity:.25}.world-firefly-3,.world-firefly-6{display:none}.world-ambience-enabled .home-section-heading h2:after{right:-11px;width:4px;height:4px}.world-ambience-enabled .home-game-card .pic>.illustration{animation-duration:8.8s}}
 @media(prefers-reduced-motion:reduce){.world-ambience-enabled *,.world-ambience-enabled *:before,.world-ambience-enabled *:after{animation:none!important;transition:none!important}.world-ambience-sky{opacity:.3}.world-ambience-effects{display:none}.world-ambience-enabled [data-world-reveal]{opacity:1;translate:none}.world-ambience-enabled .logo .mark{transform:rotate(-7deg)}}
 
-/* Pırpır keeps the original four poses as the page-wide ambience grows. */
-.world-pirpir{position:absolute;left:61%;top:28%;z-index:3;display:block;width:90px;aspect-ratio:44/34;pointer-events:none!important;user-select:none;-webkit-user-select:none;filter:drop-shadow(0 7px 5px #294b3926);animation:world-pirpir-flight 13s ease-in-out infinite;transform-origin:50% 60%}
-.world-pirpir-sprite{display:block;width:100%;height:100%;background-image:var(--pirpir-sprite);background-size:200% 200%;background-repeat:no-repeat;background-position:0 0;animation:world-pirpir-flap .6s steps(1,end) infinite;pointer-events:none!important}
-.story-scene-stage>.world-pirpir{left:81%;top:40%;width:80px;z-index:3;animation-delay:-4.2s}
+/* Animals perch in reserved site UI space, never inside an illustration. */
+.world-ambience-enabled .home-kicker-row.world-pet-host-home{position:relative;min-height:70px;padding-right:176px;align-items:center}
+.world-ambience-enabled .home-section-heading.world-pet-host-section{position:relative;padding-top:64px;margin-top:26px}
+body.world-ambience-enabled>footer.world-pet-host-footer{position:relative;padding-top:86px}
+.world-pet-perch{position:absolute;inset:0;display:block;pointer-events:none!important;user-select:none;-webkit-user-select:none;z-index:2}
+.world-pet-perch-footer{inset:5px auto auto 50%;width:min(100%,600px);height:72px;transform:translateX(-50%)}
+.world-pet-perch-nav{display:block!important}
+.world-ambience-enabled .learning[data-screen=task]>.learn-nav.world-pet-host-nav{position:relative;min-height:44px}
+.world-ambience-enabled .learning[data-screen=task]>.learn-nav.world-pet-host-nav>span:not(.world-pet-perch){visibility:hidden}
+.world-pet-perch-nav .world-site-pet-bird{width:48px;max-height:38px;left:50%;top:5px;margin-left:-24px;--pet-aspect:44/34;animation:world-site-bird-hover 13s ease-in-out infinite}
+.world-site-pet{position:absolute;display:block;width:64px;height:auto;max-height:62px;aspect-ratio:var(--pet-aspect,1.25);pointer-events:none!important;user-select:none;-webkit-user-select:none;filter:drop-shadow(0 4px 3px #53613a1c);animation:world-pet-breathe 5.7s ease-in-out infinite;transform-origin:50% 90%}
+.world-site-pet-sprite{display:block;width:100%;height:100%;position:absolute;inset:0;background-image:var(--pet-atlas);background-size:200% 200%;background-repeat:no-repeat;background-position:0 0;animation:world-pet-poses var(--pet-cycle,4s) steps(1,end) infinite;pointer-events:none!important}
+.world-site-pet[hidden]{display:none!important}
+.world-site-pet-lion,.world-site-pet-rabbit,.world-site-pet-fox{--pet-aspect:1}
+.world-site-pet-squirrel,.world-site-pet-turtle{--pet-aspect:1.5}
+.world-pet-perch-home .world-site-pet-lion{width:62px;right:90px;bottom:6px;--pet-cycle:4.8s}
+.world-pet-perch-home .world-site-pet-bird{width:48px;max-height:44px;right:10px;bottom:16px;--pet-aspect:44/34;animation:world-site-bird-hover 13s ease-in-out infinite}
+.world-site-pet-bird .world-site-pet-sprite{animation:world-pirpir-flap .6s steps(1,end) infinite}
+.world-pet-perch-section .world-site-pet{width:64px;max-height:54px;right:14px;top:5px}
+.world-pet-perch-section .world-site-pet-rabbit,.world-pet-perch-section .world-site-pet-fox{width:54px}
+.world-site-pet-rabbit{--pet-cycle:3.4s;animation:world-pet-rabbit-bob 5.8s ease-in-out infinite}
+.world-site-pet-fox{--pet-cycle:4.3s;animation-delay:-2.2s}
+.world-pet-perch-footer .world-site-pet-squirrel{width:65px;left:20%;top:7px;--pet-cycle:3.9s;animation-delay:-1.8s}
+.world-pet-perch-footer .world-site-pet-turtle{width:66px;right:20%;top:12px;--pet-cycle:5.6s;animation:world-pet-turtle-peek 8.2s ease-in-out infinite}
+@keyframes world-pet-poses{0%,54.999%{background-position:0 0}55%,69.999%{background-position:100% 0}70%,84.999%{background-position:0 100%}85%,100%{background-position:100% 100%}}
 @keyframes world-pirpir-flap{0%,24.999%{background-position:0 0}25%,49.999%{background-position:100% 0}50%,74.999%{background-position:0 100%}75%,100%{background-position:100% 100%}}
-@keyframes world-pirpir-flight{0%,100%{translate:0 0;rotate:-2deg}24%{translate:19px -12px;rotate:5deg}51%{translate:7px -22px;rotate:-4deg}77%{translate:-13px -7px;rotate:2deg}}
-.home-shell[data-motion-paused=true] .world-pirpir,.home-shell[data-motion-paused=true] .world-pirpir-sprite,.story-scene[data-story-paused=true] .world-pirpir,.story-scene[data-story-paused=true] .world-pirpir-sprite{animation-play-state:paused!important}
-body.writing-focus .world-pirpir{display:none}
-@media(max-width:700px){.home-island-art>.world-pirpir{width:60px;left:59%;top:28%}.story-scene-stage>.world-pirpir{width:65px;left:78%;top:42%}}
-@media(prefers-reduced-motion:reduce){.world-pirpir,.world-pirpir-sprite{animation:none!important;translate:none;rotate:none}.world-pirpir-sprite{background-position:100% 0}}
+@keyframes world-pet-breathe{0%,100%{translate:0 0;rotate:0deg}50%{translate:0 -3px;rotate:1deg}}
+@keyframes world-site-bird-hover{0%,100%{translate:0 0;rotate:-1deg}24%{translate:3px -3px;rotate:3deg}51%{translate:0 -5px;rotate:-2deg}77%{translate:-3px -1px;rotate:1deg}}
+@keyframes world-pet-rabbit-bob{0%,67%,100%{translate:0 0}76%{translate:0 -4px}85%{translate:0 0}92%{translate:0 -2px}}
+@keyframes world-pet-turtle-peek{0%,100%{translate:0 0;rotate:0deg}50%{translate:3px -1px;rotate:1deg}}
+body.writing-focus .world-pet-perch{display:none}
+body.writing-focus .world-site-pet,body.writing-focus .world-site-pet-sprite{animation-play-state:paused!important}
+@media(max-width:700px){.world-ambience-enabled .home-kicker-row.world-pet-host-home{min-height:70px;padding-right:174px}.world-ambience-enabled .home-kicker-row.world-pet-host-home .home-greeting{font-size:12px;max-width:100%;min-width:0}.world-ambience-enabled .home-section-heading.world-pet-host-section{padding-top:62px;margin-top:22px}.world-pet-perch-section .world-site-pet{right:8px;top:4px;width:52px;max-height:52px}.world-pet-perch-footer .world-site-pet-squirrel{left:18%;width:62px}.world-pet-perch-footer .world-site-pet-turtle{right:18%;width:64px}}
+@media(max-width:700px){.world-pet-perch-nav .world-site-pet-bird{width:38px;max-height:32px;left:50%;top:5px;margin-left:-19px}}
+@media(prefers-reduced-motion:reduce){.world-site-pet,.world-site-pet-sprite{animation:none!important;translate:none;rotate:none}.world-site-pet-sprite{background-position:0 0}.world-site-pet-bird .world-site-pet-sprite{background-position:100% 0}}

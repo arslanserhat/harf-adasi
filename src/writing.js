@@ -6,6 +6,30 @@
  * ordinary catalog retain their normal scrolling behaviour.
  */
 let activeGuard = null;
+let clearReleaseClick = null;
+
+// Survives a toolbar action's navigation, then expires or yields to a new tap.
+function suppressReleasedClick(x, y) {
+  clearReleaseClick?.();
+  let timer;
+  const clean = () => {
+    clearTimeout(timer);
+    document.removeEventListener('click', duplicate, true);
+    document.removeEventListener('pointerdown', newContact, true);
+    if (clearReleaseClick === clean) clearReleaseClick = null;
+  };
+  const duplicate = event => {
+    if (event.isTrusted && event.detail > 0 && Math.hypot(event.clientX - x, event.clientY - y) < 20) {
+      if (event.cancelable) event.preventDefault();
+      event.stopImmediatePropagation(); clean();
+    }
+  };
+  const newContact = event => { if (event.isPrimary !== false) clean(); };
+  document.addEventListener('click', duplicate, true);
+  document.addEventListener('pointerdown', newContact, true);
+  timer = setTimeout(clean, 700);
+  clearReleaseClick = clean;
+}
 
 export function releaseWritingGuard() {
   activeGuard?.destroy();
@@ -43,6 +67,9 @@ export function mountWritingGuard(svg) {
   let destroyed = false;
   let fallbackTouch = null;
   let fallbackMouse = false;
+  let actionContact = null;
+  let actionTimer = 0;
+  let pendingAction = null;
 
   function listen(target, name, listener, options = false) {
     target.addEventListener(name, listener, options);
@@ -66,8 +93,9 @@ export function mountWritingGuard(svg) {
     frame = 0;
     if (destroyed) return;
     const viewport = window.visualViewport;
-    root.style.setProperty('--writing-viewport-height', `${viewport?.height || window.innerHeight}px`);
-    root.style.setProperty('--writing-viewport-width', `${viewport?.width || window.innerWidth}px`);
+    const bounded = values => Math.min(...values.filter(value => Number.isFinite(value) && value > 0));
+    root.style.setProperty('--writing-viewport-height', `${bounded([viewport?.height, window.innerHeight, root.clientHeight])}px`);
+    root.style.setProperty('--writing-viewport-width', `${bounded([viewport?.width, window.innerWidth, root.clientWidth])}px`);
     root.style.setProperty('--writing-viewport-top', `${viewport?.offsetTop || 0}px`);
     root.style.setProperty('--writing-viewport-left', `${viewport?.offsetLeft || 0}px`);
   }
@@ -93,6 +121,44 @@ export function mountWritingGuard(svg) {
   // logical SVG coordinates without offsets or distorted input.
   if (!svg.querySelector('[data-target]')) svg.setAttribute('preserveAspectRatio', 'none');
   updateViewport();
+
+  // Drawing can suppress a browser's following compatibility click. Activate a
+  // released toolbar tap once, then consume only that tap's duplicate click.
+  // Keyboard activation and gestures starting on the notebook stay native.
+  listen(document, 'pointerdown', event => {
+    clearTimeout(actionTimer); actionTimer = 0; pendingAction = null;
+    const button = event.target instanceof Element ? event.target.closest('#main button[data-do], #main button[data-learning]') : null;
+    actionContact = button && !button.disabled && !isDialogEvent(event) && event.button === 0
+      && event.isPrimary !== false && touchIds.size === 0 && pointerIds.size === 0
+      ? { button, pointerId: event.pointerId, x: event.clientX, y: event.clientY, moved: false } : null;
+  }, true);
+  listen(document, 'pointermove', event => {
+    if (actionContact?.pointerId === event.pointerId && Math.hypot(event.clientX - actionContact.x, event.clientY - actionContact.y) > 12) actionContact.moved = true;
+  }, { capture: true, passive: true });
+  listen(document, 'pointercancel', () => {
+    actionContact = null; clearTimeout(actionTimer); actionTimer = 0; pendingAction = null;
+  }, true);
+  listen(document, 'pointerup', event => {
+    const contact = actionContact;
+    actionContact = null;
+    if (!contact || contact.moved || contact.pointerId !== event.pointerId || !contact.button.isConnected || contact.button.disabled
+      || Math.hypot(event.clientX - contact.x, event.clientY - contact.y) > 12) return;
+    const box = contact.button.getBoundingClientRect();
+    if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) return;
+    pendingAction = contact;
+    actionTimer = setTimeout(() => {
+      actionTimer = 0; pendingAction = null;
+      if (destroyed || !contact.button.isConnected || contact.button.disabled) return;
+      suppressReleasedClick(event.clientX, event.clientY);
+      contact.button.click();
+    }, 120);
+  }, { capture: true, passive: false });
+  listen(document, 'click', event => {
+    if (!event.isTrusted || event.detail === 0) return;
+    if (pendingAction?.button.contains(event.target)) {
+      clearTimeout(actionTimer); actionTimer = 0; pendingAction = null;
+    }
+  }, true);
 
   listen(svg, 'pointerdown', event => {
     prevent(event);
@@ -199,6 +265,7 @@ export function mountWritingGuard(svg) {
       destroyed = true;
       cleanup.splice(0).forEach(remove => remove());
       cancelAnimationFrame(frame);
+      clearTimeout(actionTimer);
       touchIds.clear();
       pointerIds.clear();
       body.classList.remove('writing-stroke-active');

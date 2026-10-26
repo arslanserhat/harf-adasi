@@ -1,0 +1,63 @@
+{
+  "instrument": "Salamander Grand Piano",
+  "creator": "Alexander Holm",
+  "license": "CC BY 3.0",
+  "license_url": "https://creativecommons.org/licenses/by/3.0/",
+  "source": "https://github.com/Tonejs/audio/tree/master/salamander",
+  "changes": "Recorded piano samples decoded, trimmed, low-pass filtered, faded, gain adjusted and layered. No oscillator synthesis.",
+  "recordings": {
+    "C4": {
+      "url": "https://tonejs.github.io/audio/salamander/C4.mp3",
+      "sha256": "689eaa4c2fd7f29a2cc0e386eec462156d523a87d701269e5e2458e66056f4f6"
+    },
+    "A4": {
+      "url": "https://tonejs.github.io/audio/salamander/A4.mp3",
+      "sha256": "a62df24a2c84cea8d18c1fa8aca7c18c877ba2b76a00a591256fa74d3ce54ac3"
+    },
+    "C5": {
+      "url": "https://tonejs.github.io/audio/salamander/C5.mp3",
+      "sha256": "2f5b0f7422063010fb379e684bfdf2daa3911dcd2251413d79fa2a53029fdc30"
+    }
+  },
+  "cues": {
+    "tap": {
+      "file": "fx-tap-acoustic-v3.wav",
+      "duration": 0.105,
+      "peak": 0.32,
+      "rms": 0.083595,
+      "source_notes": [
+        "C4"
+      ]
+    },
+    "correct": {
+      "file": "fx-correct-acoustic-v3.wav",
+      "duration": 0.62,
+      "peak": 0.46,
+      "rms": 0.08718,
+      "source_notes": [
+        "C4",
+        "A4"
+      ]
+    },
+    "retry": {
+      "file": "fx-retry-acoustic-v3.wav",
+      "duration": 0.245,
+      "peak": 0.28,
+      "rms": 0.081322,
+      "source_notes": [
+        "A4"
+      ]
+    },
+    "complete": {
+      "file": "fx-complete-acoustic-v3.wav",
+      "duration": 1.1,
+      "peak": 0.48,
+      "rms": 0.07255,
+      "source_notes": [
+        "C4",
+        "A4",
+        "C5"
+      ]
+    }
+  }
+}

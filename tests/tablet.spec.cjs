@@ -316,7 +316,7 @@ scenario('Turkish audio: nine and every word have bundled recordings; celebratio
   assert.ok(phrases.nine, 'nine does not depend on an English default browser voice');
   const celebration = Object.keys(phrases).find(text => /tebrikler.*başardın/.test(text));
   assert.ok(celebration, 'spoken congratulation is included');
-  const filenames = [phrases.nine, phrases[celebration], 'fx-tap-v2.wav', 'fx-correct-v2.wav', 'fx-retry-v2.wav', 'fx-complete-v2.wav'];
+  const filenames = [phrases.nine, phrases[celebration], ...['tap', 'correct', 'retry', 'complete'].map(name => `fx-${name}-acoustic-v3.wav`)];
   for (const filename of filenames) {
     assert.equal(/^(https?:|\/\/|\.\.)/.test(filename), false, 'sound assets are bundled with the game');
   }
@@ -341,8 +341,22 @@ scenario('Turkish fallback: an English-only device never speaks nine as English'
   await fill(page, [...'nine']);
 });
 
-scenario('celebration: recorded congratulations, no automatic advance, Escape and explicit Continue', async ({ page, cdp }) => {
+scenario('celebration: intermediate work stays inline; reviewed final writing celebrates with Escape and explicit Continue', async ({ page, cdp }) => {
   await letter(page, 'a');
+  await match(page, 'a');
+  assert.equal(await page.locator('#celebrationDialog[open]').count(), 0, 'matching a letter gives inline feedback without interrupting the lesson');
+  await assertNoAdvance(page);
+  await next(page);
+  assert.equal(await page.locator('.steps').getAttribute('aria-label'), '2. adım, toplam 3 adım');
+  await traceAll(page, cdp);
+  assert.equal(await page.locator('#celebrationDialog[open]').count(), 0, 'completing a guided trace also stays inline');
+  assert.equal(await page.locator('body').evaluate(body => body.classList.contains('writing-focus')), true, 'the drawing surface remains locked until manual continuation');
+  await assertNoAdvance(page);
+  await next(page);
+  await page.locator('#freePrompt').waitFor();
+  assert.equal(await page.locator('.steps').getAttribute('aria-label'), '3. adım, toplam 3 adım');
+  assert.equal(await page.locator('#next').isEnabled(), false, 'the final writing task still requires work and adult review');
+
   const response = await page.request.get(new URL('audio/manifest.json', page.url()).href);
   assert.equal(response.status(), 200);
   const { phrases } = await response.json();
@@ -352,7 +366,7 @@ scenario('celebration: recorded congratulations, no automatic advance, Escape an
   });
   const responses = await Promise.all([
     ...recordings.map(url => page.waitForResponse(res => res.url() === url && [200, 206].includes(res.status()), { timeout: 15000 })),
-    match(page, 'a'),
+    review(page, cdp),
   ]);
   for (const audioResponse of responses.slice(0, recordings.length)) {
     assert.match(audioResponse.headers()['content-type'], /^audio\//, 'congratulations play through bundled audio assets');
@@ -361,24 +375,34 @@ scenario('celebration: recorded congratulations, no automatic advance, Escape an
   assert.equal(await dialog.evaluate(element => element.open), true);
   assert.equal(await page.locator('#celebrationTitle').innerText(), 'Tebrikler!');
   assert.match(await page.locator('#celebrationContinue').innerText(), /^Devam et(?:\s*→)?$/u);
-  const firstStep = await page.locator('.steps').getAttribute('aria-label');
+  const finalStep = await page.locator('.steps').getAttribute('aria-label');
   await assertNoAdvance(page);
-  assert.equal(await dialog.evaluate(element => element.open), true, 'celebration waits for the child');
+  assert.equal(await dialog.evaluate(element => element.open), true, 'only the final reviewed task opens a celebration that waits for the child');
+  assert.equal(await page.locator('body').evaluate(body => body.classList.contains('writing-focus')), true, 'the final celebration keeps writing locked until the child continues');
   await page.keyboard.press('Escape');
   await dialog.waitFor({ state: 'hidden' });
-  assert.equal(await page.locator('.steps').getAttribute('aria-label'), firstStep, 'Escape closes without advancing');
+  assert.equal(await page.locator('.steps').getAttribute('aria-label'), finalStep, 'Escape closes without advancing or completing the game');
   assert.equal(await page.locator('#next').isEnabled(), true, 'dismissal retains the completed work');
+  assert.equal(await page.locator('.party').count(), 0, 'dismissing congratulations does not award the end screen automatically');
   await next(page);
-  assert.equal(await page.locator('.steps').getAttribute('aria-label'), '2. adım, toplam 3 adım');
+  await page.locator('.party').waitFor();
+  assert.equal(await page.locator('body').evaluate(body => body.classList.contains('writing-focus')), false, 'manual completion releases the writing lock');
+
+  // Replay through the real controls to verify the modal's explicit Continue
+  // path as well as Escape. No completion or ready state is injected.
+  await tap(page, 'repeat');
+  await match(page, 'a');
+  assert.equal(await page.locator('#celebrationDialog[open]').count(), 0);
+  await next(page);
   await traceAll(page, cdp);
-  assert.equal(await dialog.evaluate(element => element.open), true, 'the next successful activity celebrates too');
-  assert.equal(await page.locator('body').evaluate(body => body.classList.contains('writing-focus')), true, 'a celebration keeps the current writing surface locked until explicit continuation');
+  assert.equal(await page.locator('#celebrationDialog[open]').count(), 0);
   await next(page);
-  await page.locator('#freePrompt').waitFor();
-  assert.equal(await dialog.evaluate(element => element.open), false);
-  assert.equal(await page.locator('.steps').getAttribute('aria-label'), '3. adım, toplam 3 adım', 'one Continue advances exactly one step');
-  assert.equal(await page.locator('#next').isEnabled(), false, 'the next exercise still requires the child to do the work');
+  await review(page, cdp);
+  assert.equal(await dialog.evaluate(element => element.open), true, 'the replay celebrates only its final reviewed task');
   await assertNoAdvance(page);
+  await next(page);
+  await page.locator('.party').waitFor();
+  assert.equal(await dialog.evaluate(element => element.open), false, 'explicit Continue completes the final task and closes the modal');
 });
 
 scenario('first grade: guided three-step adventure uses selected letters, real syllables and saved rewards', async ({ page }) => {
@@ -408,7 +432,8 @@ scenario('first grade: guided three-step adventure uses selected letters, real s
         }
         await fill(page, tokens);
       }
-      assert.equal(await page.locator('#celebrationDialog').evaluate(element => element.open), true);
+      assert.equal(await page.locator('#celebrationDialog[open]').count(), step === 2 ? 1 : 0,
+        step === 2 ? 'the final adventure task celebrates' : 'intermediate adventure tasks use inline feedback');
       await assertNoAdvance(page);
       await next(page);
     }

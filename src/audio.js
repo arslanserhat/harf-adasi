@@ -4,21 +4,25 @@ import { Howl, Howler } from 'howler';
 // device actually supplies a Turkish voice; lang='tr-TR' alone is insufficient.
 const BASE = typeof document !== 'undefined' && document.querySelector('meta[name="harf-backend"]')?.content === 'laravel' ? '/' : (import.meta.env?.BASE_URL || '/');
 const AUDIO_BASE = `${BASE.endsWith('/') ? BASE : `${BASE}/`}audio/`;
-const EFFECT_LEVELS = { tap: 0.25, correct: 0.42, retry: 0.2, complete: 0.42 };
+// These are recorded acoustic cues, loaded only when a user action requests one.
+// Versioned names prevent a cached synthetic effect being reused after upgrade.
+const EFFECT_LEVELS = { tap: 0.10, correct: 0.22, retry: 0.08, complete: 0.25 };
+const effects = new Map();
+const activeEffects = new Set();
 // Keep the live HTML5 clip cache within Safari's unlocked audio pool.
 const MAX_CACHED_PHRASES = 8;
-const effects = new Map();
 const clips = new Map();
 let phrases = Object.create(null);
 let manifestPromise;
 let manifestAvailable = false;
 let muted = false;
+let effectsEnabled = true;
 let volume = 0.85;
+let lastTapAt = -Infinity;
 let speechSequence = 0;
 let currentClip = null;
 let currentUtterance = null;
 let finishCurrent = null;
-let lastTap = 0;
 let voiceMode = 'loading';
 let nativeVoiceName = '';
 let onStatus = () => {};
@@ -75,19 +79,6 @@ async function waitForTurkishVoice() {
   });
 }
 
-function ensureEffects() {
-  if (typeof window === 'undefined') return;
-  for (const name of Object.keys(EFFECT_LEVELS)) {
-    if (!effects.has(name)) {
-      effects.set(name, new Howl({
-        src: [`${AUDIO_BASE}fx-${name}-v2.wav`],
-        preload: true,
-        volume: volume * EFFECT_LEVELS[name],
-      }));
-    }
-  }
-}
-
 function loadManifest() {
   if (!manifestPromise) {
     manifestPromise = fetch(`${AUDIO_BASE}manifest.json`, { cache: 'no-cache' })
@@ -134,11 +125,11 @@ function stopSpeech() {
   clip?.stop();
   try { speechEngine()?.cancel(); } catch { /* Native speech can be unavailable. */ }
   currentUtterance = null;
+  updateEffectVolumes();
 }
 
 function unlock() {
   if (typeof window === 'undefined') return;
-  ensureEffects();
   // Howler primes its HTML5 audio pool on the first touch/key event. Resume the
   // Web Audio context here as well, synchronously inside the user's gesture.
   try {
@@ -163,6 +154,7 @@ async function nativeSpeech(text, sequence) {
   return new Promise(resolve => {
     const utterance = new window.SpeechSynthesisUtterance(text);
     currentUtterance = utterance; // Keep the utterance alive for iOS Safari.
+    updateEffectVolumes();
     utterance.voice = voice;
     utterance.lang = voice.lang;
     utterance.rate = 0.9;
@@ -171,6 +163,7 @@ async function nativeSpeech(text, sequence) {
     const finish = value => {
       if (finishCurrent === finish) finishCurrent = null;
       if (currentUtterance === utterance) currentUtterance = null;
+      updateEffectVolumes();
       resolve(value);
     };
     finishCurrent = finish;
@@ -199,6 +192,7 @@ function recordedSpeech(file, text, sequence) {
     clips.set(file, clip);
   }
   currentClip = clip;
+  updateEffectVolumes();
   clip.volume(volume);
   pruneClips();
   return new Promise(resolve => {
@@ -215,6 +209,7 @@ function recordedSpeech(file, text, sequence) {
       clean();
       if (finishCurrent === finish) finishCurrent = null;
       if (currentClip === clip) currentClip = null;
+      updateEffectVolumes();
       resolve(value);
     };
     const ended = () => finish(true);
@@ -224,6 +219,7 @@ function recordedSpeech(file, text, sequence) {
       clean();
       if (finishCurrent === finish) finishCurrent = null;
       if (currentClip === clip) currentClip = null;
+      updateEffectVolumes();
       const result = sequence === speechSequence && !muted
         ? await nativeSpeech(text, sequence) : false;
       resolve(result);
@@ -264,26 +260,70 @@ async function speak(value) {
   return file ? recordedSpeech(file, phrases[key] ? text : word, sequence) : nativeSpeech(text, sequence);
 }
 
+function updateEffectVolumes() {
+  const duck = currentClip || currentUtterance ? 0.35 : 1;
+  for (const [name, effect] of effects) effect.volume(volume * EFFECT_LEVELS[name] * duck);
+}
+
+function stopEffects() {
+  activeEffects.clear();
+  // Howler queues stop() while loading. Clearing our intent is sufficient for
+  // a pending load; never leave a deferred play/stop operation in its queue.
+  for (const effect of effects.values()) if (effect.state() === 'loaded') effect.stop();
+}
+
 function playEffect(name) {
-  if (muted || !Object.hasOwn(EFFECT_LEVELS, name)) return;
+  if (muted || !effectsEnabled || !Object.hasOwn(EFFECT_LEVELS, name)) return;
   const now = Date.now();
-  if (name === 'tap' && now - lastTap < 65) return;
-  if (name === 'tap') lastTap = now;
+  if (name === 'tap' && now - lastTapAt < 100) return;
+  if (activeEffects.has(name)) return;
+  if (name === 'tap') lastTapAt = now;
   unlock();
-  const effect = effects.get(name);
-  effect?.volume(volume * EFFECT_LEVELS[name] * (currentClip || currentUtterance ? 0.55 : 1));
-  effect?.play();
+  let effect = effects.get(name);
+  if (!effect) {
+    effect = new Howl({
+      src: [`${AUDIO_BASE}fx-${name}-acoustic-v3.wav`],
+      preload: false,
+      volume: volume * EFFECT_LEVELS[name],
+    });
+    effects.set(name, effect);
+    const finished = () => activeEffects.delete(name);
+    effect.on('end', finished);
+    effect.on('stop', finished);
+    effect.on('loaderror', finished);
+    effect.on('playerror', finished);
+    effect.on('load', () => {
+      if (!activeEffects.has(name) || muted || !effectsEnabled) return;
+      updateEffectVolumes();
+      try { effect.play(); }
+      catch { activeEffects.delete(name); }
+    });
+  }
+  updateEffectVolumes();
+  activeEffects.add(name);
+  try {
+    if (effect.state() === 'loaded') effect.play();
+    else if (effect.state() === 'unloaded') effect.load();
+  }
+  catch { activeEffects.delete(name); }
 }
 
 function stopEffect(name) {
-  effects.get(name)?.stop();
+  activeEffects.delete(name);
+  const effect = effects.get(name);
+  if (effect?.state() === 'loaded') effect.stop();
+}
+
+function setEffectsEnabled(value) {
+  effectsEnabled = Boolean(value);
+  if (!effectsEnabled) stopEffects();
 }
 
 function setMuted(value) {
   muted = Boolean(value);
   if (muted) {
     stopSpeech();
-    for (const effect of effects.values()) effect.stop();
+    stopEffects();
   }
 }
 
@@ -291,24 +331,24 @@ function setVolume(value) {
   const requested = Number(value);
   if (!Number.isFinite(requested)) return;
   volume = Math.max(0, Math.min(1, requested));
-  for (const [name, effect] of effects) effect.volume(volume * EFFECT_LEVELS[name]);
+  updateEffectVolumes();
   for (const clip of clips.values()) clip.volume(volume);
   if (currentUtterance) currentUtterance.volume = volume;
 }
 
 function preload() {
-  ensureEffects();
   return loadManifest();
 }
 
 function voiceStatus() {
-  return { mode: voiceMode, locale: 'tr-TR', muted, volume, recordedPhrases: Object.keys(phrases).length, manifestAvailable, voiceName: nativeVoiceName };
+  return { mode: voiceMode, locale: 'tr-TR', muted, volume, effectsEnabled, recordedPhrases: Object.keys(phrases).length, manifestAvailable, voiceName: nativeVoiceName };
 }
 
 export function configureAudio(options = {}) {
   if (typeof options.onStatus === 'function') onStatus = options.onStatus;
   if (typeof options.muted === 'boolean') setMuted(options.muted);
+  if (typeof options.effects === 'boolean') setEffectsEnabled(options.effects);
   if (options.volume !== undefined) setVolume(options.volume);
 }
 
-export const audio = { unlock, speak, stopSpeech, setMuted, setVolume, playEffect, stopEffect, preload, voiceStatus };
+export const audio = { unlock, speak, stopSpeech, setMuted, setVolume, setEffectsEnabled, playEffect, stopEffect, preload, voiceStatus };

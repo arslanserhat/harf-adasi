@@ -1,5 +1,43 @@
 # Harf Adası — güncel devir notu
 
+## 26 Ekim 2026 — ekrana sığan oyuncu ve gerçek akustik efektler
+
+Güncel uygulama kodu **036da60191dc7bf0a3f33908e81d2fa9bdaad956**, teknik
+sürüm 5.3.0. Görünür sürüm etiketi ekleme. Pages workflow `40331521520`
+başarılı; https://arslanserhat.github.io/harf-adasi/?yenile=3 adresindeki
+varlık yerel derlemeyle aynı. Gerçek yayında sekiz görevlik tur ve ses çalımı
+sınandı; en yeni kanıt `docs/QA.md` başındadır. Sonraki QA/belge değişiklikleri
+bu uygulama kodunu değiştirmez.
+
+Kullanıcı önceki mobil görünümü ve v2 efektleri tekrar reddetti. Son açık
+isteği efektleri kapatmak değil, daha iyi bildirimlerdir. Dört **gerçek
+Salamander piyano kaydı türevi** acoustic-v3 WAV eklendi (Alexander Holm,
+CC BY 3.0); atıf uygulama notları ve `public/audio/LICENSE-acoustic-effects-v3.txt`
+içinde. Ayarlarda Dokunuş / Doğru cevap / Macera sonu önizlemesi bulunur.
+Konuşan kişi hâlâ Emel; ChatGPT Voice veya yeni insan sesi eklenmedi.
+
+- `player-viewport.js/css`: intro ve görev, kullanılabilir pencereye sığar.
+  Telefon görevinde kendi Home/ses/mola çubuğu vardır; yinelenen başlık ve
+  uzun üst diyalog gizlenir. Başlangıç resmi contain, telefon dünyası kısa
+  resim + etkileşim alanıdır. Ana sayfa/yetişkin listeleri normal kayar.
+- `world-ambience.js/css`: aslan, kuş, tavşan, tilki, sincap, kaplumbağa
+  dört pozlu atlaslarla **görsellerin dışında** ayrılmış site alanlarında.
+  Dar görev çubuğunda kuş düğmeye değiyorsa gizlenir; yazıda bütün dekor durur.
+- `game.js`: ara doğru adımlar satır içi geri bildirim verir. Modal ve tek
+  tebrik yalnız son adımda açılır. Öğrenme turunun gerçek son kartı korunur.
+- `writing.js/css`: döndürmede eski genişliğin taşması sınırlanır. Kaybolan
+  uyumluluk tıklamasına 120ms yedek yalnız birincil, çizim dışı düğme
+  dokunuşunda devreye girer; hareket/ikinci parmak reddedilir. Kısa süreli
+  çift tıklama engeli ekran geçişinde de kalır; yeni gerçek dokunuş temizler.
+- `audio.js`: ilk efekt isteğinde açık `load()`, gerçek load callback'i,
+  sessiz/efekt tercihi ve yükleme iptal koruması. Sadece `play()` çağırmak
+  Howler preload:false dosyalarını yüklemez; sahte loaded testiyle yetinme.
+
+Son kaynakta 80 JS mantık, 32 eski bölüm, 26 öğrenme, 6+6 Chromium/WebKit
+oyuncu, 6 hayvan ve 2 yazı kontrolü geçti. Fiziksel iPhone ve insan dinlemesi
+yapılmadı. Eski 5.2 testlerini bu sürümün kanıtı sayma. Yeni VPS yayını
+varsayma; bu çalışmada e-Tahlil veya başka depo/servis değiştirilmedi.
+
 ## 26 Ekim 2026 — ses, kutlama ve iPhone revizyonu
 
 Pages'te `2a99b7b` uygulama kodu yayımlandı; workflow `40318291199` başarılı.

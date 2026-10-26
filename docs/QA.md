@@ -1,3 +1,66 @@
+# Ekrana sığan macera ve akustik bildirimler — 26 Ekim 2026
+
+Uygulama kodu **036da60191dc7bf0a3f33908e81d2fa9bdaad956** (teknik sürüm
+5.3.0); çocuk arayüzünde sürüm etiketi yok. Pages workflow
+[40331521520](https://github.com/arslanserhat/harf-adasi/actions/runs/40331521520)
+başarılı. Yayın adresi: https://arslanserhat.github.io/harf-adasi/?yenile=3
+
+Bu kayıt aşağıdaki 5.2 doğrulamasının yerine geçer. Kullanıcının ekran
+fotoğrafları önceki testlerin cevapların görünürlüğünü yeterince sınamadığını
+gösterdi. Yeni kontroller yalnız yatay taşmaya bakmaz: başlangıç düğmesi,
+cevaplar ve Devam gerçek görünüm alanında kalır; etkin oyuncu belgeyi aşağı
+uzatmaz. Uzun cümleler gerektiğinde yalnız kendi etkileşim alanında kayar.
+
+Son uygulama derlemesinde geçen kontroller:
+
+- `npm run test:unit`: **80/80**; bunun 15'i gerçek yükleme durumlarını içeren
+  ses mantığı testidir. `preload:false` efekt ilk istekte açıkça yüklenir;
+  yükleme sırasında sessize alma eski bir oynatma kuyruğunu geri getiremez.
+- `node tests/player-fit.spec.cjs`: **6/6 Chromium tam turu**; aynı dosya gerçek
+  **Linux WebKit 26.0 ile 6/6**. Boyutlar 1366×768, 1024×768, 390×844,
+  390×660, 360×640 ve 844×390. Her turda sekiz gerçek görev, yazı/yetişkin
+  kontrolü, döndürme, kaydırma kilidi ve bitiş kartı doğrulandı.
+- `node tests/tablet.spec.cjs`: **32/32**; iki tablet yönünde 58 büyük/küçük
+  Türkçe harf kılavuzu, hece, kelime, okuma, cümle, sayı ve son kutlama.
+  Ara adımda modal açılmaz; son gerçek tamamlamada kayıtlı tebrik çalar.
+- `node tests/learning.spec.cjs`: **26/26**; kendi kelimelerini düzenleme,
+  öğretilen harf filtresi, bağlı görevler, destek/bağımsızlık ayrımı, geri
+  yükleme, harita durakları ve başka bir hikâyeye geçiş korunur.
+- `node tests/ambience.spec.cjs`: **6/6**; altı ayrı hayvanın gerçek WebP
+  atlasları yüklenir, resim/düğmelerle çakışmaz, yazıda gizlenir ve hareket
+  durdurma/azaltılmış hareket uygulanır.
+- `node tests/writing-controls.spec.cjs`: **2/2** gerçek CDP dokunma senaryosu;
+  ikinci parmak mevcut yazıyı silemez/onaylayamaz. Eksik uyumluluk tıklaması
+  tek manuel devam üretir; sonraki görev kendi cevabını bekler.
+- Pages ve Laravel üretim derlemeleri geçti. Dört yeni PCM WAV 0.105/0.620/
+  0.245/1.100 saniye; kırpılma yok, ilk/son örnekler sıfır. Kaynak ve CC BY 3.0
+  atfı `visual-audio-assets.md` ve yayımlanan lisans dosyasında.
+
+Canlı HTTPS varlığı `assets/index-DH_wB9WW.js`, yerel üretim çıktısıyla bayt
+bayt aynı. SHA-256:
+`06ab4d1dc0e1d2c8ffe3394ec52b759498196546e00f17f5ac4945f8f78a3350`.
+
+390×660 gerçek Pages adresinde sekiz görev, bilinçli yanlış cevap/düzeltme,
+yazı ve yetişkin kontrolüyle bitirildi. Dört akustik dosyanın 200/206 ses yanıtı,
+gerçek Web Audio kaynaklarının `ended` olayları ve macera sonunun kayıtlı
+Türkçe tebrik dosyasının `ended` olayı gözlendi. Oyun başarısı enjekte edilmedi.
+İlk çalışanın testi 1/1 geçti; kabuk çıkışındaki olmayan geçici NSS takma adı
+silme denemesi 255 döndürdü. Tarayıcı doğrulaması ve sertifika erişimi ayrıca
+kontrol edildi; bu durum bir oyun hatası veya TLS doğrulamasını kapatma değildir.
+390×844 ile ikinci canlı tur da tüm ses kontrolleriyle **1/1 geçti ve süreç 0
+ile kapandı**. Chromium, ortamın mevcut NSS veritabanı için yazma erişimi
+gerektiriyordu; mevcut proxy CA'sı kullanıldı, ek bir CA bırakılmadı.
+Canlı intro/görev/son kart görüntüleri `test-results/live-v53/` altındadır.
+
+Fiziksel iPhone/iOS Chrome veya iPad testi yapılmadı. Linux WebKit, fiziksel
+Apple aygıtı değildir. Sesin estetik kalitesi insan dinlemesiyle onaylanmadı.
+Konuşan kişi mevcut Türkçe Emel anlatıcısıdır; bu sürüm bildirimleri gerçek
+piyano örnekleriyle değiştirir, ChatGPT Voice veya yeni oyuncu kaydı eklemez.
+Backend değişmedi; eski PHP test sayıları bu çalışmada yeniden koşulmuş gibi
+sayılmadı. VPS/e-Tahlil servislerinde değişiklik ve yeni VPS yayını yapılmadı.
+
+---
+
 # Ses, kutlama ve telefon düzeni — 26 Ekim 2026
 
 Uygulama kaynağı 5.2.0; sürüm numarası çocuk arayüzünde gösterilmez.

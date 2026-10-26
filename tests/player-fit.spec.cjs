@@ -240,6 +240,7 @@ async function screenshot(app, label) {
           assert.ok(await app.page.evaluate(() => window.__playedAcoustic.length > 3), 'real acoustic Web Audio sources reached their ended events');
           console.log('Browser audio: all four acoustic cues fetched; real instrument sources and recorded journey congratulations reached ended events. Human listening remains separate.');
         }
+        await screenshot(app, 'completion');
         await press(app, '#celebrationReturn');
         await app.page.locator('#celebrationDialog').waitFor({ state: 'hidden' });
         const state = await saved(app.page);

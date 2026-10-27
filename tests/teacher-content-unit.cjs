@@ -135,14 +135,50 @@ test('sentence-only teacher lists survive normalization and block untaught lette
   assert.deepEqual(normalizeLearningState(saved, NOW), saved);
 });
 
-test('teacher sentence library prioritizes independent lines and retains compatible word-linked sentences', async () => {
+test('teacher sentence cards contain only explicitly saved lines and never word-linked examples', async () => {
   const { getTeacherLibrary } = await import(require('./model-loader.cjs').modelURL('teacher-library.js'));
   const { createLearningState } = await learning;
   const state = createLearningState(NOW);
-  state.lists[0].sentences = ['İnal anten al.', 'Anne nane al.', 'Şal al.'];
+  state.lists[0].sentences = ['İnal, anten al!', 'Lale tane tane anlat.'];
+  state.lists[0].words = [{ text: 'nane', sentence: 'Anne nane al.' }, { text: 'at', sentence: 'Şal at.' }];
   const library = getTeacherLibrary(state, ['a', 'n', 'e', 't', 'i', 'l']);
-  assert.equal(library.sentences[0].text, 'İnal anten al.');
-  assert.equal(library.sentences.filter(entry => entry.text === 'Anne nane al.').length, 1);
-  assert.ok(library.sentences.some(entry => entry.text === 'Ali lale al.'), 'old word-linked sentences still work');
-  assert.deepEqual(library.blockedSentences.find(entry => entry.text === 'Şal al.').missingLetters, ['ş']);
+  assert.deepEqual(library.sentences.map(entry => entry.text), ['İnal, anten al!', 'Lale tane tane anlat.']);
+  assert.deepEqual(library.blockedSentences, [], 'unrelated word examples must not appear as blocked sentence cards either');
+  assert.equal(library.words[0].sentence, 'Anne nane al.', 'word context remains available to its existing consumers');
+});
+
+test('empty or older teacher sentence fields stay empty and offer the sentence editor', async () => {
+  const { JSDOM } = require('jsdom');
+  const { getTeacherLibrary, renderTeacherLibrary } = await import(modelURL('teacher-library.js'));
+  const { createLearningState } = await learning;
+  for (const missing of [false, true]) {
+    const state = createLearningState(NOW);
+    if (missing) delete state.lists[0].sentences; else state.lists[0].sentences = [];
+    const library = getTeacherLibrary(state, [...'abcçdefgğhıijklmnoöprsştuüvyz']);
+    assert.deepEqual(library.sentences, []);
+    assert.deepEqual(library.blockedSentences, []);
+    const dom = new JSDOM(renderTeacherLibrary('sentences', library));
+    try {
+      assert.equal(dom.window.document.querySelector('[data-do="sentence"]'), null);
+      assert.equal(dom.window.document.querySelector('[data-do="practice-next"]'), null);
+      assert.ok(dom.window.document.querySelector('[data-do="learning-parent"]'));
+      assert.match(dom.window.document.querySelector('.teacher-library-notice').textContent, /henüz cümle yok/u);
+    } finally { dom.window.close(); }
+  }
+});
+
+test('saving the five photo lesson sentences beside starter vocabulary renders exactly those five cards', async () => {
+  const { JSDOM } = require('jsdom');
+  const { TEACHER_SENTENCE_PRESET } = await teacher;
+  const { createLearningState } = await learning;
+  const { getTeacherLibrary, renderTeacherLibrary } = await import(modelURL('teacher-library.js'));
+  const state = createLearningState(NOW);
+  state.lists[0].sentences = [...TEACHER_SENTENCE_PRESET];
+  assert.equal(new Set(state.lists[0].words.map(word => word.sentence).filter(Boolean)).size, 3, 'the former three automatic examples are present in word context');
+  const library = getTeacherLibrary(state, ['a', 'n', 'e', 't', 'i', 'l']);
+  assert.deepEqual(library.sentences.map(entry => entry.text), [...TEACHER_SENTENCE_PRESET]);
+  const dom = new JSDOM(renderTeacherLibrary('sentences', library));
+  try {
+    assert.deepEqual([...dom.window.document.querySelectorAll('[data-do="sentence"]')].map(card => card.dataset.text), [...TEACHER_SENTENCE_PRESET]);
+  } finally { dom.window.close(); }
 });

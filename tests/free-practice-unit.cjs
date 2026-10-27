@@ -34,7 +34,7 @@ const functions = ['allowed', 'bar', 'practiceContentPool', 'practiceDomain', 'p
 async function fixture({ mode = 'syllables', source: contentSource = 'teacher', text = 'na', filter = 'all', caps = false, numMode = 'trace', list, selection } = {}) {
   const [content, learning, teacher] = await models;
   const learner = learning.createLearningState(1);
-  learner.lists = [list || { id: 'lesson', title: 'Öğretmenimin kartları', updatedAt: 1, letters: ['a', 'n', 'e', 't'], syllables: ['na', 'ne', 'an'], words: [
+  learner.lists = [list || { id: 'lesson', title: 'Öğretmenimin kartları', updatedAt: 1, letters: ['a', 'n', 'e', 't'], syllables: ['na', 'ne', 'an'], sentences: ['Anne nane al.', 'Anne anne al.'], words: [
     { text: 'nane', parts: ['na', 'ne'], emoji: '🌿', meaning: '', sentence: 'Anne nane al.' },
     { text: 'anne', parts: ['an', 'ne'], emoji: '👩', meaning: '', sentence: 'Anne anne al.' },
     { text: 'at', parts: ['at'], emoji: '🐎', meaning: '', sentence: '' },
@@ -77,6 +77,7 @@ async function fixture({ mode = 'syllables', source: contentSource = 'teacher', 
   vm.runInContext([constant('esc'), constant('actionIcons'), constant('button'), ...functions.map(declaration), source.slice(clickStart, clickEnd)].join('\n'), context);
   return {
     context, main, launches, navigation, contentStore, speech,
+    selectList(next) { learner.lists.push(next); learner.activeListId = next.id; },
     complete: () => context.complete(),
     actions() {
       const html = main.innerHTML.slice(main.innerHTML.indexOf('<div class="actions">'));
@@ -153,15 +154,31 @@ test('a changed empty teacher pool keeps a route back to its own cards', async (
   assert.deepEqual(app.navigation, ['syllables']);
 });
 
-test('teacher sentence continuation opens the original authored card after normalized selection', async () => {
-  const app = await fixture({ mode: 'sentences', text: 'Anne nane al.', list: { id: 'spacing', title: 'Cümlelerim', updatedAt: 1, letters: [], syllables: [], words: [
+test('teacher sentence continuation preserves the explicitly authored case and punctuation', async () => {
+  const app = await fixture({ mode: 'sentences', text: 'Anne nane al.', list: { id: 'authored', title: 'Cümlelerim', updatedAt: 1, letters: [], syllables: [], sentences: ['Anne nane al.', 'İnal, anten al!'], words: [
     { text: 'nane', parts: ['na', 'ne'], emoji: '', meaning: '', sentence: 'Anne nane al.' },
     { text: 'anne', parts: ['an', 'ne'], emoji: '', meaning: '', sentence: 'Anne  anne al.' },
   ] } });
   app.complete(); app.click(app.actions()[0]);
   assert.equal(app.launches.length, 1, 'the canonical selection resolves to a real authored sentence card');
-  assert.equal(app.launches[0].text, 'Anne  anne al.');
+  assert.equal(app.launches[0].text, 'İnal, anten al!');
   assert.equal(app.launches[0].options.source, 'teacher');
+});
+
+test('teacher sentence primary launch and continuation use only the explicit current active list', async () => {
+  const own = ['İnal, anten al!', 'Lale tane tane anlat.'];
+  const app = await fixture({ mode: 'sentences', text: own[0], list: { id: 'mine', title: 'Benim cümlelerim', updatedAt: 1,
+    sentences: own, words: [{ text: 'nane', parts: ['na', 'ne'], sentence: 'Anne nane al.' }] } });
+  assert.deepEqual(Array.from(app.context.practiceContentPool('sentences', 'teacher')), own);
+  app.click({ dataset: { do: 'practice-next', view: 'sentences', source: 'teacher' } });
+  app.context.nextPractice('sentences', 'teacher', own[0]);
+  assert.deepEqual(app.launches.map(item => item.text), own);
+  app.selectList({ id: 'new', title: 'Yeni listem', updatedAt: 2, words: [{ text: 'at', sentence: 'Anne at al.' }], sentences: ['Nil ala atlet al.'] });
+  app.context.nextPractice('sentences', 'teacher', own[1]);
+  assert.equal(app.launches.at(-1).text, 'Nil ala atlet al.');
+  const count = app.launches.length;
+  app.context.sentence(own[0], 'teacher');
+  assert.equal(app.launches.length, count, 'a card from the previous active list cannot reopen');
 });
 
 test('short-card filters and actual selection history choose an unserved eligible teacher target', async () => {

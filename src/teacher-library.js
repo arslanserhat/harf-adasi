@@ -32,14 +32,6 @@ export function getTeacherLibrary(value, letters, catalogWords = []) {
     if (missingLetters.length) blockedSentences.push(entry); else sentences.push(entry);
   };
   for (const text of teacher.suppliedSentences) addSentence(text, '', true);
-  for (const word of words) {
-    const sentence = word.sentence.trim();
-    if (!sentence) continue;
-    const tokens = sentence.split(/\s+/u);
-    if (tokens.length < 2 || tokens.length > 40 || sentence.length > 240) continue;
-    if (!tokens.some(token => lower(token).replace(/[^abcçdefgğhıijklmnoöprsştuüvyz]/gu, '') === word.text)) continue;
-    addSentence(sentence, word.text);
-  }
   return { id: teacher.id, title: teacher.title, words, syllables, sentences,
     letters: [...teacher.letters], lettersProvided: teacher.lettersProvided,
     blockedLetters: [...teacher.blockedLetters], blockedSyllables: teacher.blockedSyllables.map(entry => ({ ...entry, missingLetters: [...entry.missingLetters] })),
@@ -90,7 +82,7 @@ export function renderTeacherLibrary(mode, library, { filter = 'all', caps = fal
   const empty = emptyList ? `Bu listede henüz ${letterMode ? 'harf' : sentenceMode ? 'cümle' : syllableMode ? 'hece' : 'kelime'} yok. Öğretmeninin verdiklerini birlikte ekleyelim.` : sentenceMode ? 'Bu listede çalışılabilir cümle yok. Bir büyüğün Cümleler alanına öğretmeninin verdiği cümleleri ekleyebilir.' : filter === 'short'
     ? 'Bu filtreye uygun kısa öğretmen kartı yok. Hepsi seçeneğinden diğer kelimelerine bakabilirsin.'
     : 'Bu listedeki kartlar seçili harflerle henüz açılamıyor. Eksik harfleri aşağıdan birlikte kontrol edelim.';
-  return `<section class="teacher-library" data-teacher-library="${escape(mode)}"><div class="teacher-library-heading"><div><small>ÖĞRETMENİMİN LİSTESİ</small><h2>${escape(library.title)}</h2><p>${letterMode ? library.lettersProvided ? 'Öğretmeninin bu liste için verdiği harfler.' : 'Okulda öğrendiğin harflerle tek tek çalış.' : sentenceMode ? 'Öğretmeninin cümlelerini tekrar tekrar oku, kelimelerle kur ve tamamını yaz.' : syllableMode ? 'Öğretmeninin heceleri ve kelimelerinin gerçek parçaları.' : 'Kendi kelimelerinle çalış; sonra macerada başka görevlerle yeniden hatırla.'}</p></div>${action('learning-parent', 'Listemi düzenle')}</div><div class="teacher-library-journey">${emptyList ? action('learning-parent', 'Öğretmenimin verdiklerini ekle') : `${action('practice-next', sentenceMode ? 'Cümlelerimi çalış →' : 'Bana sıradaki kartı seç →', `data-view="${escape(mode)}" data-source="teacher"`)}${sentenceMode ? '' : action('quest-start', 'Bu kartlarla maceraya çık →', `data-quest-kind="${escape(mode)}"`)}`}</div>${entries.length ? `<div class="grid ${sentenceMode ? 'sentences' : letterMode ? 'letters' : 'words'}">${cards}</div>` : `<p class="teacher-library-notice">${empty}</p>${sentenceMode && !emptyList ? action('learning-parent', 'Cümle ve anlam ekle') : ''}`}${unavailable}</section>`;
+  return `<section class="teacher-library" data-teacher-library="${escape(mode)}"><div class="teacher-library-heading"><div><small>ÖĞRETMENİMİN LİSTESİ</small><h2>${escape(library.title)}</h2><p>${letterMode ? library.lettersProvided ? 'Öğretmeninin bu liste için verdiği harfler.' : 'Okulda öğrendiğin harflerle tek tek çalış.' : sentenceMode ? 'Yalnızca bu listeye kaydettiğin cümlelerle oku, kur ve tamamını yaz.' : syllableMode ? 'Öğretmeninin heceleri ve kelimelerinin gerçek parçaları.' : 'Kendi kelimelerinle çalış; sonra macerada başka görevlerle yeniden hatırla.'}</p></div>${action('learning-parent', 'Listemi düzenle')}</div><div class="teacher-library-journey">${emptyList ? action('learning-parent', 'Öğretmenimin verdiklerini ekle') : `${action('practice-next', sentenceMode ? 'Cümlelerimi çalış →' : 'Bana sıradaki kartı seç →', `data-view="${escape(mode)}" data-source="teacher"`)}${sentenceMode ? '' : action('quest-start', 'Bu kartlarla maceraya çık →', `data-quest-kind="${escape(mode)}"`)}`}</div>${entries.length ? `<div class="grid ${sentenceMode ? 'sentences' : letterMode ? 'letters' : 'words'}">${cards}</div>` : `<p class="teacher-library-notice">${empty}</p>${sentenceMode && !emptyList ? action('learning-parent', 'Cümle ve anlam ekle') : ''}`}${unavailable}</section>`;
 }
 
 export function renderTeacherRoute(library, { kind = 'words', context = 'story' } = {}) {

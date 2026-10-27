@@ -165,10 +165,24 @@ test('adult sentence review moves keyboard focus into the review controls', asyn
   } finally { f.done(); }
 });
 
-test('legacy word-linked sentences remain playable after a full independent sentence list', async () => {
-  const f = await fixture({ text: 'Anne nane al.', sentences: [...Array.from({ length: 100 }, (_, index) => `Anne ${index} tane al.`), 'Anne nane al.'] });
-  try { assert.equal(f.root.querySelector('.sentence-reading-line')?.textContent, 'Anne nane al.'); }
-  finally { f.done(); }
+test('completion cycles only through the explicitly saved active teacher sentences', async () => {
+  const { createLearningState } = await import(modelURL('learning-model.js'));
+  const { getTeacherLibrary } = await import(modelURL('teacher-library.js'));
+  const own = [LINES[2], LINES[3]], state = createLearningState();
+  state.lists = [{ id: 'mine', title: 'Benim cümlelerim', words: [{ text: 'nane', sentence: 'Anne nane al.' }], sentences: own },
+    { id: 'other', title: 'Diğer liste', words: [], sentences: ['Nil ala atlet al.'] }];
+  state.activeListId = 'mine';
+  const pool = getTeacherLibrary(state, ['a', 'n', 'e', 't', 'i', 'l']).sentences.map(item => item.text);
+  assert.deepEqual(pool, own);
+  const f = await fixture({ text: own[0], sentences: pool });
+  try {
+    for (const next of [own[1], own[0]]) {
+      read(f); build(f); f.draw(); f.click('review'); f.click('approve'); f.click('next');
+      assert.equal(f.state().text, next);
+      assert.equal(f.state().source, 'teacher');
+      assert.equal(f.root.querySelector('.sentence-reading-line').textContent, next);
+    }
+  } finally { f.done(); }
 });
 
 test('malformed saved token identities and out-of-bounds ink cannot restore a completed sentence', async () => {

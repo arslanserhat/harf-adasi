@@ -96,3 +96,30 @@ test('profile changes are subscribable and the UI store receives other-tab selec
   assert.deepEqual(changes, [profile.id, '']);
   store.destroy();
 });
+
+test('a first visit invites a name only on the home screen with no other dialog', async () => {
+  const { shouldShowChildWelcome } = await api;
+  const state = { version: 1, profiles: [], activeId: '' };
+  assert.equal(shouldShowChildWelcome({ state, atHome: true }), true);
+  assert.equal(shouldShowChildWelcome({ state, atHome: false }), false, 'an active game is never interrupted');
+  assert.equal(shouldShowChildWelcome({ state, atHome: true, dialogOpen: true }), false, 'settings keep control of their dialog');
+  assert.equal(shouldShowChildWelcome({ state, atHome: true, dismissed: true }), false, 'Escape dismisses the invitation for the mounted session');
+});
+
+test('returning profiles bypass the first-visit invitation even after signing out', async () => {
+  const { createChildProfileStore, shouldShowChildWelcome } = await api;
+  const storage = memory();
+  const store = createChildProfileStore({ storage });
+  store.save('İnci', '');
+  assert.equal(shouldShowChildWelcome({ state: createChildProfileStore({ storage }).getState(), atHome: true }), false);
+  store.signOut();
+  assert.equal(shouldShowChildWelcome({ state: store.getState(), atHome: true }), false);
+});
+
+test('corrupt or invalid stored profiles cannot bypass the first-visit invitation', async () => {
+  const { createChildProfileStore, CHILD_PROFILE_KEY, shouldShowChildWelcome } = await api;
+  for (const raw of ['{invalid', JSON.stringify({ version: 1, activeId: 'child-x', profiles: [{ id: 'child-x', name: '<script>' }] })]) {
+    const store = createChildProfileStore({ storage: memory({ [CHILD_PROFILE_KEY]: raw }) });
+    assert.equal(shouldShowChildWelcome({ state: store.getState(), atHome: true }), true);
+  }
+});

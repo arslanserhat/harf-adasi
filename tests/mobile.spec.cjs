@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { assert, getPlaywright, startServer, touch, stroke, assertClean } = require('./helpers.cjs');
+const { assert, getPlaywright, startServer, ensureChildProfile, touch, stroke, assertClean } = require('./helpers.cjs');
 
 const browserName = process.env.TEST_BROWSER || 'chromium';
 const viewports = [{ width: 360, height: 800 }, { width: 390, height: 844 }, { width: 393, height: 852 },
@@ -18,6 +18,7 @@ async function open(browser, url, viewport) {
   await page.goto(url);
   assert.equal(page.url(), new URL(url).href);
   await page.locator('#ready').filter({ hasText: 'Oyun hazır' }).waitFor();
+  await ensureChildProfile(page);
   await page.evaluate(() => document.fonts.ready);
   return { context, page, errors, cdp: browserName === 'chromium' ? await context.newCDPSession(page) : null };
 }

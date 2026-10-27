@@ -11,7 +11,7 @@ const idOkay = value => typeof value === 'string' && /^child-[a-z0-9-]{1,80}$/iu
 
 export function validateChildName(value) {
   const name = typeof value === 'string' ? value.normalize('NFC').replace(/\s+/gu, ' ').trim() : '';
-  if (!name) return { okay: false, name: '', error: 'Çocuğun adını yazın; adsız oynamak için “Profilden çık” seçeneğini kullanabilirsiniz.' };
+  if (!name) return { okay: false, name: '', error: 'Çocuğun adını yazın.' };
   if ([...name].length > MAX_NAME) return { okay: false, name: '', error: 'Ad en fazla 40 karakter olabilir.' };
   if (!/^[\p{L}\p{M}][\p{L}\p{M} .’'-]*$/u.test(name)) return { okay: false, name: '', error: 'Ad için harf, boşluk, kısa çizgi veya kesme işareti kullanın.' };
   return { okay: true, name, error: '' };
@@ -71,6 +71,10 @@ let defaultStore;
 const sharedStore = () => defaultStore ||= createChildProfileStore();
 export function getCurrentChildName() { return sharedStore().getName(); }
 
+export function shouldShowChildWelcome({ state = sharedStore().getState(), atHome = false, dialogOpen = false, dismissed = false } = {}) {
+  return atHome && !dialogOpen && !dismissed && normalizeChildProfileState(state).profiles.length === 0;
+}
+
 function nameWithSuffix(name, mark, suffix) {
   const lower = name.toLocaleLowerCase('tr-TR');
   const vowel = [...lower].reverse().find(letter => 'aeıioöuü'.includes(letter)) || 'e';
@@ -108,13 +112,55 @@ export function renderProfileControls({ state = sharedStore().getState(), editin
 const SKIP_COPY = 'script,style,noscript,input,textarea,select,option,[data-child-profile-controls],[data-learning-content],.word,.target,.bank,.slots,.quest-bank,.quest-slots,.grid,.learn-word-edit,.teacher-library,.teacher-route,.learning-parent,.home-parent-tile[data-do="learning-parent"],.continuation-preview,.quest-summary-result,.quest-feedback,.learn-whole-word,.learn-bank,.learn-slots,.learn-review,.learn-task-header>p,#freePrompt,#questModel,#learningModel,[data-quest="choice"],[data-learning="choice"],[data-do="word"],[data-do="tile"],[data-quest="tile"],[data-learning="tile"]';
 let mounted;
 
+function renderChildWelcome(illustration) {
+  const key = ++panelSequence;
+  return `<div class="child-welcome-card"><div class="child-welcome-scene" aria-hidden="true">${illustration ? `<img src="${escape(illustration)}" alt="" width="1672" height="941">` : ''}<span class="child-welcome-letter">a</span><span class="child-welcome-island-name">Harf Adası</span></div><div class="child-welcome-copy"><button type="button" class="child-welcome-dismiss" data-child-welcome-dismiss aria-label="Şimdilik kapat">×</button><h2 id="childWelcomeTitle-${key}">Harf Adası’na <br>hoş geldin!</h2><p id="childWelcomeIntro-${key}" class="child-welcome-intro">Keşfe çıkmadan önce tanışalım.<br>Sana nasıl seslenelim?</p><form data-child-welcome-form novalidate><label for="childWelcomeName-${key}">Çocuğun adı</label><input id="childWelcomeName-${key}" data-child-welcome-name name="child-name" type="text" maxlength="40" autocomplete="off" autocapitalize="words" spellcheck="false" required aria-describedby="childWelcomeHint-${key} childWelcomeError-${key}" placeholder="Adını buraya yaz"><p id="childWelcomeHint-${key}" class="child-welcome-hint">Şifre gerekmez. Adın yalnızca bu tarayıcıda kullanılır.</p><p id="childWelcomeError-${key}" class="child-welcome-error" data-child-welcome-error role="alert" hidden></p><button type="submit" class="child-welcome-start">Kaydet ve adaya gir<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></button></form><p class="child-welcome-note">Kendi hızında, birlikte.</p></div></div>`;
+}
+
 export function mountChildProfiles({ root = typeof document !== 'undefined' ? document.body : null, store = sharedStore() } = {}) {
   if (!root) return () => {};
   mounted?.destroy();
   const doc = root.ownerDocument;
   const texts = new Map(), attributes = new Map();
-  let scheduled = false, destroyed = false;
+  let scheduled = false, destroyed = false, welcomeDismissed = false, welcome = null;
   const containsTemplate = value => /Alp\s+Arslan|Alparslan|\{\{child\}\}/iu.test(value);
+  const focusHome = () => root.querySelector('#main')?.focus({ preventScroll: true });
+  function removeWelcome() {
+    if (!welcome) return;
+    const dialog = welcome;
+    welcome = null;
+    if (dialog.open) dialog.close();
+    dialog.remove();
+  }
+  function dismissWelcome() {
+    welcomeDismissed = true;
+    removeWelcome();
+    focusHome();
+  }
+  function syncWelcome() {
+    const atHome = Boolean(root.querySelector('#main .home-shell'));
+    const dialogOpen = [...root.querySelectorAll('dialog[open]')].some(dialog => dialog !== welcome);
+    const state = store.getState();
+    if (welcome) {
+      if (!atHome || dialogOpen || state.profiles.length) removeWelcome();
+      return;
+    }
+    if (!shouldShowChildWelcome({ state, atHome, dialogOpen, dismissed: welcomeDismissed })) return;
+    // The rest of the game continues to use its own settings dialog. This
+    // invitation is created only after the initial home screen is available.
+    const dialog = doc.createElement('dialog');
+    if (typeof dialog.showModal !== 'function') return;
+    dialog.className = 'child-welcome';
+    dialog.dataset.childWelcome = '';
+    dialog.innerHTML = renderChildWelcome(root.querySelector('.home-island-art > img')?.getAttribute('src') || '');
+    dialog.setAttribute('aria-labelledby', dialog.querySelector('h2').id);
+    dialog.setAttribute('aria-describedby', dialog.querySelector('.child-welcome-intro').id);
+    dialog.addEventListener('cancel', event => { event.preventDefault(); dismissWelcome(); });
+    welcome = dialog;
+    root.append(dialog);
+    dialog.showModal();
+    dialog.querySelector('[data-child-welcome-name]').focus({ preventScroll: true });
+  }
   function renderControls(element, options = {}) {
     const markup = renderProfileControls({ state: store.getState(), ...options });
     if (element.matches('[data-child-profile-controls]')) {
@@ -165,10 +211,13 @@ export function mountChildProfiles({ root = typeof document !== 'undefined' ? do
       }
     }
     for (const [element] of attributes) if (!element.isConnected) attributes.delete(element);
+    syncWelcome();
   }
   function schedule() { if (!scheduled && !destroyed) { scheduled = true; queueMicrotask(scan); } }
   function controlsContainer(element) { return element.closest('[data-child-profile-controls]'); }
   const onClick = event => {
+    const dismiss = event.target.closest?.('[data-child-welcome-dismiss]');
+    if (dismiss && welcome?.contains(dismiss)) { dismissWelcome(); return; }
     const button = event.target.closest?.('[data-child-profile]');
     if (!button || !root.contains(button)) return;
     const container = controlsContainer(button);
@@ -186,16 +235,41 @@ export function mountChildProfiles({ root = typeof document !== 'undefined' ? do
       }
     }
   };
+  const onSubmit = event => {
+    const form = event.target;
+    if (!form.matches?.('[data-child-welcome-form]') || !welcome?.contains(form)) return;
+    event.preventDefault();
+    const input = form.querySelector('[data-child-welcome-name]');
+    const result = store.save(input.value, '');
+    if (!result.okay) {
+      const message = form.querySelector('[data-child-welcome-error]');
+      message.textContent = result.error;
+      message.hidden = false;
+      input.setAttribute('aria-invalid', 'true');
+      input.focus();
+      return;
+    }
+    welcomeDismissed = true;
+    removeWelcome();
+    focusHome();
+  };
+  const onInput = event => {
+    const input = event.target;
+    if (input.matches?.('[data-child-welcome-name]') && welcome?.contains(input)) {
+      input.removeAttribute('aria-invalid');
+      welcome.querySelector('[data-child-welcome-error]').hidden = true;
+    }
+  };
   const onChange = event => { if (event.target.matches?.('[data-child-profile-select]') && root.contains(event.target)) store.select(event.target.value); };
   const unsubscribe = store.subscribe(() => {
     for (const panel of root.querySelectorAll('[data-child-profile-controls]')) renderControls(panel);
     scan();
   });
   const observer = new MutationObserver(schedule);
-  observer.observe(root, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['aria-label', 'alt', 'title'] });
-  root.addEventListener('click', onClick); root.addEventListener('change', onChange);
+  observer.observe(root, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['aria-label', 'alt', 'title', 'open'] });
+  root.addEventListener('click', onClick); root.addEventListener('change', onChange); root.addEventListener('submit', onSubmit); root.addEventListener('input', onInput);
   scan();
-  const destroy = () => { destroyed = true; observer.disconnect(); unsubscribe(); root.removeEventListener('click', onClick); root.removeEventListener('change', onChange); texts.clear(); attributes.clear(); if (mounted?.root === root) mounted = null; };
+  const destroy = () => { destroyed = true; observer.disconnect(); unsubscribe(); removeWelcome(); root.removeEventListener('click', onClick); root.removeEventListener('change', onChange); root.removeEventListener('submit', onSubmit); root.removeEventListener('input', onInput); texts.clear(); attributes.clear(); if (mounted?.root === root) mounted = null; };
   mounted = { root, destroy };
   return destroy;
 }

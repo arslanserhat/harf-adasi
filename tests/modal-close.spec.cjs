@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { assert, getPlaywright, startServer } = require('./helpers.cjs');
+const { assert, getPlaywright, startServer, ensureChildProfile } = require('./helpers.cjs');
 
 const chromiumPath = '/workspace/.browser-cache/chromium_headless_shell-1200/chrome-headless-shell-linux64/chrome-headless-shell';
 const viewports = [{ width: 390, height: 660 }, { width: 1366, height: 768 }];
@@ -24,6 +24,7 @@ const viewports = [{ width: 390, height: 660 }, { width: 1366, height: 768 }];
       try {
         await page.goto(process.env.TEST_BASE_URL || service.url);
         await page.locator('#ready').filter({ hasText: 'Oyun hazır' }).waitFor();
+        await ensureChildProfile(page);
         await page.evaluate(() => document.fonts.ready);
         for (let opening = 0; opening < 2; opening++) {
           await page.locator('header [data-do="settings"]').tap();

@@ -2,3 +2,32 @@
 .child-profile-controls h2{margin:5px 0 8px;font-size:22px}.child-profile-controls p{font-size:13px;line-height:1.55;color:#607357}.child-profile-eyebrow{font-size:9px;letter-spacing:1px;font-weight:850;color:#778366}.child-profile-controls label{display:block;margin:14px 0 5px;font-size:13px;font-weight:800}.child-profile-controls input,.child-profile-controls select{display:block;box-sizing:border-box;width:100%;max-width:100%;min-height:44px;padding:10px 12px;border:1px solid #c6d4b9;border-radius:11px;background:#fffef8;color:#315844;font:inherit;font-size:16px}.child-profile-actions{display:flex;flex-wrap:wrap;gap:9px;margin:15px 0}.child-profile-actions button{min-width:44px;min-height:44px;padding:10px 14px;border:1px solid #c2d1b4;border-radius:12px;background:#fffef8;color:#315844;font:inherit;font-size:13px;font-weight:850;box-shadow:0 3px #bfccae}.child-profile-actions button:first-child{background:#2f6f57;border-color:#28634c;color:#fffdf3;box-shadow:0 3px #20503d}.child-profile-controls :focus-visible{outline:3px solid #ed9b55;outline-offset:3px}.child-profile-status[data-error=true]{color:#9b432a}
 body>header .logo{min-width:0}body>header .logo>span:last-child{min-width:0}body>header .logo small.header-greeting{max-width:100%;white-space:normal;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
 @media(max-width:700px){body>header .logo{flex:1 1 auto;overflow:hidden}body>header .logo>span:last-child{max-width:calc(100vw - 220px)}body>header .logo small.header-greeting{font-size:10px;line-height:1.1}.child-profile-controls{padding:16px 13px}.child-profile-actions{gap:8px}.child-profile-actions button{font-size:12px;padding:9px 11px}}
+
+/* A quiet landing on the island before the first game. */
+dialog.child-welcome{width:min(92vw,780px);max-width:none;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);padding:0;border:0;border-radius:29px;background:#fffdf5;color:#294b43;box-shadow:0 24px 90px #173e4240;overflow:auto;overscroll-behavior:contain}
+dialog.child-welcome::backdrop{background:#244c477a;backdrop-filter:blur(5px)}
+.child-welcome-card{display:grid;grid-template-columns:.9fr 1fr;min-height:454px}
+.child-welcome-scene{position:relative;isolation:isolate;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#e0f2ed;border-right:1px solid #cfe4db}
+.child-welcome-scene img{display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:58% center;mix-blend-mode:multiply;opacity:.9}
+.child-welcome-letter{position:absolute;left:29px;top:27px;display:grid;place-items:center;width:48px;height:52px;border:3px solid #fff7d9;border-radius:16px;background:#efb652;box-shadow:0 4px #cc983b;color:#fffdf3;font-size:39px;font-weight:900;line-height:1;transform:rotate(-8deg)}
+.child-welcome-island-name{position:absolute;left:24px;right:24px;bottom:26px;padding:10px 16px;border:1px solid #fffdf4b3;border-radius:18px;background:#fffdf4e8;color:#315a4c;text-align:center;font-size:19px;font-weight:850;letter-spacing:-.5px;box-shadow:0 5px 16px #2c4e3820}
+.child-welcome-copy{position:relative;padding:43px 33px 26px}
+.child-welcome-dismiss{position:absolute;right:10px;top:9px;display:grid;place-items:center;width:44px;height:44px;border:0;border-radius:50%;background:transparent;color:#617c6e;font-size:28px;font-weight:500;line-height:1}
+.child-welcome-dismiss:hover{background:#edf2e7}
+.child-welcome-copy h2{margin:0 0 15px;color:#285747;font-size:34px;font-weight:850;letter-spacing:-1.2px;line-height:1.13}
+.child-welcome-copy .child-welcome-intro{margin:0 0 24px;color:#607668;font-size:15px;line-height:1.6}
+.child-welcome-copy label{display:block;margin:0 0 8px;color:#315846;font-size:14px;font-weight:800}
+.child-welcome-copy input{display:block;width:100%;min-width:0;min-height:53px;padding:12px 15px;border:1.5px solid #a9c6b6;border-radius:13px;background:#fffefa;color:#294b43;font:inherit;font-size:17px;line-height:1.4;box-shadow:inset 0 2px 3px #315a4605}
+.child-welcome-copy input::placeholder{color:#829184;font-size:15px}
+.child-welcome-copy input[aria-invalid=true]{border-color:#b55b35;background:#fffaf2}
+.child-welcome-copy .child-welcome-hint{margin:9px 0 19px;color:#64796a;font-size:12px;line-height:1.55}
+.child-welcome-copy .child-welcome-error{margin:-6px 0 16px;padding:10px 12px;border-radius:10px;background:#fff0df;color:#934122;font-size:13px;font-weight:700;line-height:1.5}
+.child-welcome-start{display:flex;align-items:center;justify-content:center;gap:13px;width:100%;min-height:53px;padding:13px 15px;border:1px solid #28674e;border-radius:14px;background:#317351;color:#fffef3;font:inherit;font-size:15px;font-weight:850;line-height:1.4;box-shadow:0 4px #20563f}
+.child-welcome-start svg{flex-shrink:0;width:19px;height:19px}
+.child-welcome-start:hover{background:#286748}
+.child-welcome-start:active{transform:translateY(2px);box-shadow:0 2px #20563f}
+.child-welcome-copy .child-welcome-note{margin:20px 0 0;text-align:center;color:#718373;font-size:11px;line-height:1.4}
+.child-welcome :focus-visible{outline:3px solid #d59b36;outline-offset:4px}
+@media(max-width:620px){dialog.child-welcome{width:calc(100% - 28px);border-radius:24px}.child-welcome-card{grid-template-columns:1fr;min-height:0}.child-welcome-scene{min-height:155px;border-right:0;border-bottom:1px solid #cfe4db}.child-welcome-scene img{object-position:50% 55%}.child-welcome-letter{width:39px;height:42px;left:22px;top:19px;font-size:31px;border-radius:13px}.child-welcome-island-name{left:auto;right:20px;bottom:16px;font-size:14px;padding:7px 14px;border-radius:12px}.child-welcome-copy{padding:27px 25px 23px}.child-welcome-copy h2{font-size:31px;line-height:1.13;letter-spacing:-1px;margin-right:22px}.child-welcome-copy h2 br{display:none}.child-welcome-copy .child-welcome-intro{margin-bottom:20px;font-size:14px}.child-welcome-dismiss{right:7px;top:9px}.child-welcome-copy .child-welcome-note{margin-top:18px}}
+@media(max-height:650px){.child-welcome-scene{min-height:106px}.child-welcome-copy{padding-top:25px;padding-bottom:19px}.child-welcome-copy h2{font-size:28px;margin-bottom:10px}.child-welcome-copy .child-welcome-intro{margin-bottom:15px}.child-welcome-copy .child-welcome-note{margin-top:15px}.child-welcome-island-name{bottom:13px}}
+@media(prefers-reduced-motion:reduce){dialog.child-welcome::backdrop{backdrop-filter:none}}

@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { assert, getPlaywright, startServer, touch, stroke, assertClean } = require('./helpers.cjs');
+const { assert, getPlaywright, startServer, ensureChildProfile, touch, stroke, assertClean } = require('./helpers.cjs');
 
 const browserName = process.env.TEST_BROWSER || 'chromium';
 const kinds = ['letters', 'syllables', 'words', 'reading', 'sentences', 'numbers'];
@@ -31,6 +31,7 @@ async function learning(page) {
 async function ready(page, url) {
   await page.goto(url);
   await page.locator('#ready').filter({ hasText: 'Oyun hazır' }).waitFor();
+  await ensureChildProfile(page);
   await page.evaluate(() => document.fonts.ready);
   if (process.env.TEST_EXPECTED_VERSION) assert.equal(await page.evaluate(() => window.HARF_ADASI_VERSION), process.env.TEST_EXPECTED_VERSION);
 }
@@ -156,6 +157,7 @@ async function preserveWriting(app) {
   await app.page.locator('[data-do="quest-start"][data-quest-kind="words"]').first().waitFor();
   await app.page.reload();
   await app.page.locator('#ready').filter({ hasText: 'Oyun hazır' }).waitFor();
+  await ensureChildProfile(app.page);
   await press(app, '[data-do="quest-start"][data-quest-kind="words"]');
   const restored = await active(app.page);
   assert.equal(restored.index, before.index);

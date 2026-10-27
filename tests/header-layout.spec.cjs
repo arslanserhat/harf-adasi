@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { assert, getPlaywright, startServer, touch, assertClean } = require('./helpers.cjs');
+const { assert, getPlaywright, startServer, ensureChildProfile, touch, assertClean } = require('./helpers.cjs');
 
 const browserName = process.env.TEST_BROWSER || 'chromium';
 const defaults = [{ width: 360, height: 640 }, { width: 390, height: 660 },
@@ -35,6 +35,7 @@ async function ready(app, url) {
   await app.page.goto(url);
   assert.equal(app.page.url(), new URL(url).href);
   await app.page.locator('#ready').filter({ hasText: 'Oyun hazır' }).waitFor();
+  await ensureChildProfile(app.page);
   await app.page.evaluate(() => document.fonts.ready);
   await app.page.waitForFunction(() => document.querySelectorAll('.world-site-pet').length === 6
     && document.querySelectorAll('body > footer .world-site-pet').length === 4);
@@ -43,7 +44,7 @@ async function ready(app, url) {
 async function checkHeaderAndHero(page, viewport) {
   assert.equal(await page.locator('.header-greeting').count(), 1, 'the greeting appears exactly once');
   assert.equal(await page.locator('body > header .header-greeting').count(), 1, 'the greeting belongs to the existing header');
-  assert.equal((await page.locator('.header-greeting').innerText()).replace(/\s+/gu, ' ').trim(), 'Hoş geldin', 'a fresh browser has a neutral greeting until an adult selects a child name');
+  assert.equal((await page.locator('.header-greeting').innerText()).replace(/\s+/gu, ' ').trim(), 'Hoş geldin, Deniz', 'the gameplay fixture keeps the selected child name in the header');
   assert.equal(await page.locator('.home-kicker-row, .home-greeting, .world-pet-perch-home').count(), 0, 'no separate greeting or animal row consumes space above the island');
   const metrics = await page.evaluate(() => {
     const bounds = element => {

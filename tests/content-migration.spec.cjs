@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { assert, getPlaywright, startServer, touch, assertClean } = require('./helpers.cjs');
+const { assert, getPlaywright, startServer, ensureChildProfile, touch, assertClean } = require('./helpers.cjs');
 
 const browserName = process.env.TEST_BROWSER || 'chromium';
 const viewports = process.env.TEST_VIEWPORT
@@ -30,6 +30,7 @@ async function ready(app, url) {
   await app.page.goto(url);
   assert.equal(app.page.url(), new URL(url).href);
   await app.page.locator('#ready').filter({ hasText: 'Oyun hazır' }).waitFor();
+  await ensureChildProfile(app.page);
   if (process.env.TEST_EXPECTED_VERSION) assert.equal(await app.page.evaluate(() => window.HARF_ADASI_VERSION), process.env.TEST_EXPECTED_VERSION);
 }
 async function stored(page, key) {

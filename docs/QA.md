@@ -1,4 +1,26 @@
-# Dinamik içerik, öğretmen girdileri ve yerel profil — 27 Ekim 2026
+# 5.5.1 — profil açılışı, sakin görev alanları ve doğru devam
+
+27 Ekim 2026, kullanıcı bilgisayarındaki Windows ortamı. **176/176** mevcut
+ve yeni JavaScript/gerçek DOM kontrolü geçti: önceki 146, yeni profil
+politikası 3, serbest çalışma devamı 14, profil DOM 5 ve animasyon DOM 8.
+Gerçek DOM testleri kilitli jsdom 26.1.0 ile `npm run test:unit` içindedir.
+
+Tarayıcı önizlemesinde boş ad reddi, Enter ile profil oluşturma, kayıttan
+sonra odak aktarımı, yenilemede adın korunması ve 390 px ekran geometrisi
+kontrol edildi. Gerçek fare çizimi ve yetişkin onayıyla serbest **na**
+tamamlandı; ana **Sıradaki heceyi yap** düğmesi başka bir hece olan **ne**
+çalışmasını açtı. Diğer beş tür ve sayı alt türleri gerçek devam fonksiyonları
+üzerindeki odaklı davranış testleriyle kapsandı.
+
+Alan adları ve HTTPS zinciri dışarıdan doğrulandı; HTTP/www yönlendirmeleri
+yol ve sorguyu korur. Certbot yalnız Harf sertifikası için yenileme denemesini
+başarıyla tamamladı. Bu kayıt fiziksel iPhone/iPad, WebKit veya duyulan ses
+kalitesi doğrulaması değildir. Son canlı yayın kanıtı dağıtılan dosyalarla
+yeniden kontrol edilmelidir.
+
+---
+
+# Önceki 5.5.0: dinamik içerik, öğretmen girdileri ve yerel profil — 27 Ekim 2026
 
 Uygulama commit'i **505495332669775103dba854fd5db5d834af3a86** (teknik
 5.5.0, görünür etiket yok). Pages

@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { assert, getPlaywright, startServer, open, tap, home, catalog, tapStandard, letter, match, next, assertNoAdvance, touch, stroke, paths, traceAll, ink, review, fill, assertClean } = require('./helpers.cjs');
+const { assert, getPlaywright, startServer, ensureChildProfile, open, tap, home, catalog, tapStandard, letter, match, next, assertNoAdvance, touch, stroke, paths, traceAll, ink, review, fill, assertClean } = require('./helpers.cjs');
 
 const cases = [];
 const scenario = (name, fn) => cases.push({ name, fn });
@@ -214,6 +214,7 @@ scenario('syllable, anne/etti/inat, duplicate cards, undo/restart, hints, break,
   await page.getByRole('button', { name: 'Kapat', exact: true }).tap();
   await page.reload();
   await page.locator('#ready').filter({ hasText: 'Oyun hazır' }).waitFor();
+  await ensureChildProfile(page);
   assert.equal(await page.locator('#badge').innerText(), badge);
   assert.equal(await page.locator('#sound').getAttribute('aria-label'), 'Sesi aç');
   await tap(page, 'settings');
@@ -448,6 +449,7 @@ scenario('first grade: guided three-step adventure uses selected letters, real s
   assert.equal(await page.locator('.quest-practice-links [data-do="catalog"]').count(), 6, 'the six original games remain available');
   await page.reload();
   await page.locator('#ready').filter({ hasText: 'Oyun hazır' }).waitFor();
+  await ensureChildProfile(page);
   assert.equal(Number(await page.locator('#badge').innerText()), initialBadges + 1, 'adventure reward survives reload');
   await tap(page, 'settings');
   const selected = await page.locator('.settings [data-do="select-letter"][aria-pressed="true"]').evaluateAll(buttons => buttons.map(button => button.dataset.letter));

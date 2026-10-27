@@ -69,6 +69,16 @@ async function startServer() {
   return { server, url: `http://127.0.0.1:${server.address().port}/harf-adasi/` };
 }
 
+// Suites about gameplay enter through the same first-visit form as a family.
+// Existing profiles remain selected and persist naturally across reloads.
+async function ensureChildProfile(page) {
+  const welcome = page.locator('dialog[data-child-welcome][open]');
+  if (!await welcome.isVisible()) return;
+  await welcome.getByLabel('Çocuğun adı', { exact: true }).fill('Deniz');
+  await welcome.getByRole('button', { name: 'Kaydet ve adaya gir', exact: true }).click();
+  await welcome.waitFor({ state: 'detached' });
+}
+
 async function open(browser, url, viewport = { width: 768, height: 1024 }, options = {}) {
   const context = await browser.newContext({ viewport, hasTouch: true, isMobile: true });
   if (options.unavailableApis) {
@@ -102,6 +112,7 @@ async function open(browser, url, viewport = { width: 768, height: 1024 }, optio
   await page.goto(url);
   assert.equal(page.url(), new URL(url).href, 'test loads the requested origin/path without a local fallback');
   await page.locator('#ready').filter({ hasText: 'Oyun hazır' }).waitFor();
+  await ensureChildProfile(page);
   assert.equal(await page.locator('#error').isVisible(), false);
   const cdp = await context.newCDPSession(page);
   return { context, page, cdp, errors };
@@ -268,4 +279,4 @@ async function assertClean(page, errors) {
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true, 'no horizontal overflow');
 }
 
-module.exports = { assert, getPlaywright, startServer, open, tap, home, catalog, openStandardLibrary, tapStandard, letter, match, next, assertNoAdvance, touch, stroke, paths, traceAll, ink, review, fill, assertClean };
+module.exports = { assert, getPlaywright, startServer, ensureChildProfile, open, tap, home, catalog, openStandardLibrary, tapStandard, letter, match, next, assertNoAdvance, touch, stroke, paths, traceAll, ink, review, fill, assertClean };

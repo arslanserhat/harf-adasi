@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { assert, getPlaywright, startServer } = require('./helpers.cjs');
+const { assert, getPlaywright, startServer, ensureChildProfile } = require('./helpers.cjs');
 
 const species = ['lion', 'bird', 'rabbit', 'fox', 'squirrel', 'turtle'];
 const cases = [];
@@ -25,6 +25,7 @@ async function open(browser, url, viewport) {
   await page.goto(url);
   assert.equal(page.url(), new URL(url).href, 'the requested published/local URL is used without a fallback');
   await page.locator('#ready').filter({ hasText: 'Oyun hazır' }).waitFor();
+  await ensureChildProfile(page);
   await page.waitForFunction(() => document.querySelectorAll('.world-site-pet').length === 6
     && document.querySelectorAll('body > footer .world-site-pet').length === 4);
   return { context, page, errors };
@@ -104,33 +105,46 @@ scenario('six different animals load and remain outside the illustration and con
   }
 });
 
-scenario('a task keeps its bird outside the scene and away from controls; writing removes distractions', async ({ page }) => {
+scenario('lessons and quests keep decorative animals on the home page; writing stays calm', async ({ page }) => {
   await press(page, '[data-do="learning-world"][data-world="post"]');
   await page.locator('#learning[data-screen="intro"]').waitFor();
   assert.equal(await page.locator('#learning[data-screen="intro"] .learn-nav .world-site-pet').count(), 0,
-    'the crowded introduction navigation gets no animal');
+    'lesson introduction navigation gets no decorative animal');
   await press(page, '[data-learning="begin-tasks"]');
   await page.locator('#learning[data-screen="task"]').waitFor();
-  const bird = page.locator('#learning[data-screen="task"] > .learn-nav .world-site-pet-bird');
-  await bird.waitFor({ state: 'attached' });
-  await page.evaluate(() => document.fonts?.ready);
-  // A narrow navigation row may deliberately withhold this decorative bird.
-  // Visible birds must keep all actual controls clear; hidden ones must be an
-  // explicit space-saving choice, rather than an accidentally missing image.
-  if (!await bird.isVisible()) assert.equal(await bird.evaluate(element => element.hidden), true,
-    'a crowded navigation row deliberately hides its decorative bird');
-  const overlaps = await bird.evaluate(element => {
-    const rect = element.getBoundingClientRect();
-    return [...element.closest('.learn-nav').querySelectorAll('button, a, input, select')].filter(control => {
-      const box = control.getBoundingClientRect();
-      return box.width && box.height && rect.left < box.right - 1 && rect.right > box.left + 1
-        && rect.top < box.bottom - 1 && rect.bottom > box.top + 1;
-    }).map(control => control.textContent.trim() || control.getAttribute('aria-label'));
-  });
-  assert.deepEqual(overlaps, [], 'the task bird leaves Home, sound and pause buttons unobstructed');
+  assert.equal(await page.locator('#learning .world-site-pet').count(), 0, 'lesson navigation and image receive no decorative animals');
+  const lesson = await page.evaluate(() => ({
+    visiblePets: [...document.querySelectorAll('.world-site-pet')].filter(element => {
+      const rect = element.getBoundingClientRect(); return rect.width && rect.height;
+    }).length,
+    foreground: getComputedStyle(document.querySelector('.world-ambience-effects')).display,
+    background: getComputedStyle(document.querySelector('.world-ambience-sky')).display,
+    motes: [...document.querySelectorAll('#learning .story-world-motes')].map(element => getComputedStyle(element).display),
+  }));
+  assert.equal(lesson.visiblePets, 0, 'the persistent footer cast also waits until the child returns home');
+  assert.equal(lesson.foreground, 'none', 'site tap effects stay outside lessons');
+  assert.equal(lesson.background, 'none', 'global sky effects stay outside lessons');
+  assert.ok(lesson.motes.every(display => display === 'none'), 'decorative story particles are hidden');
   await assertOutsidePictures(page);
 
   await press(page, '#learning .learn-nav [data-learning="home"]');
+  await page.locator('.games').waitFor();
+  await page.waitForFunction(() => document.querySelectorAll('.world-site-pet').length === 6
+    && document.body.dataset.ambienceHome === 'true');
+  await press(page, '[data-do="quest-start"][data-quest-kind="syllables"]');
+  await page.locator('#quest[data-screen="task"]').waitFor();
+  const quest = await page.evaluate(() => ({
+    animals: [...document.querySelectorAll('#quest .quest-character-route, #quest .quest-pirpir')]
+      .map(element => getComputedStyle(element).display),
+    train: getComputedStyle(document.querySelector('#quest .quest-train')).display,
+    controls: [...document.querySelectorAll('#quest .quest-controls button')].filter(element => {
+      const rect = element.getBoundingClientRect(); return rect.width && rect.height;
+    }).length,
+  }));
+  assert.ok(quest.animals.length > 0 && quest.animals.every(display => display === 'none'), 'quest animal overlays are removed from the image');
+  assert.notEqual(quest.train, 'none', 'the train still shows the pieces assembled during play');
+  assert.ok(quest.controls > 0, 'quest answer controls remain available');
+  await press(page, '[data-quest="home"]');
   await page.locator('.games').waitFor();
   await press(page, '[data-do="catalog"][data-view="letters"]');
   await press(page, '[data-do="letter"][data-letter="a"]');
@@ -174,6 +188,7 @@ scenario('the motion control stops both poses and movement; system reduced motio
   assert.deepEqual(await motionSnapshot(), paused, 'neither wing frames nor animal movement continue after pause');
   await page.reload();
   await page.locator('#ready').filter({ hasText: 'Oyun hazır' }).waitFor();
+  await ensureChildProfile(page);
   await page.waitForFunction(() => document.querySelector('.world-site-pet-sprite')
     && [...document.querySelectorAll('.world-site-pet, .world-site-pet-sprite')]
       .every(element => element.getAnimations().every(animation => animation.playState === 'paused')));

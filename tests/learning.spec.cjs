@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { assert, getPlaywright, startServer, open, openStandardLibrary, touch, stroke, assertClean, fill, next: legacyNext, review: legacyReview } = require('./helpers.cjs');
+const { assert, getPlaywright, startServer, ensureChildProfile, open, openStandardLibrary, touch, stroke, assertClean, fill, next: legacyNext, review: legacyReview } = require('./helpers.cjs');
 
 const cases = [];
 const scenario = (name, run, browserOptions = {}) => cases.push({ name, run, browserOptions });
@@ -203,6 +203,7 @@ scenario('teacher lists: invalid text, custom words, taught-letter filtering and
   assert.deepEqual(edited.words.find(word => word.text === 'nane').parts, ['nan', 'e'], 'the adult can explicitly replace the suggested syllable split');
   await page.reload();
   await page.locator('#ready').filter({ hasText: 'Oyun hazır' }).waitFor();
+  await ensureChildProfile(page);
   const reloaded = (await snapshot(page)).lists.find(value => value.id === list.id);
   assert.deepEqual(reloaded.words.find(word => word.text === 'nane').parts, ['nan', 'e'], 'the teacher’s explicit override survives reload');
   await begin(app);
@@ -390,6 +391,7 @@ scenario('home island motion: pause freezes real animations and survives refresh
   assert.deepEqual(await moving.evaluate(element => element.getAnimations().map(animation => Number(animation.currentTime))), paused, 'the paused map is actually frozen');
   await app.page.reload();
   await app.page.locator('#ready').filter({ hasText: 'Oyun hazır' }).waitFor();
+  await ensureChildProfile(app.page);
   assert.equal(await app.page.locator('.home-shell').getAttribute('data-motion-paused'), 'true');
   assert.ok(await app.page.locator('.home-floating-letter').first().evaluate(element => element.getAnimations().every(animation => animation.playState === 'paused')), 'a refresh retains the chosen motion preference');
   await app.page.emulateMedia({ reducedMotion: 'reduce' });
@@ -422,7 +424,7 @@ scenario('bridge construction: only correct placed cards build physical bridge p
   assert.equal(await app.page.locator('#learningNext').isEnabled(), true);
 });
 
-scenario('legacy continuation: the next journey follows the completed word instead of an old unrelated queue', async app => {
+scenario('free-word continuation: the primary result action opens a different word and preserves the saved journey', async app => {
   await begin(app);
   const old = (await snapshot(app.page)).session;
   assert.equal(old.tasks[0].word, 'nane');
@@ -435,17 +437,18 @@ scenario('legacy continuation: the next journey follows the completed word inste
   await legacyReview(app.page, app.cdp);
   await legacyNext(app.page);
   await app.page.locator('.party').waitFor();
-  const continuation = app.page.locator('[data-do="learning-continue"]');
-  assert.equal(await continuation.getAttribute('data-focus-text'), 'anne');
-  assert.equal(await continuation.getAttribute('data-focus-skill'), 'write');
-  assert.match(await app.page.locator('.continuation-preview').innerText(), /anne/u, 'the preview describes the actual word being continued');
+  const continuation = app.page.locator('.party .actions > button').first();
+  assert.equal(await continuation.getAttribute('data-do'), 'practice-next');
+  assert.equal(await continuation.getAttribute('data-view'), 'words');
+  assert.equal(await continuation.getAttribute('data-source'), 'standard');
   await press(app, continuation);
-  await finishIntro(app);
+  await app.page.locator('.lesson[data-practice-mode="words"]').waitFor();
+  assert.equal(await app.page.locator('.lesson').getAttribute('data-content-source'), 'standard');
+  assert.notEqual(await app.page.locator('.lesson').getAttribute('data-content-target'), 'anne', 'the next free-practice word differs from the completed word');
+  await app.page.locator('#bank [data-do="tile"]').first().waitFor();
   const following = (await snapshot(app.page)).session;
-  assert.notEqual(following.id, old.id, 'continuation replaces an unrelated unfinished journey');
-  assert.equal(following.tasks[0].word, 'anne', 'the completed word is the next actual task target');
-  assert.notEqual(following.tasks[0].kind, 'write', 'the word continues into a different learning skill');
-  assert.equal((await currentTask(app)).word, 'anne');
+  assert.equal(following.id, old.id, 'free practice preserves the existing unfinished journey');
+  assert.deepEqual(following.tasks, old.tasks, 'free practice does not replace the saved journey with an adaptive queue');
 });
 
 scenario('unavailable Turkish audio: adult support works and cannot earn independent listening credit', async app => {
@@ -493,6 +496,7 @@ scenario('delayed letter review: one slot, actual distractors and a resumable re
   assert.ok(await app.page.locator('[data-learning="tile"]').count() >= 2, 'letter practice offers actual alternatives');
   await app.page.reload();
   await app.page.locator('#ready').filter({ hasText: 'Oyun hazır' }).waitFor();
+  await ensureChildProfile(app.page);
   await begin(app);
   assert.equal((await currentTask(app)).id, task.id, 'a known single-letter task survives reload without resetting the journey');
   await listen(app);
@@ -538,6 +542,7 @@ scenario('resume: home and browser reload preserve the exact connected task', as
   await app.page.locator('.games').waitFor();
   await app.page.reload();
   await app.page.locator('#ready').filter({ hasText: 'Oyun hazır' }).waitFor();
+  await ensureChildProfile(app.page);
   await begin(app);
   assert.equal((await currentTask(app)).id, second.id, 'reload resumes the saved index rather than creating an unrelated lesson');
   const ids = (await snapshot(app.page)).events.map(event => event.id);

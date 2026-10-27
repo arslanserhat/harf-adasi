@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { assert, getPlaywright, startServer, touch, stroke, assertClean } = require('./helpers.cjs');
+const { assert, getPlaywright, startServer, ensureChildProfile, touch, stroke, assertClean } = require('./helpers.cjs');
 const chromiumPath = '/workspace/.browser-cache/chromium_headless_shell-1200/chrome-headless-shell-linux64/chrome-headless-shell';
 
 async function press(app, selector) {
@@ -136,6 +136,7 @@ const scenarios = [
       try {
         await page.goto(process.env.TEST_BASE_URL || url);
         await page.locator('#ready').filter({ hasText: 'Oyun hazır' }).waitFor();
+        await ensureChildProfile(page);
         await run(app); await assertClean(page, errors); passed++;
         console.log(`PASS ${name}`);
       } catch (error) {

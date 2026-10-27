@@ -1,5 +1,31 @@
 # Harf Adası — güncel devir notu
 
+## 27 Ekim 2026 — 5.5.1, ilk profil ve serbest çalışma devamı
+
+Teknik sürüm **5.5.1**; çocuk ekranında sürüm etiketi yoktur. Ana Laravel
+yayın adresi **https://harfadasi.com.tr/** olarak hazırlanmıştır. Alan adı ve
+www sertifikası geçerlidir; HTTP ve www ana HTTPS adresine yönlenir.
+Sertifika yenileme denemesi ve Nginx yenileme kancası başarıyla doğrulandı.
+
+- İlk ziyarette çocuğun adı mevcut yerel profil yapısıyla kaydedilir.
+  Kayıtlı profillere yeniden karşılama formu açılmaz. Bu şifresiz cihaz
+  profilidir; ayrı hesap veya profiller arasında ayrı ilerleme iddiası yoktur.
+- Dekoratif hareketli hayvanlar ve site efektleri ana sayfa/alt alanla
+  sınırlıdır. Görev sahnelerine hayvan katmanı eklenmez; gerçek tren, cevap
+  ve ilerleme nesneleri korunur.
+- Altı serbest çalışma türünün bitişinde ana devam düğmesi aynı türde
+  farklı uygun hedef açar. Öğretmen/standart kaynağı, filtre, geçmiş, büyük
+  harf ve sayı alt türü korunur. Tek/boş havuzlarda yeni hedef varmış gibi
+  davranılmaz. Hikâyelerin bağlantılı öğrenme akışı ayrıdır.
+- JavaScript/gerçek DOM kontrolleri: **176/176**. Tarayıcı önizlemesinde
+  profil doğrulama, Enter ile kaydetme, yenilemede adı koruma ve gerçek
+  çizim/onay sonrası **na → ne** serbest hece devamı doğrulandı.
+- Üretim APP_KEY, SQLite yolu ve mevcut kalıcı volume korunur. Kullanıcının
+  açık izni olmadan yedek, veritabanı kopyası veya restore oluşturulmaz.
+
+Aşağıdaki 5.5.0 ve önceki kayıtlar tarihsel kanıttır; yeni yayının canlı
+kontrolü ayrıca yapılmalıdır.
+
 ## 27 Ekim 2026 — ortak dinamik içerik, öğretmen heceleri ve yerel profil
 
 Son uygulama kodu **505495332669775103dba854fd5db5d834af3a86**, teknik sürüm

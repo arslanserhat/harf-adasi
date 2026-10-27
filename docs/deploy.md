@@ -4,16 +4,24 @@ Bu kurulum yalnızca Harf Adası içindir. Ayrı Compose proje adı, ayrı `harf
 
 ## Erişim durumu
 
-**27 Ekim 2026 güncel ortam:** Bu görev şu anda yönetilen Linux `/workspace`
-executor'ında çalışıyor; kullanıcının bilgisayarındaki eski başarılı SSH
-oturumu buraya bağlı değildir. `94.138.209.208:22` hedefli SSH denemesi,
-tanımlı `proxy:8088` TCP aracısında Connection refused / errno 111 ile hedefe
-ulaşmadan durdu (çıkış 255). Mevcut araçlarda bağlı yerel SSH/VNC veya TCP
-erişim yapılandırmasını değiştirme yolu bulunmuyor. Bu, VPS'nin portunun
-kapalı olduğunu göstermez; yeni şifre/anahtar istemek de ağ engelini çözmez.
-Son uygulama `5054953` Pages'te doğrulandı; VPS'de bu sürüm doğrulanmadı.
-Alan adı/SSL durumu ve somut DNS yanıtları `CODEX_HANDOFF.md` ve `docs/QA.md`
-başındadır. Sunucu ayarları değiştirilmedi.
+**27 Ekim 2026 güncel yerel ortam:** Kullanıcının Windows bilgisayarından
+VPS'ye SSH erişimi sağlandı. Harf Adası `/srv/harf-adasi` altında, mevcut
+`harf-adasi` Compose projesi ve `harf-adasi_harf-storage` volume'uyla çalışır.
+Kaynak Compose'a ek olarak özel `/srv/harf-adasi-ops/compose.runtime.yaml`
+kaynak sınırları kullanılır; bu üretim override'ını sonraki yayında koruyun.
+
+**Ana adres: https://harfadasi.com.tr/**. Apex ve www A kayıtları doğru
+VPS'yi gösterir. Harf'e ait ayrı Nginx vhost'u `127.0.0.1:8086` uygulamasına
+gider; HTTP ve www ana HTTPS adresine yönlenir. Ayrı alan adı sertifikası
+25 Ocak 2027'ye kadar geçerlidir ve `/etc/letsencrypt/live/harfadasi.com.tr/`
+altındadır. Certbot webroot'u `/srv/harf-adasi-ops/acme`, zamanlayıcısı
+`certbot.timer` ve Harf'e özel Nginx reload kancası etkinleştirildi. Yalnız
+bu sertifikanın yenileme denemesi başarıyla geçti.
+
+Eski IP/8446 erişimi korunmuştur. Üretim APP_KEY veya veritabanı yolu
+değiştirilmez; kullanıcı açıkça izin vermeden yedek/veritabanı kopyası ya da
+restore oluşturulmaz. Alan adına geçişte eski IP kökenindeki tarayıcı
+çerezleri ve yerel kayıtlar otomatik taşınmaz.
 
 **Tarihsel kayıt:** Önceki bir kullanıcı bilgisayarı oturumundan ayrı Harf
 Adası Laravel yayını yapılmış ve canlı etkileşimli tur doğrulanmıştı. Sunucuya

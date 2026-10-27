@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { assert, getPlaywright, startServer, open, touch, match, fill, next, assertClean } = require('./helpers.cjs');
+const { assert, getPlaywright, startServer, ensureChildProfile, open, touch, match, fill, next, assertClean } = require('./helpers.cjs');
 
 const cases = [];
 const scenario = (name, run, options = {}) => cases.push({ name, run, ...options });
@@ -78,6 +78,7 @@ async function celebrate(app) {
 async function reloadMap(app) {
   await app.page.reload();
   await app.page.locator('#ready').filter({ hasText: 'Oyun hazır' }).waitFor();
+  await ensureChildProfile(app.page);
   await enter(app);
 }
 
@@ -330,6 +331,7 @@ scenario('Laravel restore race: a delayed old snapshot cannot move a freshly pla
       page.reload(),
     ]);
     await page.locator('#ready').filter({ hasText: 'Oyun hazır' }).waitFor();
+    await ensureChildProfile(page);
     await enter(app);
     await start(app, 'treasure');
     await walkPath(app);

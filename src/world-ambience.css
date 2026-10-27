@@ -1,9 +1,14 @@
-/* Calm movement spans the interface while the writing desk stays still. */
+/* Ambient movement stays on the home page, outside every game scene. */
 body.world-ambience-enabled{isolation:isolate}
 .world-ambience-sky{position:fixed;inset:0;z-index:2;overflow:hidden;pointer-events:none;user-select:none;-webkit-user-select:none;contain:strict}
 body.world-ambience-enabled>header{position:relative;z-index:3}
 .world-ambience-sky *,.world-ambience-effects *{pointer-events:none!important}
 .world-ambience-effects{position:fixed;inset:0;z-index:440;overflow:hidden;pointer-events:none;contain:strict;user-select:none;-webkit-user-select:none}
+/* These animals and atmosphere overlays are decoration. The train, selected
+   pieces, delivered objects and success feedback continue to show progress. */
+.world-ambience-enabled .quest-scene .quest-character-route,.world-ambience-enabled .quest-scene .quest-pirpir,.world-ambience-enabled .quest-scene .quest-atmosphere{display:none!important}
+.world-ambience-enabled .story-scene .story-world-motes,.world-ambience-enabled .story-scene .story-episode-lanterns,.world-ambience-enabled .learning .world-pirpir-flight{display:none!important}
+.world-ambience-enabled .story-scene .story-world-backdrop{animation:none}
 .world-cloud-wisp{position:absolute;display:block;width:180px;height:18px;opacity:.47;background:linear-gradient(90deg,transparent,#fffdf0b3 35%,#fff9d370 70%,transparent);border-radius:50%;filter:blur(3px);animation:world-cloud-sail 28s ease-in-out infinite}
 .world-cloud-wisp:before,.world-cloud-wisp:after{content:'';position:absolute;border-radius:50%;background:inherit;bottom:0;width:43%;height:170%;left:23%;filter:blur(1px)}
 .world-cloud-wisp:after{left:52%;height:130%;width:30%}
@@ -53,13 +58,10 @@ body.writing-focus .world-ambience-effects,body[data-motion-paused=true] .world-
 
 /* Animals perch in reserved site UI space, never inside an illustration. */
 .world-ambience-enabled .home-section-heading.world-pet-host-section{position:relative;padding-top:64px;margin-top:26px}
-body.world-ambience-enabled>footer.world-pet-host-footer{position:relative;padding-top:86px}
+body.world-ambience-enabled>footer.world-pet-host-footer{position:relative}
+body[data-ambience-home=true].world-ambience-enabled>footer.world-pet-host-footer{padding-top:86px}
 .world-pet-perch{position:absolute;inset:0;display:block;pointer-events:none!important;user-select:none;-webkit-user-select:none;z-index:2}
 .world-pet-perch-footer{inset:5px auto auto 50%;width:min(100%,600px);height:72px;transform:translateX(-50%)}
-.world-pet-perch-nav{display:block!important}
-.world-ambience-enabled .learning[data-screen=task]>.learn-nav.world-pet-host-nav{position:relative;min-height:44px}
-.world-ambience-enabled .learning[data-screen=task]>.learn-nav.world-pet-host-nav>span:not(.world-pet-perch){visibility:hidden}
-.world-pet-perch-nav .world-site-pet-bird{width:48px;max-height:38px;left:50%;top:5px;margin-left:-24px;--pet-aspect:44/34;animation:world-site-bird-hover 13s ease-in-out infinite}
 .world-site-pet{position:absolute;display:block;width:64px;height:auto;max-height:62px;aspect-ratio:var(--pet-aspect,1.25);pointer-events:none!important;user-select:none;-webkit-user-select:none;filter:drop-shadow(0 4px 3px #53613a1c);animation:world-pet-breathe 5.7s ease-in-out infinite;transform-origin:50% 90%}
 .world-site-pet-sprite{display:block;width:100%;height:100%;position:absolute;inset:0;background-image:var(--pet-atlas);background-size:200% 200%;background-repeat:no-repeat;background-position:0 0;animation:world-pet-poses var(--pet-cycle,4s) steps(1,end) infinite;pointer-events:none!important}
 .world-site-pet[hidden]{display:none!important}
@@ -84,5 +86,10 @@ body.world-ambience-enabled>footer.world-pet-host-footer{position:relative;paddi
 body.writing-focus .world-pet-perch{display:none}
 body.writing-focus .world-site-pet,body.writing-focus .world-site-pet-sprite{animation-play-state:paused!important}
 @media(max-width:700px){.world-ambience-enabled .home-section-heading.world-pet-host-section{padding-top:62px;margin-top:22px}.world-pet-perch-section .world-site-pet{right:8px;top:4px;width:52px;max-height:52px}.world-pet-perch-footer .world-site-pet-lion{width:58px}.world-pet-perch-footer .world-site-pet-squirrel{width:62px}.world-pet-perch-footer .world-site-pet-turtle{width:64px}.world-pet-perch-footer .world-site-pet-bird{width:44px}}
-@media(max-width:700px){.world-pet-perch-nav .world-site-pet-bird{width:38px;max-height:32px;left:50%;top:5px;margin-left:-19px}}
 @media(prefers-reduced-motion:reduce){.world-site-pet,.world-site-pet-sprite{animation:none!important;translate:none;rotate:none}.world-site-pet-sprite{background-position:0 0}.world-site-pet-bird .world-site-pet-sprite{background-position:100% 0}}
+
+/* Route changes hide the whole cast, including the persistent footer perch. */
+.world-ambience-sky[hidden],.world-ambience-effects[hidden],.world-pet-perch[hidden]{display:none!important}
+body[data-ambience-home=false] .world-ambience-sky,body[data-ambience-home=false] .world-ambience-effects,body[data-ambience-home=false] .world-pet-perch{display:none!important}
+body[data-ambience-home=false].world-ambience-enabled .logo .mark,body[data-ambience-home=false].world-ambience-enabled header nav .pill>svg,body[data-ambience-home=false].world-ambience-enabled header nav .pill>.illustration{animation:none}
+body[data-ambience-home=false] .world-site-pet,body[data-ambience-home=false] .world-site-pet-sprite{animation-play-state:paused!important}

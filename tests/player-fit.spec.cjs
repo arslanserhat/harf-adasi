@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { assert, getPlaywright, startServer, touch, stroke, assertClean } = require('./helpers.cjs');
+const { assert, getPlaywright, startServer, ensureChildProfile, touch, stroke, assertClean } = require('./helpers.cjs');
 
 const browserName = process.env.TEST_BROWSER || 'chromium';
 const viewports = [{ width: 1366, height: 768 }, { width: 1024, height: 768 }, { width: 390, height: 844 },
@@ -44,6 +44,7 @@ async function open(browser, url, viewport) {
   await page.goto(url);
   assert.equal(page.url(), new URL(url).href);
   await page.locator('#ready').filter({ hasText: 'Oyun hazır' }).waitFor();
+  await ensureChildProfile(page);
   await page.evaluate(() => document.fonts.ready);
   if (process.env.TEST_EXPECTED_VERSION) assert.equal(await page.evaluate(() => window.HARF_ADASI_VERSION), process.env.TEST_EXPECTED_VERSION);
   assert.equal(await page.locator('.home-version').count(), 0, 'no technical version label is shown to the child');

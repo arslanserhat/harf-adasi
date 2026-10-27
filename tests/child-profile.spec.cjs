@@ -48,6 +48,24 @@ async function save(app, name, newProfile = false) {
   await greeting(app.page, name);
   assert.equal(await app.page.locator('#dialog [data-do="all-letters"]').count(), 1, 'saving a profile does not replace the surrounding settings panel');
 }
+async function firstVisit(app, name) {
+  const dialog = app.page.locator('dialog[data-child-welcome]');
+  await dialog.waitFor({ state: 'visible' });
+  const input = dialog.getByLabel('Çocuğun adı', { exact: true });
+  assert.equal(await input.evaluate(element => document.activeElement === element), true, 'the first name field receives focus');
+  await press(app, dialog.getByRole('button', { name: 'Kaydet ve adaya gir' }));
+  assert.equal(await input.getAttribute('aria-invalid'), 'true', 'an empty name has an accessible validation error');
+  assert.equal(await dialog.locator('[role="alert"]').isVisible(), true);
+  await input.fill('<img src=x onerror=alert(1)>');
+  await input.press('Enter');
+  assert.equal(await input.getAttribute('aria-invalid'), 'true');
+  assert.equal(await dialog.locator('[data-child-welcome-error] img').count(), 0, 'invalid name text is never interpreted as markup');
+  await input.fill(name);
+  await input.press('Enter');
+  await dialog.waitFor({ state: 'detached' });
+  await greeting(app.page, name);
+  assert.equal(await app.page.locator('#main').evaluate(element => document.activeElement === element), true, 'saving places focus in the game');
+}
 async function currentCopy(page, name, absent) {
   await page.waitForFunction(value => document.querySelector('.home-hero-copy')?.textContent.includes(value), name);
   const copy = await page.locator('.home-shell').innerText();
@@ -88,9 +106,10 @@ async function fits(page) {
       try {
         await ready(page, url); await greeting(page, '');
         const before = await page.evaluate(key => Object.fromEntries(Object.keys(localStorage).filter(name => name !== key).map(name => [name, localStorage.getItem(name)])), PROFILE_KEY);
-        await settings(app); await save(app, FIRST); await close(app);
+        await firstVisit(app, FIRST);
         await currentCopy(page, FIRST, [SECOND]);
         await ready(page, url); await greeting(page, FIRST);
+        assert.equal(await page.locator('[data-child-welcome]').count(), 0, 'a saved valid profile enters without being prompted again');
         await settings(app); await save(app, SECOND, true); await close(app);
         await currentCopy(page, SECOND, [FIRST]);
         await settings(app);
@@ -109,11 +128,12 @@ async function fits(page) {
         const anonymous = await page.locator('.home-shell').innerText();
         assert.equal(anonymous.includes(SECOND) || anonymous.includes(LONG) || anonymous.includes(FIRST), false);
         await ready(page, url); await greeting(page, '');
+        assert.equal(await page.locator('[data-child-welcome]').count(), 0, 'signing out of an existing profile does not turn a returning visit into a first visit');
         const after = await page.evaluate(key => Object.fromEntries(Object.keys(localStorage).filter(name => name !== key).map(name => [name, localStorage.getItem(name)])), PROFILE_KEY);
         assert.deepEqual(after, before, 'changing the display profile cannot erase or select another progress/teacher record');
         for (const value of requests) for (const name of [FIRST, SECOND, LONG]) assert.equal(value.includes(name) || value.includes(encodeURIComponent(name)), false, 'private display names never enter a request URL or body');
         await assertClean(page, errors); passed++;
-        console.log(`PASS ${browserName} ${viewport.width}x${viewport.height} local profiles: neutral default, real saves/switch/reload/sign-out, Turkish/long names, safe text and no name requests`);
+        console.log(`PASS ${browserName} ${viewport.width}x${viewport.height} local profiles: first-visit form, Enter/validation/focus, saved-profile bypass, switch/reload/sign-out, Turkish/long names, safe text and no name requests`);
       } catch (error) {
         console.error(`FAIL ${browserName} ${viewport.width}x${viewport.height} local profile\n${error.stack}`);
         fs.mkdirSync(artifacts, { recursive: true }); await page.screenshot({ path: path.join(artifacts, `${browserName}-${viewport.width}-failure.png`), fullPage: true });

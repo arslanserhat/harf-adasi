@@ -56,6 +56,42 @@ Anahtar üretim betiği `APP_KEY` değerini doğrudan özel ayar dosyasına yaza
 
 Uygulama FrankenPHP/Caddy ile gerçek PHP HTTP sunucusu olarak çalışır; `artisan serve` üretim sunucusu olarak kullanılmaz. Runtime `www-data` kullanıcısıdır. Compose, yalnızca bu container'ın ağ ad alanında düşük porta bağlanmasına izin verir. Başlangıçta SQLite dosyası kalıcı storage içinde oluşturulur, Laravel migration'ları ve cache hazırlığı çalışır. Başarısız migration veya eksik anahtar uygulamayı sağlıklı göstermeden başlatmayı durdurur.
 
+## Birleşik Türkçe ses yayını
+
+Yeni ses düzeni sabit MP3'lerde ve izinli yeni öğretmen metinlerinde aynı
+ElevenLabs İrem sesini (`irem-v4-v1`) kullanır. Yeni MP3 dizini, tam manifest,
+sunucunun sabit metin kataloğu, ön yüz ve ses API'si birlikte yayımlanır. Kısmen
+üretilmiş eski/yeni ses karışımı manifest yayımlamayın. Eski Emel üretim betikleri
+yalnızca eski paketi yeniden üretmek içindir; yeni kataloğu bunlarla güncellemeyin.
+
+`.env.example` üretimi kapalı başlatır: `ELEVENLABS_ENABLED=false`; API anahtarı,
+ses kimliği ve model kimliği boştur. Aynı sunucu değişkenlerini özel
+`.env.production` dosyasında, kullanıcı tarafından onaylanan değerlerle
+yapılandırın. Anahtarı depoya, manifest içine, `VITE_*` değişkenlerine veya image
+build argümanlarına yazmayın. Hazır MP3 oynatımı sağlayıcı anahtarı gerektirmez.
+Hizmet açılmadığında yeni metin üretimi kullanılamaz; yazılı yönerge ve yetişkin
+okuması kullanılabilir.
+
+Varsayılan ayarlar `ELEVENLABS_REVISION=irem-v4-v1`, `ELEVENLABS_STABILITY=0.5`
+ve `ELEVENLABS_SIMILARITY_BOOST=0.75` değerleridir. Karakter sınırları genel günlük
+500, aylık 1000, oturum başına günlük 200 ve IP başına günlük 500'dür. Bu sınırlar
+çalışma sırasında istenen yeni sesler içindir; sabit kataloğun toplu üretimi ayrı
+bir bütçe ve onay gerektirir. Ses hizmeti için veritabanı migration'ı gerekmez;
+mevcut `APP_KEY`, oturumlar ve kalıcı storage korunur.
+
+Hazır kaydı olmayan eklenmiş öğretmen metni, hizmet açıkken dinleme isteğiyle
+ElevenLabs'e gönderilir; çocuğun profil adı gönderilmez. Öğretmen alanındaki
+bilgilendirme görünür kalmalı ve kişisel bilgi girilmemelidir. Yeni bir sesi
+üretmek veya henüz yüklenmemiş dosyayı indirmek internet gerektirir. Yeni düzende
+cihaz sesine geçilmez. GitHub Pages'te ses API'si çalışmaz; bilinmeyen veya
+yüklenemeyen ses `false` sonucu ve okunabilir yetişkin desteğiyle karşılanır.
+
+Yayını doğrularken hazır kayıt, izinli öğretmen metni, aynı metnin önbellekten
+tekrar okunması ve çıkış/sessize alma sırasında iptali ayrı ayrı kontrol edin.
+Sağlayıcı/kota hataları yerel sahte sağlayıcı testleriyle sınanır; PHP testleri
+yalnızca yeni yerel SQLite `:memory:` veritabanı kullanır. Canlı sağlayıcı
+istekleri kredi tüketebilir; otomatik testlerde gerçek sağlayıcı çağrılmaz.
+
 ## HTTPS reverse proxy
 
 `deploy/nginx.example`, mevcut Nginx'e eklenecek **yeni** vhost için bir şablondur. `harf.example.com` ve sertifika yollarını değiştirin. Örneği mevcut bir uygulamanın vhost'unun üstüne kopyalamayın. Yapılandırmayı `nginx -t` ile doğrulamadan yeniden yüklemeyin.

@@ -7,11 +7,12 @@ const vm = require('node:vm');
 // Isolate browser/audio APIs without network or an actual audio output device.
 // Only the bundler import and BASE_URL expression are replaced; the production
 // module's voice selection, playback, cancellation and fallback run unchanged.
-function createAudio({ manifest = {}, voices = [] } = {}) {
+function createAudio({ manifest = {}, voices = [], backend = false, csrfToken = 'session-csrf', resolver, speechLoading = false, clock = Date.now } = {}) {
   const players = [];
   const spoken = [];
   const notices = [];
   const requests = [];
+  const requestDetails = [];
   const scheduledTimers = [];
   class FakeHowl {
     constructor(options) {
@@ -22,7 +23,7 @@ function createAudio({ manifest = {}, voices = [] } = {}) {
       this.loadCount = 0;
       this.queuedPlayCount = 0;
       this.queuedStopCount = 0;
-      this.loadingState = options.preload === false ? 'unloaded' : 'loaded';
+      this.loadingState = options.preload === false ? 'unloaded' : speechLoading ? 'loading' : 'loaded';
       players.push(this);
     }
     on(name, fn) { this.handlers.set(name, [...this.handlers.get(name) || [], { fn }]); return this; }
@@ -59,8 +60,18 @@ function createAudio({ manifest = {}, voices = [] } = {}) {
   const context = vm.createContext({
     Howl: FakeHowl,
     Howler: { ctx: { state: 'running' } },
-    window: { speechSynthesis: engine, SpeechSynthesisUtterance: class { constructor(text) { this.text = text; } } },
-    fetch: async url => { requests.push(url); return { ok: true, json: async () => manifest }; },
+    window: { location: { origin: 'https://harf.test' }, speechSynthesis: engine, SpeechSynthesisUtterance: class { constructor(text) { this.text = text; } } },
+    document: { querySelector(selector) {
+      if (selector === 'meta[name="harf-backend"]') return backend ? { content: 'laravel' } : null;
+      if (selector === 'meta[name="csrf-token"]') return csrfToken ? { content: csrfToken } : null;
+      return null;
+    } },
+    URL, AbortController, Date: class extends Date { static now() { return clock(); } },
+    fetch: async (url, options) => {
+      requests.push(url); requestDetails.push({ url, options });
+      return url.endsWith('manifest.json') ? { ok: true, json: async () => manifest }
+        : resolver ? resolver(url, options) : { ok: false, status: 503, json: async () => ({ message: 'Unavailable' }) };
+    },
     setTimeout: (fn, delay) => { scheduledTimers.push(delay); return setTimeout(fn, 1); },
     clearTimeout,
     queueMicrotask,
@@ -72,10 +83,16 @@ function createAudio({ manifest = {}, voices = [] } = {}) {
   vm.runInContext(`${source}\nthis.exports = { audio, configureAudio, normalizeSpeechText };`, context);
   const api = context.exports;
   api.configureAudio({ onStatus: message => notices.push(message) });
-  return { ...api, players, spoken, notices, requests, scheduledTimers };
+  return { ...api, players, spoken, notices, requests, requestDetails, scheduledTimers };
 }
 
 const tick = () => new Promise(resolve => setImmediate(resolve));
+const legacyManifest = phrases => ({ voice: 'tr-TR-EmelNeural', phrases });
+const unifiedManifest = phrases => ({ provider: 'elevenlabs', revision: 'irem-v4-v1', phrases });
+const resolvedUrl = hash => `/api/speech/audio/${hash.repeat(64)}?expires=1999999999&signature=${'f'.repeat(64)}`;
+const resolvedResponse = (url = resolvedUrl('a'), overrides = {}) => ({
+  ok: true, json: async () => ({ url, revision: 'irem-v4-v1', expires_at: Math.floor(Date.now() / 1000) + 300, ...overrides }),
+});
 
 test('manifest keys preserve Turkish dotted/dotless distinctions', () => {
   const { normalizeSpeechText } = createAudio();
@@ -98,7 +115,7 @@ test('recorded Turkish nine takes priority over an English system voice', async 
 });
 
 test('English-only speech is never used as a fallback', async () => {
-  const app = createAudio({ voices: [{ lang: 'en-GB', name: 'English' }] });
+  const app = createAudio({ manifest: legacyManifest({}), voices: [{ lang: 'en-GB', name: 'English' }] });
   assert.equal(await app.audio.speak('nine'), false);
   assert.equal(app.spoken.length, 0);
   assert.ok(app.notices.some(message => message.includes('Türkçe ses bulunamadı')));
@@ -106,7 +123,7 @@ test('English-only speech is never used as a fallback', async () => {
 
 test('native fallback explicitly selects a real Turkish voice', async () => {
   const turkish = { lang: 'tr-TR', name: 'Yelda', localService: true };
-  const app = createAudio({ voices: [{ lang: 'en-US', name: 'English' }, turkish] });
+  const app = createAudio({ manifest: legacyManifest({}), voices: [{ lang: 'en-US', name: 'English' }, turkish] });
   assert.equal(await app.audio.speak('nine'), true);
   assert.equal(app.spoken.length, 1);
   assert.equal(app.spoken[0].voice, turkish);
@@ -129,7 +146,7 @@ test('replacing speech stops the old clip and resolves its pending request', asy
 });
 
 test('missing recording falls back to Turkish and waits for that speech', async () => {
-  const app = createAudio({ manifest: { nine: 'missing.mp3' }, voices: [{ lang: 'tr-TR', name: 'Yelda' }] });
+  const app = createAudio({ manifest: legacyManifest({ nine: 'missing.mp3' }), voices: [{ lang: 'tr-TR', name: 'Yelda' }] });
   const finished = app.audio.speak('nine');
   await tick();
   const clip = app.players.find(player => player.options.src[0].endsWith('missing.mp3'));
@@ -345,4 +362,171 @@ test('exact punctuation and sentence recordings take precedence; number dots are
   }
   assert.equal(await app.audio.speak('1.'), false, 'ordinal punctuation cannot silently become a cardinal number recording');
   assert.equal(app.players.some(player => player.options.src[0].endsWith('one.mp3')), false);
+});
+
+test('unified teacher speech resolves with session CSRF and plays the same-origin signed clip', async () => {
+  const app = createAudio({ backend: true, manifest: unifiedManifest({}), resolver: async () => resolvedResponse() });
+  const finished = app.audio.speak('Şule'); await tick();
+  const request = app.requestDetails.find(item => item.url === '/api/speech/resolve');
+  assert.ok(request, 'unknown teacher text is sent to the protected resolver');
+  assert.equal(request.options.method, 'POST');
+  assert.equal(request.options.credentials, 'same-origin');
+  assert.equal(request.options.headers['X-CSRF-TOKEN'], 'session-csrf');
+  assert.equal(request.options.headers['Content-Type'], 'application/json');
+  assert.deepEqual(JSON.parse(request.options.body), { text: 'Şule' });
+  assert.ok(request.options.signal instanceof AbortSignal);
+  const clip = app.players.find(player => player.options.src[0] === resolvedUrl('a'));
+  assert.ok(clip); assert.equal(clip.options.html5, true); assert.equal(clip.playCount, 1);
+  assert.equal(app.spoken.length, 0);
+  clip.emit('end'); assert.equal(await finished, true);
+});
+
+test('a signed extensionless backend audio route declares the MP3 codec to Howler', async () => {
+  const app = createAudio({ backend: true, manifest: unifiedManifest({}), resolver: async () => resolvedResponse() });
+  const finished = app.audio.speak('naneli'); await tick();
+  const clip = app.players.find(player => player.options.src[0] === resolvedUrl('a'));
+  assert.ok(clip, 'the resolved signed route reaches the recorded player');
+  assert.deepEqual(Array.from(clip.options.format || []), ['mp3'], 'Howler cannot infer a codec from the extensionless signed route');
+  clip.emit('end'); assert.equal(await finished, true);
+});
+
+test('a loaded unified fixed clip wins without a resolver request or native voice', async () => {
+  const app = createAudio({ backend: true, manifest: unifiedManifest({ nine: 'irem-v4-v1/nine.mp3' }), voices: [{ lang: 'tr-TR', name: 'Device Turkish' }] });
+  const finished = app.audio.speak('nine'); await tick();
+  assert.equal(app.requests.filter(url => url.includes('/speech/resolve')).length, 0);
+  assert.equal(app.players[0].options.src[0], '/audio/irem-v4-v1/nine.mp3');
+  app.players[0].emit('end'); assert.equal(await finished, true); assert.equal(app.spoken.length, 0);
+});
+
+test('unified fixed load failure resolves once and a failed resolved clip never loops to device speech', async () => {
+  const app = createAudio({ backend: true, manifest: unifiedManifest({ nine: 'irem-v4-v1/missing.mp3' }),
+    voices: [{ lang: 'tr-TR', name: 'Device Turkish' }], resolver: async () => resolvedResponse() });
+  const finished = app.audio.speak('nine'); await tick(); app.players[0].emit('loaderror'); await tick();
+  assert.equal(app.requests.filter(url => url === '/api/speech/resolve').length, 1);
+  const recovered = app.players.find(player => player.options.src[0] === resolvedUrl('a'));
+  assert.ok(recovered); recovered.emit('loaderror'); await tick();
+  assert.equal(await finished, false); assert.equal(app.spoken.length, 0);
+  assert.equal(app.requests.filter(url => url === '/api/speech/resolve').length, 1);
+  assert.ok(app.notices.length > 0);
+});
+
+test('unified quota and provider errors return false with calm status and never use native speech', async () => {
+  for (const status of [422, 429, 503]) {
+    const app = createAudio({ backend: true, manifest: unifiedManifest({}), voices: [{ lang: 'tr-TR', name: 'Device Turkish' }],
+      resolver: async () => ({ ok: false, status, json: async () => ({ message: 'private upstream details' }) }) });
+    assert.equal(await app.audio.speak('Şule'), false);
+    assert.equal(app.spoken.length, 0); assert.equal(app.players.length, 0);
+    assert.ok(app.notices.length > 0); assert.ok(app.notices.every(message => !message.includes('private upstream')));
+  }
+});
+
+test('static unified voice and unknown manifest metadata fail without resolver or native speech', async () => {
+  for (const manifest of [unifiedManifest({}), {}]) {
+    const app = createAudio({ manifest, voices: [{ lang: 'tr-TR', name: 'Device Turkish' }] });
+    assert.equal(await app.audio.speak('Şule'), false); assert.equal(app.spoken.length, 0);
+    assert.equal(app.requests.filter(url => url.includes('/api/speech/')).length, 0);
+    assert.ok(app.notices.length > 0);
+  }
+});
+
+test('resolver playback rejects remote, absolute, alternate-path, expired and wrong-revision replies', async () => {
+  const replies = [
+    { url: `https://evil.test${resolvedUrl('a')}` }, { url: `https://harf.test${resolvedUrl('a')}` },
+    { url: `//evil.test${resolvedUrl('a')}` }, { url: '/audio/arbitrary.mp3' },
+    { url: '/api/speech/audio/../secret?signature=x' }, { url: `${resolvedUrl('a')}#fragment` },
+    { expires_at: Math.floor(Date.now() / 1000) - 1 }, { revision: 'other-voice-v1' },
+  ];
+  for (const reply of replies) {
+    const app = createAudio({ backend: true, manifest: unifiedManifest({}), resolver: async () => resolvedResponse(resolvedUrl('a'), reply) });
+    assert.equal(await app.audio.speak('Şule'), false); assert.equal(app.players.length, 0); assert.equal(app.spoken.length, 0);
+    assert.equal(app.requests.filter(url => url === '/api/speech/resolve').length, 1);
+  }
+});
+
+test('stop and mute abort pending resolution, settle false promptly, and prevent late playback', async () => {
+  for (const cancel of [app => app.audio.stopSpeech(), app => app.audio.setMuted(true)]) {
+    let complete;
+    const app = createAudio({ backend: true, manifest: unifiedManifest({}), resolver: () => new Promise(resolve => { complete = resolve; }) });
+    let settled = false;
+    const finished = app.audio.speak('Şule').then(value => { settled = true; return value; }); await tick();
+    const lookup = app.requestDetails.find(item => item.url === '/api/speech/resolve'); assert.ok(lookup);
+    cancel(app); await tick(); assert.equal(settled, true); assert.equal(await finished, false);
+    assert.equal(lookup.options.signal.aborted, true);
+    complete(resolvedResponse()); await tick(); assert.equal(app.players.length, 0);
+  }
+});
+
+test('identical in-flight requests share lookup while only the newest speech intent can play', async () => {
+  let complete;
+  const app = createAudio({ backend: true, manifest: unifiedManifest({}), resolver: () => new Promise(resolve => { complete = resolve; }) });
+  const first = app.audio.speak('Şule'); await tick();
+  const second = app.audio.speak('Şule'); await tick();
+  assert.equal(await first, false); assert.equal(app.requests.filter(url => url === '/api/speech/resolve').length, 1);
+  assert.equal(app.requestDetails.find(item => item.url === '/api/speech/resolve').options.signal.aborted, false);
+  complete(resolvedResponse()); await tick(); assert.equal(app.players.length, 1); assert.equal(app.players[0].playCount, 1);
+  app.players[0].emit('end'); assert.equal(await second, true);
+});
+
+test('successful resolver URLs and Howler players are reused while the cache remains bounded', async () => {
+  let index = 0;
+  const app = createAudio({ backend: true, manifest: unifiedManifest({}), resolver: async () => resolvedResponse(resolvedUrl((index++ % 10).toString())) });
+  for (const text of ['Şule', 'Şule', ...Array.from({ length: 10 }, (_, i) => `öğretmen ${i}`), 'Şule']) {
+    const finished = app.audio.speak(text); await tick();
+    const clip = app.players.filter(player => !player.unloaded).at(-1); clip.emit('end'); assert.equal(await finished, true);
+  }
+  assert.equal(app.requests.filter(url => url === '/api/speech/resolve').length, 12, 'an evicted text requires a fresh resolution');
+  assert.ok(app.players.filter(player => !player.unloaded).length <= 8);
+});
+
+test('canceling a loading speech clip never queues a stale Howler play or stop', async () => {
+  const app = createAudio({ manifest: unifiedManifest({ nine: 'irem-v4-v1/nine.mp3' }), speechLoading: true });
+  const finished = app.audio.speak('nine'); await tick(); const clip = app.players[0];
+  app.audio.stopSpeech(); assert.equal(await finished, false); clip.emit('load');
+  assert.equal(clip.playCount, 0); assert.equal(clip.queuedPlayCount, 0); assert.equal(clip.queuedStopCount, 0);
+});
+
+test('replacing a pending different text aborts its lookup and ignores its late signed URL', async () => {
+  const pending = [];
+  const app = createAudio({ backend: true, manifest: unifiedManifest({}), resolver: () => new Promise(resolve => { pending.push(resolve); }) });
+  const first = app.audio.speak('Şule'); await tick();
+  const second = app.audio.speak('Eylül'); await tick(); assert.equal(await first, false);
+  const requests = app.requestDetails.filter(item => item.url === '/api/speech/resolve');
+  assert.equal(requests.length, 2); assert.equal(requests[0].options.signal.aborted, true);
+  pending[0](resolvedResponse(resolvedUrl('a'))); await tick(); assert.equal(app.players.length, 0);
+  pending[1](resolvedResponse(resolvedUrl('b'))); await tick(); assert.equal(app.players.length, 1);
+  assert.equal(app.players[0].options.src[0], resolvedUrl('b')); app.players[0].emit('end'); assert.equal(await second, true);
+});
+
+test('expired signed URL cache entries are resolved again before playback', async () => {
+  let now = Date.now(), count = 0;
+  const app = createAudio({ backend: true, manifest: unifiedManifest({}), clock: () => now,
+    resolver: async () => resolvedResponse(resolvedUrl(count++ === 0 ? 'a' : 'b'), { expires_at: Math.floor(now / 1000) + 30 }) });
+  let finished = app.audio.speak('Şule'); await tick(); app.players[0].emit('end'); assert.equal(await finished, true);
+  finished = app.audio.speak('Şule'); await tick(); app.players[0].emit('end'); assert.equal(await finished, true);
+  assert.equal(count, 1);
+  now += 31000;
+  finished = app.audio.speak('Şule'); await tick();
+  assert.equal(count, 2); assert.equal(app.players[1].options.src[0], resolvedUrl('b'));
+  app.players[1].emit('end'); assert.equal(await finished, true);
+});
+
+test('a resolver is never called without session CSRF and static failed media never changes voice', async () => {
+  const noToken = createAudio({ backend: true, csrfToken: '', manifest: unifiedManifest({}), voices: [{ lang: 'tr-TR', name: 'Device Turkish' }] });
+  assert.equal(await noToken.audio.speak('Şule'), false); assert.equal(noToken.spoken.length, 0);
+  assert.equal(noToken.requests.filter(url => url === '/api/speech/resolve').length, 0);
+  const app = createAudio({ manifest: unifiedManifest({ nine: 'irem-v4-v1/missing.mp3' }), voices: [{ lang: 'tr-TR', name: 'Device Turkish' }] });
+  const finished = app.audio.speak('nine'); await tick(); app.players[0].emit('loaderror');
+  assert.equal(await finished, false); assert.equal(app.spoken.length, 0); assert.ok(app.notices.length > 0);
+  assert.equal(app.requests.filter(url => url === '/api/speech/resolve').length, 0);
+});
+
+test('resolved speech retains volume, effect ducking and playback-unlock behavior', async () => {
+  const app = createAudio({ backend: true, manifest: unifiedManifest({}), resolver: async () => resolvedResponse() });
+  app.audio.playEffect('correct'); const effect = app.players[0]; effect.emit('load');
+  const originalLevel = effect.currentVolume;
+  const finished = app.audio.speak('Şule'); await tick(); const clip = app.players[1];
+  assert.ok(effect.currentVolume < originalLevel);
+  app.audio.setVolume(0.4); assert.equal(clip.currentVolume, 0.4);
+  clip.emit('playerror'); clip.emit('unlock'); assert.equal(clip.playCount, 2);
+  clip.emit('end'); assert.equal(await finished, true); assert.equal(effect.currentVolume, 0.4 * 0.35);
 });

@@ -1,8 +1,9 @@
 import { Howl, Howler } from 'howler';
 
-// Recorded Turkish is the primary voice. Native speech is used only when the
-// device actually supplies a Turkish voice; lang='tr-TR' alone is insufficient.
-const BASE = typeof document !== 'undefined' && document.querySelector('meta[name="harf-backend"]')?.content === 'laravel' ? '/' : (import.meta.env?.BASE_URL || '/');
+// The unified voice uses its fixed catalog or the protected same-origin
+// resolver. Device speech is limited to explicitly identified legacy media.
+const IS_LARAVEL = typeof document !== 'undefined' && document.querySelector('meta[name="harf-backend"]')?.content === 'laravel';
+const BASE = IS_LARAVEL ? '/' : (import.meta.env?.BASE_URL || '/');
 const AUDIO_BASE = `${BASE.endsWith('/') ? BASE : `${BASE}/`}audio/`;
 // Explicit versioned files keep retired cues out of playback and the cache.
 // Loading still starts only when a user action requests the corresponding cue.
@@ -18,6 +19,8 @@ const activeEffects = new Set();
 // Keep the live HTML5 clip cache within Safari's unlocked audio pool.
 const MAX_CACHED_PHRASES = 8;
 const clips = new Map();
+const resolvedClips = new Map();
+let pendingResolution = null;
 let phrases = Object.create(null);
 let manifestPromise;
 let manifestAvailable = false;
@@ -33,6 +36,8 @@ let voiceMode = 'loading';
 let nativeVoiceName = '';
 let onStatus = () => {};
 let nativeNoticeShown = false;
+let legacyNativeAllowed = false;
+let voiceRevision = '';
 
 Howler.autoUnlock = true;
 
@@ -93,6 +98,8 @@ function loadManifest() {
         return response.json();
       })
       .then(data => {
+        legacyNativeAllowed = data.voice === 'tr-TR-EmelNeural' && !data.provider && !data.revision;
+        voiceRevision = typeof data.revision === 'string' ? data.revision : '';
         const source = data.phrases || data;
         for (const [text, entry] of Object.entries(source)) {
           const file = typeof entry === 'string' ? entry : entry?.file || entry?.src;
@@ -105,7 +112,7 @@ function loadManifest() {
         return phrases;
       })
       .catch(() => {
-        voiceMode = selectTurkishVoice() ? 'native-turkish' : 'unavailable';
+        voiceMode = 'unavailable';
         return phrases;
       });
   }
@@ -122,16 +129,96 @@ function pruneClips() {
   }
 }
 
-function stopSpeech() {
+function stopSpeech(preserveResolutionKey = '') {
   speechSequence += 1;
+  if (pendingResolution && pendingResolution.key !== preserveResolutionKey) {
+    pendingResolution.controller.abort();
+    pendingResolution = null;
+  }
   const clip = currentClip;
   finishCurrent?.(false);
   finishCurrent = null;
   currentClip = null;
-  clip?.stop();
+  // No deferred Howler play/stop is queued for a clip still loading. Playback
+  // starts only in its guarded load handler, which finishCurrent removes.
+  if (clip?.state() === 'loaded') clip.stop();
   try { speechEngine()?.cancel(); } catch { /* Native speech can be unavailable. */ }
   currentUtterance = null;
   updateEffectVolumes();
+}
+
+function waitForSpeechStep(promise, sequence) {
+  return new Promise(resolve => {
+    let settled = false;
+    const finish = value => {
+      if (settled) return;
+      settled = true;
+      if (finishCurrent === finish) finishCurrent = null;
+      resolve(value);
+    };
+    finishCurrent = finish;
+    Promise.resolve(promise).then(value => finish(sequence === speechSequence && !muted ? value : false), () => finish(false));
+  });
+}
+
+function unavailableSpeech() {
+  voiceMode = 'unavailable';
+  status('Bu ses şu anda çalınamıyor. Bir büyüğünle birlikte okuyabilirsin.');
+  return false;
+}
+
+function validResolvedClip(data) {
+  if (!data || typeof data.url !== 'string' || !/^\/api\/speech\/audio\/[a-f0-9]{64}\?[^#]+$/u.test(data.url)
+    || typeof data.revision !== 'string' || !/^[a-zA-Z0-9_.:-]{1,80}$/u.test(data.revision)
+    || voiceRevision && data.revision !== voiceRevision
+    || !Number.isInteger(data.expires_at) || data.expires_at <= Math.floor(Date.now() / 1000)) return null;
+  try {
+    const url = new URL(data.url, window.location.origin);
+    if (url.origin !== window.location.origin || url.hash) return null;
+    return { url: data.url, revision: data.revision, expiresAt: data.expires_at };
+  } catch { return null; }
+}
+
+function resolveClip(text) {
+  const key = normalizeSpeechText(text);
+  const cached = resolvedClips.get(key);
+  if (cached && cached.expiresAt > Math.floor(Date.now() / 1000) && (!voiceRevision || cached.revision === voiceRevision)) {
+    resolvedClips.delete(key); resolvedClips.set(key, cached);
+    return Promise.resolve(cached);
+  }
+  resolvedClips.delete(key);
+  if (pendingResolution?.key === key) return pendingResolution.promise;
+  const csrf = typeof document !== 'undefined' ? document.querySelector('meta[name="csrf-token"]')?.content : '';
+  if (!IS_LARAVEL || !csrf || typeof AbortController !== 'function') return Promise.resolve(null);
+  const request = { key, controller: new AbortController(), promise: null };
+  pendingResolution = request;
+  request.promise = (async () => {
+    try {
+      const response = await fetch('/api/speech/resolve', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-CSRF-TOKEN': csrf },
+        body: JSON.stringify({ text }), signal: request.controller.signal,
+      });
+      if (!response.ok) return null;
+      const entry = validResolvedClip(await response.json());
+      if (!entry || request.controller.signal.aborted || pendingResolution !== request) return null;
+      resolvedClips.set(key, entry);
+      while (resolvedClips.size > MAX_CACHED_PHRASES) resolvedClips.delete(resolvedClips.keys().next().value);
+      return entry;
+    } catch { return null; }
+    finally { if (pendingResolution === request) pendingResolution = null; }
+  })();
+  return request.promise;
+}
+
+async function resolvedSpeech(text, sequence) {
+  const entry = await waitForSpeechStep(resolveClip(text), sequence);
+  if (sequence !== speechSequence || muted) return false;
+  return entry ? recordedSpeech(entry.url, text, sequence, true) : unavailableSpeech();
+}
+
+function speechFallback(text, sequence) {
+  return legacyNativeAllowed ? nativeSpeech(text, sequence) : resolvedSpeech(text, sequence);
 }
 
 function unlock() {
@@ -144,7 +231,7 @@ function unlock() {
 }
 
 async function nativeSpeech(text, sequence) {
-  const voice = await waitForTurkishVoice();
+  const voice = await waitForSpeechStep(waitForTurkishVoice(), sequence);
   if (sequence !== speechSequence || muted) return false;
   if (!voice || typeof window?.SpeechSynthesisUtterance !== 'function') {
     voiceMode = 'unavailable';
@@ -185,17 +272,20 @@ async function nativeSpeech(text, sequence) {
   });
 }
 
-function recordedSpeech(file, text, sequence) {
-  let clip = clips.get(file);
+function recordedSpeech(url, text, sequence, resolved = false) {
+  let clip = clips.get(url);
   if (!clip) {
     clip = new Howl({
-      src: [`${AUDIO_BASE}${file}`],
+      src: [url],
+      format: ['mp3'],
       html5: true,
       preload: true,
       volume,
       pool: 1,
     });
-    clips.set(file, clip);
+    clips.set(url, clip);
+  } else {
+    clips.delete(url); clips.set(url, clip);
   }
   currentClip = clip;
   updateEffectVolumes();
@@ -208,6 +298,7 @@ function recordedSpeech(file, text, sequence) {
       clip.off('loaderror', loadError);
       clip.off('playerror', playError);
       clip.off('unlock', retryAfterUnlock);
+      clip.off('load', playWhenReady);
     };
     const finish = value => {
       if (settled) return;
@@ -225,9 +316,12 @@ function recordedSpeech(file, text, sequence) {
       clean();
       if (finishCurrent === finish) finishCurrent = null;
       if (currentClip === clip) currentClip = null;
+      if (clips.get(url) === clip) clips.delete(url);
+      clip.unload();
       updateEffectVolumes();
+      if (resolved && resolvedClips.get(normalizeSpeechText(text))?.url === url) resolvedClips.delete(normalizeSpeechText(text));
       const result = sequence === speechSequence && !muted
-        ? await nativeSpeech(text, sequence) : false;
+        ? resolved ? unavailableSpeech() : await speechFallback(text, sequence) : false;
       resolve(result);
     };
     const retryAfterUnlock = () => {
@@ -235,35 +329,43 @@ function recordedSpeech(file, text, sequence) {
     };
     const playError = () => {
       if (sequence !== speechSequence || muted || settled) { finish(false); return; }
+      clip.off('unlock', retryAfterUnlock);
       clip.once('unlock', retryAfterUnlock);
       status('Sesi başlatmak için Dinle düğmesine yeniden dokun.');
+    };
+    const playWhenReady = () => {
+      if (sequence !== speechSequence || muted || settled) { finish(false); return; }
+      try { clip.play(); } catch { finish(false); }
     };
     finishCurrent = finish;
     clip.once('end', ended);
     clip.once('loaderror', loadError);
     clip.on('playerror', playError);
-    if (clip.state() === 'unloaded') clip.load();
     voiceMode = 'recorded';
     nativeVoiceName = '';
-    clip.play();
+    if (clip.state() === 'loaded') playWhenReady();
+    else {
+      clip.once('load', playWhenReady);
+      if (clip.state() === 'unloaded') clip.load();
+    }
   });
 }
 
 async function speak(value) {
-  stopSpeech();
   const text = String(value ?? '').trim();
+  stopSpeech(normalizeSpeechText(text));
   if (!text) return false;
   if (muted) { status('Ses kapalı. Hoparlöre dokunarak açabilirsin.'); return false; }
   unlock();
   const sequence = speechSequence;
-  await loadManifest();
+  await waitForSpeechStep(loadManifest(), sequence);
   if (sequence !== speechSequence || muted) return false;
   const key = normalizeSpeechText(text);
   // A single literacy word may come from a sentence card with its final stop.
   // Keep exact phrases first; never strip dots from numbers or whole sentences.
   const word = key.match(/^([abcçdefgğhıijklmnoöprsştuüvyz]{1,24})[.!?…]+$/u)?.[1];
   const file = phrases[key] || (word ? phrases[word] : null);
-  return file ? recordedSpeech(file, phrases[key] ? text : word, sequence) : nativeSpeech(text, sequence);
+  return file ? recordedSpeech(`${AUDIO_BASE}${file}`, phrases[key] ? text : word, sequence) : speechFallback(text, sequence);
 }
 
 function updateEffectVolumes() {

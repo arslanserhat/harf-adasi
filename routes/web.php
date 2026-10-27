@@ -3,6 +3,7 @@
 use App\Http\Controllers\GameProgressController;
 use App\Http\Controllers\GameSessionController;
 use App\Http\Controllers\LearningStateController;
+use App\Http\Controllers\SpeechController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'game')->name('game');
@@ -37,3 +38,12 @@ Route::put('/api/learning', [LearningStateController::class, 'store'])
 Route::delete('/api/learning', [LearningStateController::class, 'destroy'])
     ->middleware('throttle:10,1')
     ->name('learning.destroy');
+
+Route::post('/api/speech/resolve', [SpeechController::class, 'resolve'])
+    ->middleware('throttle:120,1')
+    ->name('speech.resolve');
+
+Route::get('/api/speech/audio/{hash}', [SpeechController::class, 'audio'])
+    ->where('hash', '[a-f0-9]{64}')
+    ->middleware('throttle:240,1')
+    ->name('speech.audio');

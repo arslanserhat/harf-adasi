@@ -2,6 +2,25 @@
 
 return [
 
+    'elevenlabs' => [
+        'enabled' => env('ELEVENLABS_ENABLED', false),
+        'key' => env('ELEVENLABS_API_KEY'),
+        'voice_id' => env('ELEVENLABS_VOICE_ID', ''),
+        // Enabled only after the approved account's actual model is verified.
+        'model_id' => env('ELEVENLABS_MODEL_ID', ''),
+        'revision' => env('ELEVENLABS_REVISION', 'irem-v4-v1'),
+        'settings' => [
+            'stability' => (float) env('ELEVENLABS_STABILITY', 0.5),
+            'similarity_boost' => (float) env('ELEVENLABS_SIMILARITY_BOOST', 0.75),
+        ],
+        'daily_char_limit' => (int) env('ELEVENLABS_DAILY_CHAR_LIMIT', 500),
+        'monthly_char_limit' => (int) env('ELEVENLABS_MONTHLY_CHAR_LIMIT', 1000),
+        'session_daily_char_limit' => (int) env('ELEVENLABS_SESSION_DAILY_CHAR_LIMIT', 200),
+        'ip_daily_char_limit' => (int) env('ELEVENLABS_IP_DAILY_CHAR_LIMIT', 500),
+        'catalog_path' => resource_path('speech/catalog.json'),
+        'fixed_audio_path' => public_path('audio'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Third Party Services

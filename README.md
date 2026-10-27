@@ -4,10 +4,13 @@ Türkçe okuma, yazma ve sayı alıştırmaları için Laravel 13 uygulaması. A
 
 ## Ses, kutlama ve telefon düzeni
 
-Noktalı tek kelimeler hazır Türkçe kayıtlarını kullanır; `al.` artık kayıtlı `al`
-kelimesini atlayıp cihaz sesine geçmez. Tebrik tek kısa kayıttır. Dört efekt,
-yumuşak ahşap/kâğıt/vurmalı tınılarla yenilendi. Ses kaynağı EmelNeural'dır;
-ChatGPT Voice aktarımı değildir.
+Yeni ses düzeninde sabit MP3 kataloğu ve izin verilen yeni öğretmen metinleri
+aynı ElevenLabs İrem sesini (`irem-v4-v1`) kullanır. Önce hazır dosya oynatılır;
+hazır kaydı olmayan veya yüklenemeyen metinler Laravel ses hizmetine yönlendirilir.
+Yeni düzende tarayıcının cihaz sesi kullanılmaz. Sunucuda ses üretimi varsayılan
+olarak kapalıdır; etkinleştirmek için özel sunucu ayarları gerekir. ChatGPT Voice
+aktarımı değildir. Noktalı tek kelimeler mevcut kelime kayıtlarını kullanabilir;
+tebrik tek kısa kayıttır. Dört kısa oyun efekti anlatımdan ayrı ayarlanır.
 
 Tam yolculuk bitince açılan macera kartı çocuğun devamını bekler. Logo, menü,
 oyun kartları ve sayfa kenarları da hareketlidir; dekor dokunmaları engellemez ve
@@ -23,8 +26,8 @@ köprü tahtaları ve sulama hareketleri durdurulabilir; azaltılmış hareket d
 
 “Devam et” bitirilen kelime/heceyi ve son beceriyi sonraki plana taşır. Sonraki
 turlar kelime ve görev sırasını değiştirir; üç yazılmış hikâye arasında ilerler:
-Kayıp Bahçe Mektubu, Pırpır'ın Bahçe Pazarı ve Fener Şenliği. Gerekli 77 sabit metnin
-hazır Türkçe kaydı vardır; bunlar ChatGPT Voice sesiyle üretilmiş değildir.
+Kayıp Bahçe Mektubu, Pırpır'ın Bahçe Pazarı ve Fener Şenliği. Hikâye metinleri de
+aynı Türkçe anlatım kataloğunu kullanır.
 
 ## Hikâyeli öğrenme yolculuğu
 
@@ -34,12 +37,12 @@ hazır Türkçe kaydı vardır; bunlar ChatGPT Voice sesiyle üretilmiş değild
 - **Hatırlama takibi:** aynı kelime farklı görevlerde geri gelir; sonraki günlere yayılan bağımsız hatırlama, ilk günkü tamamlamadan ayrı izlenir. Çalışılan harflerin yazma ve kart sıralama gözlemleri de ayrıca izlenir.
 - **Kaldığın yerden devam:** görev sırası, ipucu kayıtları ve sınırlı yazı taslağı bu tarayıcıda; Laravel'de ayrıca oturuma ayrılmış şifreli kayıt içinde korunur.
 
-[Araştırma ve tasarım kararları](docs/learning-design.md), kullanılan kaynakları, uyarlama kurallarını ve sınırlarını açıklar. Bu kurallar kendini yeniden yazan yapay zekâ veya öğrenme güçlüğü tanısı değildir. Yeni öğretmen kelimelerinde kayıt yoksa gerçek Türkçe cihaz sesi ya da yetişkin okuması kullanılır; her yeni kelime için sunucuda otomatik ses üretimi yoktur.
+[Araştırma ve tasarım kararları](docs/learning-design.md), kullanılan kaynakları, uyarlama kurallarını ve sınırlarını açıklar. Bu kurallar kendini yeniden yazan yapay zekâ veya öğrenme güçlüğü tanısı değildir. Sunuculu sürümde, ses hizmeti etkinse hazır kaydı olmayan kayıtlı öğretmen metni dinleme isteğiyle ElevenLabs'e gönderilir. Çocuğun profil adı gönderilmez; öğretmen alanına kişisel bilgi yazılmamalıdır. Ses kullanılamazsa yetişkin okuyabilir.
 
 ## Korunan oyunlar ve araçlar
 
 - **Yazı stüdyosu:** tablet ekranına sığan defter, yazarken sayfa kaydırma kilidi, Safari için pasif olmayan dokunma koruması, çoklu parmak ayrımı ve yön değişimine uyum.
-- **Türkçe anlatım:** EmelNeural ile üretilmiş yerel MP3 kayıtları. `nine` dahil hazır kelimeler cihazın İngilizce sesine bırakılmaz; yedek ses yalnızca gerçekten Türkçe bir ses varsa kullanılır.
+- **Türkçe anlatım:** hazır MP3 kataloğu ve korumalı Laravel ses hizmetinde aynı ElevenLabs İrem sesi. Yeni ses düzeninde İngilizce veya Türkçe cihaz sesine geçilmez; ses çalınamazsa yazılı yönerge ve yetişkin desteğiyle devam edilir.
 - **Geri bildirim:** dört yumuşak oyun efekti, ses düzeyi/efekt ayarları, sesli “Tebrikler, başardın!” ve azaltılmış hareket tercihine uyan kutlama.
 - **Görseller:** platform emojileri yerine yerel 3D çizimler, Lucide arayüz ikonları, çıkartmalar ve öğrenme özeti.
 - **Laravel ilerlemesi:** tarayıcı oturumuna ayrılmış kayıtlar, doğrulanan JSON API, CSRF, tekrar gönderimde çift kayıt oluşturmayan tamamlama ve mevcut tarayıcıya ait sıfırlama.
@@ -79,24 +82,47 @@ PHP testleri SQLite `:memory:` kullanır. Tarayıcı testleri `dist/` çıktıs�
 
 ## Yayın
 
-`npm run build` statik Pages çıktısını `dist/` içine, `npm run build:laravel` PHP sunucusunun Vite varlıklarını `public/build/` içine hazırlar. Pages artefaktında PHP giriş dosyası veya Laravel sunucu kodu bulunmaz. PHP API ve sunucu veritabanı GitHub Pages'te çalışmaz; statik sürüm tarayıcı kaydını kullanır.
+`npm run build` statik Pages çıktısını `dist/` içine, `npm run build:laravel` PHP sunucusunun Vite varlıklarını `public/build/` içine hazırlar. Pages artefaktında PHP giriş dosyası veya Laravel sunucu kodu bulunmaz. PHP API ve sunucu veritabanı GitHub Pages'te çalışmaz; statik sürüm tarayıcı kaydını kullanır. Pages'te yalnızca hazır sesler oynatılır; hazır kaydı olmayan veya yüklenemeyen metin için `speak()` sonucu `false` olur, okunabilir bildirim ve yetişkin desteği sunulur.
 
 VPS kurulumu, kalıcı SQLite volume'u ve ayrı uygulama portu için [yayın belgesi](docs/deploy.md); API için [backend belgesi](docs/backend-api.md) kullanılır. Mevcut e-Tahlil uygulaması üzerinde değişiklik yapılmaz. HTTPS yayınını tamamlandı saymak için deployment kaydına ek olarak gerçek adreste etkileşimli bir oyun turu doğrulanmalıdır.
 
 ## Ses ve görsel kaynakları
 
-Çalışan oyunun ses üretim servisine ihtiyacı yoktur; MP3 ve WAV dosyaları yerel olarak sunulur. Geliştirmede ses paketini yenilemek için:
+Sabit anlatım dosyaları `public/audio/irem-v4-v1/` altında, eşlemeleri
+`public/audio/manifest.json` içinde tutulur. Yeni manifest `provider: elevenlabs`
+ve `revision: irem-v4-v1` metadata'sını taşır. Sabit kayıtları oynatmak sağlayıcı
+anahtarı gerektirmez. Yeni metinlerin seslendirilmesi için Laravel, internet ve
+etkin sunucu ses hizmeti gerekir. Anahtar yalnızca özel sunucu ortamında tutulur;
+tarayıcıya, `VITE_*` değişkenlerine veya manifest içine yazılmaz.
+
+`.env.example` ses hizmetini `ELEVENLABS_ENABLED=false` ile kapalı başlatır;
+anahtar, ses kimliği ve model kimliği boştur. Onaylanan ses/model yapılandırıldıktan
+sonra hizmet açılabilir. Üretilecek karakter sınırları genel günlük 500, aylık
+1000, oturum başına günlük 200 ve IP başına günlük 500'dür. Hazır katalog ve yeni
+manifest birlikte yayımlanır; eski/yeni seslerden oluşan kısmi paket yayımlanmaz.
+
+### Eski Emel paketini yeniden üretme — legacy
+
+Aşağıdaki betikler eski EmelNeural kayıtlarına aittir; yeni İrem kataloğunu
+üretmek veya güncellemek için kullanılmaz. Cihaz sesiyle yedek oynatma da yalnızca
+açık eski Emel manifest metadata'sı için korunur.
 
 ```sh
 python -m pip install -r scripts/requirements-audio.txt
 python scripts/generate-speech.py
 python scripts/complete-story-speech.py
 python scripts/refresh-feedback-speech.py
-python scripts/generate-soft-effects.py
-python scripts/download-illustrations.py
+python scripts/generate-story-speech.py
 ```
 
-Ses üreteci kayıtları önbelleğe alır ve TLS doğrulamasını açık tutar. Dört efekt bu proje için dalga senteziyle üretildi. 112 görsel, [Microsoft Fluent Emoji 3D](https://github.com/microsoft/fluentui-emoji) koleksiyonundan MIT lisansıyla gelir; lisans kopyası `public/illustrations/LICENSE.microsoft.txt` içindedir. Howler, canvas-confetti, Lucide, Vite ve Laravel paket sürümleri kilit dosyalarındadır.
+Eski üreteçler kayıtları önbelleğe alır ve TLS doğrulamasını açık tutar.
+`scripts/generate-soft-effects.py` de eski sentetik efektleri üretir; güncel dört
+Pixabay efektinin kaynak/lisans bilgisi `public/audio/LICENSE-pixabay-v4.txt`
+içindedir. Görsel indirme betiği `scripts/download-illustrations.py`'dır. 112
+görsel, [Microsoft Fluent Emoji 3D](https://github.com/microsoft/fluentui-emoji)
+koleksiyonundan MIT lisansıyla gelir; lisans kopyası
+`public/illustrations/LICENSE.microsoft.txt` içindedir. Howler, canvas-confetti,
+Lucide, Vite ve Laravel paket sürümleri kilit dosyalarındadır.
 
 Yeni ada/sahne resimleri ve Pırpır sprite atlası bu proje için üretildi;
 `public/art/` altında bulunur. Nunito Sans değişken yazı tipi Fontsource üzerinden

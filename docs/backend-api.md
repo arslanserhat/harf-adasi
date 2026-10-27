@@ -1,4 +1,4 @@
-# Laravel ilerleme API'si
+# Laravel ilerleme ve ses API'si
 
 Oyun aynı ön yüzü iki yayında kullanır. GitHub Pages sürümü tarayıcı kaydını kullanır. Laravel sürümünde sayfadaki `harf-backend=laravel` ve `csrf-token` meta etiketleri aynı kökendeki sunucu kaydını etkinleştirir.
 
@@ -60,6 +60,43 @@ Son sıfırlamanın `reset_revision` değeri sonraki normal kayıtlarda da korun
 
 Bu endpointler uygulama içi anonim kayıt içindir; dışarıdan profil kimliği almaz,
 çocukların hesapları arasında ilerleme taşımaz ve bağımsız bir değerlendirme hizmeti değildir.
+
+## Aynı Türkçe sesle metin okuma
+
+Yeni ses düzeninde tarayıcı önce `irem-v4-v1` kataloğundaki hazır MP3'ü oynatır.
+Laravel sürümünde kayıt eksikse veya yüklenemezse `POST /api/speech/resolve`
+çağrılır. İstek yalnızca metin içerir:
+
+```json
+{"text":"nane"}
+```
+
+Sunucu yalnızca sabit katalogdaki metinleri veya mevcut tarayıcı oturumuna
+kaydedilmiş izinli öğretmen harf/hece/kelime/cümlelerini kabul eder. İstemci
+sağlayıcı, ses/model, URL veya profil/tarayıcı kimliği seçemez. Çocuğun profil adı
+ses sağlayıcısına gönderilmez; öğretmen metinlerine kişisel bilgi yazılmamalıdır.
+Hazır kaydı olmayan izinli metin, hizmet etkinse ElevenLabs İrem sesiyle üretilir.
+Tamamlanmış önbellek kaydı yeniden üretim tüketimi oluşturmaz.
+
+Başarılı `200` yanıtı `{url, revision, expires_at}` içerir. `revision` yeni
+katalogla aynı `irem-v4-v1` değeridir; `expires_at` Unix saniyesidir. `url`,
+`/api/speech/audio/<64-hex>?expires=...&scope=...&signature=...` biçimindedir.
+`GET` ile oynatma, kısa süreli imzaya ve aynı şifreli tarayıcı oturumuna bağlıdır;
+başka tarayıcıya kopyalanan, değiştirilmiş veya süresi dolmuş bağlantı kabul edilmez.
+Ses `audio/mpeg` olarak, özel önbellek kuralları ve Range desteğiyle sunulur.
+Sağlayıcı anahtarı ve ham sağlayıcı yanıtı tarayıcıya dönmez.
+
+Geçersiz veya izin verilmeyen metin `422`, kota/dolu üretim kilidi `429`, kapalı
+hizmet veya sağlayıcı hatası `503` döndürür. Yeni düzende hata sonrasında cihazın
+Türkçe/İngilizce sesine geçilmez; `speak()` sonucu `false` olur ve yetişkinle
+okuma seçeneğini açıklayan sakin bir bildirim gösterilir. GitHub Pages'te bu API
+yoktur; hazır kaydı olmayan veya yüklenemeyen metinde aynı yazılı destek kullanılır.
+
+Ses üretimi varsayılan olarak `ELEVENLABS_ENABLED=false` ile kapalıdır. Anahtar,
+onaylı ses kimliği ve model kimliği sunucuya özel ortamda yapılandırılır. Örnek
+sınırlar genel günlük 500, aylık 1000, oturum başına günlük 200 ve IP başına günlük
+500 karakterdir. Sağlayıcıya yeni üretim isteği yapılmadan önce sınırlar uygulanır.
+Bu hizmet yeni bir veritabanı şeması gerektirmez.
 
 Yazan/silen istekler normal Laravel `web` oturum ve CSRF korumasını kullanır. `X-CSRF-TOKEN` başlığı sayfadaki meta etiketten alınır; çerezler aynı kökene gönderilir. Tokenlar kaynak koduna veya depoya yazılmaz. Geçersiz veri `422`, eksik/uyumsuz CSRF `419`, aşırı istek `429` döndürür.
 

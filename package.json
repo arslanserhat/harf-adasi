@@ -1,6 +1,6 @@
 {
   "name": "harf-adasi",
-  "version": "5.6.2",
+  "version": "5.7.0",
   "private": true,
   "description": "Harf Adası Laravel öğrenme uygulaması",
   "scripts": {

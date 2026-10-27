@@ -1,4 +1,123 @@
-# Altı macera dünyası ve Pixabay sesleri — 26 Ekim 2026
+# Dinamik içerik, öğretmen girdileri ve yerel profil — 27 Ekim 2026
+
+Uygulama commit'i **505495332669775103dba854fd5db5d834af3a86** (teknik
+5.5.0, görünür etiket yok). Pages
+[40470683181](https://github.com/arslanserhat/harf-adasi/actions/runs/40470683181)
+başarılı. Gerçek yayın: https://arslanserhat.github.io/harf-adasi/?yenile=6
+
+## Son kodda test ve derleme
+
+- **146/146 JavaScript mantık testi**, sıfır hata: ses 18, macera 12, ada 13,
+  öğrenme 29, eşitleme 10, hikâye 4, macera modeli 21, ortak seçim 13,
+  öğretmen içeriği 9, dinamik plan kapsaması 10 ve çocuk profili 7.
+- **31/31 PHP Feature testi / 248 doğrulama**, PHP 8.5.12, mevcut yerel QA
+  imajında ağ kapalı ve SQLite bellek içi veritabanıyla. Güncel request/test
+  dosyalarının SHA-256 değerleri container ile hostta eşleşti. Yeni üç test
+  kelime olmadan harf/hece kaydını, bozuk/çift öğeleri ve liste sınırlarını
+  doğrular. Üretim `.env` veya veritabanı kullanılmadı.
+- Pages ve Laravel üretim derlemeleri başarılı. Bu kanıtlar
+  `/workspace/scratch/harf-v55-unit-final.log`, `harf-v55-php-feature.log`,
+  `harf-v55-build-final.log` ve `harf-v55-laravel-final.log` içinde.
+- Son `index-B28vc2n2.js` / `index-DyC1RMvM.css` derlemesinde **44/44 gerçek
+  tarayıcı senaryosu**, tüm süreçler çıkış 0: altı macera dünyası iki ekran
+  boyutunda Chromium 12 + Linux WebKit 12; header 6+6; yerel profil 2+1;
+  içerik entegrasyonu/göç 2+2; öğretmen kelimeleri Chromium 1.
+  Kayıtlar `/workspace/scratch/harf-v55-final-*.log` içinde.
+
+Ortak havuz testleri 29 harfin, altı bağımsız hecenin, sekiz kelimenin ve
+11 sayının birden fazla planda kapsanmasını; cümle/hazır etkinlik çeşitliliğini,
+havuz bitiminde yeni döngüyü, tek/boş havuzu, Türkçe karakterleri, ekleme/silmeyi
+ve yenilemeden devamı doğrular. Zorlanılan/vadesi gelen bir hedefe ayrılan
+tekrar diğer hedefleri dışlamaz. Öğrenilmemiş harf seviyesine uygun olmayan
+öğeler gösterilmez. Sekiz kelime, test verisidir; kelime listesi kapasitesi
+100'dür. Bağımsız öğretmen harf/hece listeleri kelime listesi olmadan işler.
+
+Tarayıcı testleri gerçek düzenleyiciden veri girer ve gerçek dokunma/çizim
+olaylarıyla cevaplar. Kayıtlı yarım eski planın yalnız havuz metadata'sı
+tamamlanır; konum/cevap/çizim değişmez, ikinci yenilemede yeniden sayılmaz.
+Görülen hedef seçimi başarı ödülü veya yeni öğrenme kaydı üretmez. Yerel
+profil testleri sentetik Türkçe/uzun adlar, kaydetme, seçme, yeniden adlandırma,
+çıkış, yenileme, güvenli metin ve kişisel adların ağ isteklerine gitmemesini
+doğrular. Gerçek kullanıcı hesabı/kimlik doğrulama testi değildir.
+
+Son eski-plan metadata düzeltmesinden önce aynı bütünleşik 5.5 özellikleriyle
+**107/107** ekrana dayalı senaryo geçti: macera 24, header 12, profil 3,
+içerik 2, öğretmen 2, hayvan hareketi 6, öğrenme 26, eski bölümler 32.
+Bu geniş koşu daha önceki `BzTotxW_` JS derlemesidir; son uygulamanın tek
+107'lik koşusu diye sunulmaz. Ardından eski plana havuz metadata'sı ekleme
+ve bozuk metadata getter koruması uygulandı; final 44 senaryo etkilenen
+alanları iki motorda tekrar kontrol etti. İlk öğrenme koşusunda 22 senaryo,
+sabit karakter adı bekleyen eski başlık seçicisine takıldı; test kayıtlı
+bölüm kimliği ve gerçek hikâye başlığına bağlandı, tam 26/26 tekrar geçti.
+Önceki başarısız günlük `harf-v55-learning.log`, düzelmiş tam koşu
+`harf-v55-learning-final.log`; eski bölüm tam koşusu `harf-v55-legacy.log`.
+
+## Gerçek Pages yayını üzerinde
+
+27 Ekim 2026 yaklaşık **08:08 UTC**: aynı gerçek yayın adresine doğrudan
+gidildi; yerel sunucuya yedek yönlendirme kullanılmadı, teknik sürüm 5.5.0
+kontrol edildi. **9/9 canlı Chromium senaryosu**, dört süreç çıkış 0:
+
+- 390×660 öğretmen kelimeleri: düzenleyici/katalog, anlam ve öğretmen cümlesi,
+  **iki tam altı görevli tur** ve farklı ikinci hedefler; çizim, liste ve
+  yenileme korunması. Kelime silindikten sonra etkin turun eski hedef ve
+  seçenekleri kullanmaması, hayali üçüncü bitiş eklememesi doğrulandı.
+- 390×660 bağımsız harf/hece: gerçek giriş, harf cevabı/çizim/yetişkin kontrolü,
+  oyunlar arasında gerçek hedef havuzu kapsaması, yeni döngü, yinelenmeyen
+  devam kaydı ve değiştirilmiş havuz.
+- 390×660 yerel profil: adsız başlangıç, kaydet/değiştir/yenile/çıkış,
+  Türkçe/uzun adlar, güvenli metin ve kişisel ad içeren istek bulunmaması.
+- Header altı boyutta: **360×640, 390×660, 768×1024, 1024×768, 844×390,
+  1366×768**. Yatay taşma yok; ana CTA ilk görünümde, kontroller ayrı,
+  altı hayvan korunuyor. Telefon header yüksekliği 67px, ada y=102.5px;
+  844×390 yatayda header 68px, ada y=99px. Üstteki eski karşılama/hayvan
+  satırı kaldırıldı; aslan/kuş mevcut alt alana taşındı. Canlı telefon ve
+  yatay ekran görüntüleri görsel olarak da incelendi.
+
+Canlı JS ve CSS, yerel son derlemeyle bayt bayt aynı:
+
+- `assets/index-B28vc2n2.js` SHA-256:
+  `eacdde30bdcc0abf92bda14edec924c63de55b12bf7c16a5e75c708e8dfa4fa8`
+- `assets/index-DyC1RMvM.css` SHA-256:
+  `cd445e97cd8c41ed3166065f5f0ac14135f06183189231787cd57edeed4c9ba0`
+
+Canlı kanıtlar `test-results/live-v55/` ve
+`/workspace/scratch/harf-v55-live-{teacher,content,profile,header}.log` içinde.
+Mevcut proxy CA/NSS güveni kullanıldı; TLS doğrulaması kapatılmadı. Başarı
+enjekte edilmedi. Teknik sürüm yalnız testin okuduğu JS değeridir, çocuk
+ekranında gösterilmez.
+
+## Kapsam sınırları ve ayrı SSL engeli
+
+Fiziksel iPhone Chrome/iPad veya gerçek iOS tarayıcı çubuğu testi yapılmadı.
+Linux WebKit gerçek motor kontrolüdür, fiziksel iOS değildir. İnsan tarafından
+ses dinleme kontrolü ve uzun dönem pedagojik etkililik pilotu yapılmadı.
+Mevcut Emel anlatımı ve kullanıcının seçtiği success03 / Level Complete /
+Soft UI Click korunur; yeni doğal insan sesi veya ChatGPT Voice eklenmedi.
+Yerel profil, hesap girişi değildir; mevcut anonim ilerleme/listeler ortaktır.
+Profil, seçim geçmişi ve macera geçmişi yereldir; öğretmen harf/hece alanları
+mevcut Laravel öğrenme kaydıyla eşitlenebilir. Pages PHP çalıştırmaz.
+
+VPS bu sürümle güncellenmedi. Kullanıcının `94.138.209.208:8446` HTTPS yayını
+korundu; mevcut gerçek sertifika/SAN/zincir/tarih ve uygulama sürümü okunamadı.
+07:35 UTC kontrolü proxy aracılı sertifika adı uyuşmazlığında durdu (curl 60,
+HTTP 000); bu gözlem VPS sertifikasının bozuk olduğuna kanıt sayılmaz.
+Ortamın tanımlı TCP proxy'si bağlantıyı reddettiği için SSH hedefe ulaşmadan
+çıkış 255 verdi; mevcut kimlik bilgisi eksikliği iddia edilmez. Ortamın
+erişim yapılandırmasını değiştiren kullanılabilir araç bulunmadı.
+
+Google ve Cloudflare üzerinden son kez 08:11 UTC'de `harfadasi.com.tr` / `www` A ve
+domain NS sorgularının tamamı NXDOMAIN döndü. İHS'de tescil/NS etkinliği ve
+yetkili DNS yayılımı doğrulanmalı; hedef A kayıtları `94.138.209.208` olmalı.
+Sertifika/vhost kurulumu için ayrıca bu çalışma ortamına desteklenen VPS
+TCP erişimi veya zaten yetkili çalışan bağlantılı ortam gerekir. Yeni şifre
+veya anahtar istemek bu ağ engelini gidermez. DNS, sertifika, vhost, reload,
+firewall ve CA hizmet işlemi yapılmadı. e-Tahlil, diğer depolar ve pytest
+değiştirilmedi.
+
+---
+
+# Önceki sürüm: altı macera dünyası ve Pixabay sesleri — 26 Ekim 2026
 
 Son uygulama kodu **a716bfc775761a76a24c8842a252ee31ea006488** (teknik sürüm
 5.4.0); ilk macera/ses uygulaması `421df87`, son düğme kontrastı ve gerçek

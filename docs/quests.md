@@ -34,8 +34,9 @@ oyuna geçmek sıra başına dönmez; aynı aşamanın yenilenmesi de iki kez sa
 
 Önce bu döngüde görülmemiş uygun öğeler, ardından en eski gösterimler gelir.
 Yeni eklenen öğe eski yüksek sayaçları yakalamak için sürekli tekrarlanmaz;
-bir kez öne geçip döngüye katılır. Sonlu havuz bitince farklı sırayla yeni
-döngü başlar; tek öğelik havuzda sınırsız tekrarsızlık vaat edilmez. Tur
+bir kez öne geçip döngüye katılır. Sonlu havuz bitince en eski gösterimlerden
+yeni döngü başlar; her döngüde farklı sıra veya sınırsız tekrarsızlık vaat
+edilmez. Tur
 içindeki bilinçli hatırlama adımları korunur. Vadesi gelen/zorlanılan kelime
 ilk yeri alabilir; ikinci yer yeni veya az karşılaşılan kelimeye kalır.
 Son tur ve on dakikalık yakın karşılaşma koruması, aynı öğenin her turu

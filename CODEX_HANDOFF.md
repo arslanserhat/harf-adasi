@@ -1,5 +1,71 @@
 # Harf Adası — güncel devir notu
 
+## 27 Ekim 2026 — ortak dinamik içerik, öğretmen heceleri ve yerel profil
+
+Son uygulama kodu **505495332669775103dba854fd5db5d834af3a86**, teknik sürüm
+5.5.0. Çocuk ekranına sürüm etiketi ekleme. Pages workflow
+[40470683181](https://github.com/arslanserhat/harf-adasi/actions/runs/40470683181)
+başarılı. Gerçek yayın https://arslanserhat.github.io/harf-adasi/?yenile=6
+üzerinde **iki tam altı görevli öğretmen kelimesi turu** tamamlandı; ikinci
+tur farklı hedefler getirdi. Canlı JS/CSS son yerel derlemeyle bayt bayt aynı.
+Sonraki belge commit'i uygulama kodunu değiştirmez. Aşağıdaki 26 Ekim kayıtları
+geçmiş sürümlerdir; güncel kapsam ve test kanıtı `docs/QA.md` başındadır.
+
+- `content-selection.js`: harf, hece, kelime, cümle, sayı ve hazır etkinlik
+  için ortak, kalıcı döngü/geçmiş. Gerçekte gösterilen hedef kaydedilir;
+  seçenekler, hayali başarı veya öğrenme kanıtı eklenmez. Uygun havuzdaki yeni
+  hedefler önceliklidir; havuz bitince en eski gösterimlerden yeni döngü başlar.
+  Gerekli zorlanma/vadeli öğrenme tekrarı diğer kelimelerin sırasını dışlamaz.
+  Oyun değişimi ve yenileme ilk küçük gruba sıfırlamaz. Eski ilerleme gerçek
+  kayıtlarından taşınır; bozuk kayıt, boş/tek öğe ve silinen öğeler korunur.
+- `teacher-content.js`, öğrenme düzenleyicisi ve Laravel doğrulaması:
+  öğretmen **harflerini, bağımsız hecelerini ve kelimelerini ayrı** girebilir;
+  hece için kelime girişi zorunlu değildir. Liste başına en çok 29 harf,
+  100 hece ve 100 kelime; testteki sekiz kelime bir kapasite sınırı değildir.
+  Türkçe yazım ve işlenmiş harfler dikkate alınır. Eski kelime parçaları
+  korunur, ancak geçersiz parçalar hece hedefi yapılmaz. Gerçek anlam veya
+  öğretmen cümlesi bulunmuyorsa uygulama anlam/cümle uydurmaz.
+- Altı macera dünyası, eski öğrenme turu ve serbest kataloglar ortak depoyu
+  kullanır. Sayılar 0–10 havuzunda döner; okuma başarısı üretmez. Liste/harf
+  seviyesi değişince etkin plan güvenle yenilenir. Eski yarım planın eksik
+  havuz metadata'sı tamamlanırken kimlik, cevaplar, konum ve çizim korunur;
+  geçmişte görülmüş gibi hayali öğe eklenmez.
+- Gerçek hesapla giriş sistemi yoktur. `child-profile.js/css` **bu tarayıcıda
+  seçili yerel çocuk profili** sunar: kaydetme, değiştirme, yeniden adlandırma,
+  çıkış ve yenileme. Adsız karşılama nötrdür; görsel hitaplar seçili adı kullanır.
+  Mevcut anonim ilerleme/listeler profiller arasında ortaktır; arayüz bunu
+  açıklar. Kişisel adlar TTS veya ağ isteklerine eklenmez. Mevcut Emel sesleri
+  değişmedi; bazı eski kayıtlar kurgu karakterin Alparslan adını söyleyebilir.
+- Karşılama kompakt header içine taşındı. Ana oyunu aşağı iten eski üst alan
+  kaldırıldı; aslan ve kuş mevcut alt hayvan alanına taşındı. Altı hayvan,
+  hareket durdurma, azaltılmış hareket ve çizim sırasında durma korunur.
+  Kullanıcının seçtiği success03 / Level Complete / Soft UI Click değişmedi.
+- Seçim geçmişi, macera geçmişi ve çocuk profili tarayıcıda yereldir; yeni
+  hesap veya bu alanlar için sunucu eşitlemesi eklenmedi. Öğretmen harf/hece
+  alanları mevcut Laravel öğrenme kaydı eşitlemesine dahildir.
+
+Son uygulama kodunda **146/146 JS testi**, **31/31 PHP Feature testi / 248
+doğrulama**, Pages ve Laravel derlemeleri geçti. Son derleme üzerinde
+**44/44 Chromium/Linux WebKit senaryosu** ve gerçek yayında **9/9 Chromium
+senaryosu** geçti. Önceki geniş 107 senaryo koşusu ile final 44 regresyonu
+aynı koşu gibi sayma; ayrıntı QA belgesinde. Fiziksel iPhone Chrome/iPad,
+gerçek iOS tarayıcı arayüzü ve insan ses dinleme kontrolü yapılmadı.
+
+**VPS / alan adı / SSL ayrı ve tamamlanmadı.** İstenen hedefler
+`harfadasi.com.tr` ve `www.harfadasi.com.tr`, VPS `94.138.209.208`.
+Kullanıcının çalışan `https://94.138.209.208:8446/` yayınına dokunulmadı.
+Mevcut SSH kimliği olmasına rağmen çalışma ortamının tanımlı TCP proxy'si
+bağlantıyı reddediyor; SSH hedef sunucuya ulaşmadan çıkış 255 veriyor. Bu,
+VPS'nin SSH portu bozuk demek değildir. Bu oturumda TCP erişim ayarı yazma
+aracı yoktur. Son Google/Cloudflare DNS sorgularında (08:11 UTC) iki A kaydı
+ve alan adı NS sorgusu NXDOMAIN döndü; İHS tescil/NS etkinliği ve yayılımı
+doğrulanmalı. Mevcut IP HTTPS kontrolünde proxy aracılı TLS adı uyuşmazlığı
+nedeniyle gerçek sunucu sertifikası/SAN/süre okunamadı; TLS doğrulaması
+kapatılmadı. Yeni sertifika, vhost, reload, firewall veya CA işlemi yapılmadı.
+Devam için desteklenen VPS TCP erişim yolu ve çözümlenen yetkili DNS gerekir;
+yeniden şifre/anahtar istemek ağ engelini çözmez. Bu sürüm VPS'ye yüklenmedi.
+e-Tahlil, diğer depolar ve pytest değiştirilmedi.
+
 ## 26 Ekim 2026 — altı macera dünyası ve kullanıcının seçtiği Pixabay sesleri
 
 Son uygulama kodu **a716bfc775761a76a24c8842a252ee31ea006488**, teknik sürüm

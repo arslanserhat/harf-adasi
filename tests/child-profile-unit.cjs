@@ -72,6 +72,23 @@ test('visual copy updates old name variants and Turkish suffixes without mutatin
   assert.equal(personalizeText('Harfleri sırala.', 'Işıl'), 'Harfleri sırala.');
 });
 
+test('narration personalization recognizes hero prose but preserves fictional friends and learning targets', async () => {
+  const { isPersonalizableNarration, personalizeText } = await api;
+  assert.equal(typeof isPersonalizableNarration, 'function');
+  assert.equal(isPersonalizableNarration('Alparslan ile Pırpır bahçeye gitti.'), true);
+  assert.equal(isPersonalizableNarration('Alp Arslan’a sor.'), true);
+  assert.equal(isPersonalizableNarration('{{child}} ile keşfedelim.'), true);
+  for (const target of ['Alparslan', 'Alp Arslan', 'Alp', 'Ali', 'anne', 'Pırpır’ın sipariş çantası']) {
+    assert.equal(isPersonalizableNarration(target), false, target);
+  }
+  assert.equal(personalizeText('Alparslan ile Pırpır bahçeye gitti.', 'Alpaslan'), 'Alpaslan ile Pırpır bahçeye gitti.');
+  assert.equal(personalizeText('Alparslan ile Pırpır bahçeye gitti.', 'Alp'), 'Alp ile Pırpır bahçeye gitti.');
+  assert.equal(personalizeText('Alparslan ile Pırpır bahçeye gitti.', 'ALP'), 'ALP ile Pırpır bahçeye gitti.');
+  assert.equal(personalizeText('Alparslan’a sor; Alparslan’ın kartı.', 'Ece'), 'Ece’ye sor; Ece’nin kartı.');
+  assert.equal(personalizeText('Alparslan’dan Alparslan’a bir kart.', 'Deniz'), 'Deniz’den Deniz’e bir kart.');
+  assert.equal(personalizeText('Alparslan’ı dinle; Alparslan’la oyna.', 'Ayşe'), 'Ayşe’yi dinle; Ayşe’yle oyna.');
+});
+
 test('rendered controls escape even explicitly supplied untrusted display snapshots', async () => {
   const { renderProfileControls } = await api;
   const html = renderProfileControls({ state: { version: 1, activeId: 'child-x', profiles: [{ id: 'child-x', name: '<img src=x>' }] } });

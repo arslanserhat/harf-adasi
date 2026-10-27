@@ -111,6 +111,47 @@ class LearningStateTest extends TestCase
         $this->assertSame($state, LearningState::query()->first()->payload);
     }
 
+    public function test_independent_teacher_sentences_round_trip_without_words_and_preserve_turkish_case_and_punctuation(): void
+    {
+        $state = $this->snapshot();
+        $state['lists'][0]['words'] = [];
+        $state['lists'][0]['sentences'] = ['  İnal,   Nil ile gel.  ', 'Ali, Ayşe’nin elini tut!', 'Oku.'];
+        $this->saveState($state)->assertCreated()
+            ->assertJsonPath('state.version', 1)
+            ->assertJsonPath('state.lists.0.words', [])
+            ->assertJsonPath('state.lists.0.sentences', ['İnal, Nil ile gel.', 'Ali, Ayşe’nin elini tut!', 'Oku.']);
+        $this->getJson('/api/learning')->assertOk()
+            ->assertJsonPath('state.lists.0.sentences.0', 'İnal, Nil ile gel.')
+            ->assertJsonPath('state.events', []);
+        $this->assertStringNotContainsString('İnal', DB::table('learning_states')->value('payload'));
+    }
+
+    public function test_teacher_sentence_validation_rejects_non_sentences_unsafe_content_and_limits(): void
+    {
+        $state = $this->snapshot();
+        foreach ([
+            [''], ['...'], [123], [['text' => 'Ali al.']], ['Ali <b>al</b>.'], ["Ali\nal."], ["Ali\tal."],
+            ["Ali\u{2028}al."], ["Ali\0al."], ['William eve gel.'], ['Ali '.str_repeat('a', 237)],
+            ['Ali '.str_repeat('al ', 40)],
+            array_map(fn ($number) => "Ali $number elma al.", range(0, 100)),
+        ] as $sentences) {
+            $state['lists'][0]['sentences'] = $sentences;
+            $this->assertSame(422, $this->saveState($state)->status(), json_encode($sentences, JSON_UNESCAPED_UNICODE));
+        }
+        $this->assertDatabaseCount('learning_states', 0);
+    }
+
+    public function test_duplicate_teacher_sentences_use_nfc_turkish_case_and_whitespace_but_preserve_distinct_punctuation(): void
+    {
+        $state = $this->snapshot();
+        foreach ([['İNAL   EVE GEL.', 'inal eve gel.'], ["I\u{0307}nal eve gel.", 'İnal eve gel.']] as $duplicates) {
+            $state['lists'][0]['sentences'] = $duplicates;
+            $this->saveState($state)->assertUnprocessable()->assertJsonValidationErrors('state.lists.0.sentences.1');
+        }
+        $state['lists'][0]['sentences'] = ['İnal eve gel.', 'İnal eve gel!'];
+        $this->saveState($state)->assertCreated()->assertJsonPath('state.lists.0.sentences', $state['lists'][0]['sentences']);
+    }
+
     public function test_invalid_or_duplicate_teacher_units_are_rejected_without_creating_state(): void
     {
         foreach (['n', 'tr', 'anne', 'saat', 'bma', 'xan'] as $invalid) {
@@ -391,6 +432,7 @@ class LearningStateTest extends TestCase
                 ],
             ]],
         ];
+
         return $state;
     }
 

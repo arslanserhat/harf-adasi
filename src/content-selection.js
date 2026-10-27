@@ -1,3 +1,5 @@
+import { normalizeTeacherSentences } from './teacher-content.js';
+
 // Target exposure is selection metadata, not a learning or completion award.
 export const SELECTION_KEY = 'harf-adasi-content-v1';
 export const CONTENT_DOMAINS = Object.freeze(['letters', 'syllables', 'words', 'sentences', 'numbers', 'activities']);
@@ -27,12 +29,7 @@ function canonical(domain, value) {
   const text = clean(value);
   if (domain === 'activities') return /^[a-z0-9][a-z0-9_.:-]{0,159}$/iu.test(text) ? text : '';
   if (domain === 'sentences') {
-    const sentence = text.replace(/\s+/gu, ' ');
-    const tokens = sentence.split(' ');
-    if (sentence.length > 160 || tokens.length < 2 || tokens.length > 8) return '';
-    const lower = sentence.toLocaleLowerCase('tr-TR');
-    return /^[abcçdefgğhıijklmnoöprsştuüvyz0-9\s'’".,!?;:()“”\-]+$/u.test(lower)
-      && tokens.every(token => /[\p{L}\p{N}]/u.test(token)) ? sentence : '';
+    return normalizeTeacherSentences([value])[0] || '';
   }
   const lower = text.toLocaleLowerCase('tr-TR');
   return domain === 'letters' ? lower.length === 1 && LETTERS.includes(lower) ? lower : ''

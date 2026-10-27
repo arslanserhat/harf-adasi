@@ -1,4 +1,5 @@
 import { Howl, Howler } from 'howler';
+import { getCurrentChildName, isPersonalizableNarration, subscribeCurrentChildName } from './child-profile.js';
 
 // The unified voice uses its fixed catalog or the protected same-origin
 // resolver. Device speech is limited to explicitly identified legacy media.
@@ -8,7 +9,7 @@ const AUDIO_BASE = `${BASE.endsWith('/') ? BASE : `${BASE}/`}audio/`;
 // Explicit versioned files keep retired cues out of playback and the cache.
 // Loading still starts only when a user action requests the corresponding cue.
 const EFFECT_FILES = {
-  tap: 'fx-tap-pixabay-v4.mp3',
+  tap: 'fx-tap-soft-v5.wav',
   correct: 'fx-correct-pixabay-v4.mp3',
   retry: 'fx-retry-pixabay-v4.mp3',
   complete: 'fx-complete-pixabay-v4.mp3',
@@ -38,6 +39,15 @@ let onStatus = () => {};
 let nativeNoticeShown = false;
 let legacyNativeAllowed = false;
 let voiceRevision = '';
+
+// The shared profile store is presentation state, never authentication. A name
+// change invalidates both an in-flight voice and any URLs for the old name.
+subscribeCurrentChildName(() => {
+  stopSpeech();
+  resolvedClips.clear();
+  for (const clip of clips.values()) clip.unload();
+  clips.clear();
+});
 
 Howler.autoUnlock = true;
 
@@ -179,8 +189,13 @@ function validResolvedClip(data) {
   } catch { return null; }
 }
 
-function resolveClip(text) {
+function resolutionKey(text, profileName = null, literal = false) {
   const key = normalizeSpeechText(text);
+  return profileName === null && !literal ? key : JSON.stringify([key, profileName, literal]);
+}
+
+function resolveClip(text, profileName = null, literal = false) {
+  const key = resolutionKey(text, profileName, literal);
   const cached = resolvedClips.get(key);
   if (cached && cached.expiresAt > Math.floor(Date.now() / 1000) && (!voiceRevision || cached.revision === voiceRevision)) {
     resolvedClips.delete(key); resolvedClips.set(key, cached);
@@ -197,7 +212,7 @@ function resolveClip(text) {
       const response = await fetch('/api/speech/resolve', {
         method: 'POST', credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-CSRF-TOKEN': csrf },
-        body: JSON.stringify({ text }), signal: request.controller.signal,
+        body: JSON.stringify({ text, ...(literal ? { literal: true } : profileName === null ? {} : { profile_name: profileName }) }), signal: request.controller.signal,
       });
       if (!response.ok) return null;
       const entry = validResolvedClip(await response.json());
@@ -211,14 +226,14 @@ function resolveClip(text) {
   return request.promise;
 }
 
-async function resolvedSpeech(text, sequence) {
-  const entry = await waitForSpeechStep(resolveClip(text), sequence);
+async function resolvedSpeech(text, sequence, profileName = null, literal = false) {
+  const entry = await waitForSpeechStep(resolveClip(text, profileName, literal), sequence);
   if (sequence !== speechSequence || muted) return false;
-  return entry ? recordedSpeech(entry.url, text, sequence, true) : unavailableSpeech();
+  return entry ? recordedSpeech(entry.url, text, sequence, true, profileName, literal) : unavailableSpeech();
 }
 
-function speechFallback(text, sequence) {
-  return legacyNativeAllowed ? nativeSpeech(text, sequence) : resolvedSpeech(text, sequence);
+function speechFallback(text, sequence, literal = false) {
+  return legacyNativeAllowed ? nativeSpeech(text, sequence) : resolvedSpeech(text, sequence, null, literal);
 }
 
 function unlock() {
@@ -272,7 +287,7 @@ async function nativeSpeech(text, sequence) {
   });
 }
 
-function recordedSpeech(url, text, sequence, resolved = false) {
+function recordedSpeech(url, text, sequence, resolved = false, profileName = null, literal = false) {
   let clip = clips.get(url);
   if (!clip) {
     clip = new Howl({
@@ -319,9 +334,10 @@ function recordedSpeech(url, text, sequence, resolved = false) {
       if (clips.get(url) === clip) clips.delete(url);
       clip.unload();
       updateEffectVolumes();
-      if (resolved && resolvedClips.get(normalizeSpeechText(text))?.url === url) resolvedClips.delete(normalizeSpeechText(text));
+      const key = resolutionKey(text, profileName, literal);
+      if (resolved && resolvedClips.get(key)?.url === url) resolvedClips.delete(key);
       const result = sequence === speechSequence && !muted
-        ? resolved ? unavailableSpeech() : await speechFallback(text, sequence) : false;
+        ? resolved ? unavailableSpeech() : await speechFallback(text, sequence, literal) : false;
       resolve(result);
     };
     const retryAfterUnlock = () => {
@@ -351,9 +367,11 @@ function recordedSpeech(url, text, sequence, resolved = false) {
   });
 }
 
-async function speak(value) {
+async function speak(value, options = {}) {
   const text = String(value ?? '').trim();
-  stopSpeech(normalizeSpeechText(text));
+  const literal = options?.literal === true, personalizable = isPersonalizableNarration(text);
+  const profileName = !literal && personalizable ? getCurrentChildName() : null;
+  stopSpeech(resolutionKey(text, profileName, literal));
   if (!text) return false;
   if (muted) { status('Ses kapalı. Hoparlöre dokunarak açabilirsin.'); return false; }
   unlock();
@@ -361,11 +379,18 @@ async function speak(value) {
   await waitForSpeechStep(loadManifest(), sequence);
   if (sequence !== speechSequence || muted) return false;
   const key = normalizeSpeechText(text);
+  // The browser keeps the approved authored text canonical. The server checks
+  // that exact catalog template and inserts only the selected full display name.
+  // A legacy fixed clip may contain a shortened/different hero name, so it must
+  // never be played for a personalizable template, including neutral profiles.
+  // A teaching target may exactly match a hero template. Its literal intent
+  // also bypasses old shortened clips, while retaining every authored name.
+  if (Object.hasOwn(phrases, key) && personalizable) return resolvedSpeech(text, sequence, profileName, literal);
   // A single literacy word may come from a sentence card with its final stop.
   // Keep exact phrases first; never strip dots from numbers or whole sentences.
   const word = key.match(/^([abcçdefgğhıijklmnoöprsştuüvyz]{1,24})[.!?…]+$/u)?.[1];
   const file = phrases[key] || (word ? phrases[word] : null);
-  return file ? recordedSpeech(`${AUDIO_BASE}${file}`, phrases[key] ? text : word, sequence) : speechFallback(text, sequence);
+  return file ? recordedSpeech(`${AUDIO_BASE}${file}`, phrases[key] ? text : word, sequence, false, null, literal) : speechFallback(text, sequence, literal);
 }
 
 function updateEffectVolumes() {

@@ -80,8 +80,12 @@ bir bütçe ve onay gerektirir. Ses hizmeti için veritabanı migration'ı gerek
 mevcut `APP_KEY`, oturumlar ve kalıcı storage korunur.
 
 Hazır kaydı olmayan eklenmiş öğretmen metni, hizmet açıkken dinleme isteğiyle
-ElevenLabs'e gönderilir; çocuğun profil adı gönderilmez. Öğretmen alanındaki
-bilgilendirme görünür kalmalı ve kişisel bilgi girilmemelidir. Yeni bir sesi
+ElevenLabs'e gönderilir. Kişiselleştirilmiş hikâye dinlendiğinde, yalnızca
+seçili profil adı kahramanın adını tam okumak için seslendirmeye eklenebilir;
+diğer profil alanları gönderilmez. Ad bir hesap kimliği değildir ve öğrenme
+veritabanına yazılmaz; adı içeren ses özel sunucu önbelleğinde tutulabilir.
+Öğretmenin çalışma hedefleri ve Pırpır adı değiştirilmez. Yetişkin alanındaki
+bilgilendirme görünür kalmalı ve öğretmen alanına kişisel bilgi girilmemelidir. Yeni bir sesi
 üretmek veya henüz yüklenmemiş dosyayı indirmek internet gerektirir. Yeni düzende
 cihaz sesine geçilmez. GitHub Pages'te ses API'si çalışmaz; bilinmeyen veya
 yüklenemeyen ses `false` sonucu ve okunabilir yetişkin desteğiyle karşılanır.

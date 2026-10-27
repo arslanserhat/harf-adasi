@@ -24,10 +24,12 @@ async function fixture({ words = [{ text: 'alet' }, { text: 'ilan' }] } = {}) {
   state.activeListId = 'school';
   let history = { version: 1, runs: [], active: null };
   let homeCount = 0;
+  const speech = [];
   const root = window.document.querySelector('#main');
   const { createQuests } = await questsAPI;
   const quests = createQuests({ root, getLearningState: () => state, getLetters: () => ['a', 'l', 'e', 't', 'i', 'n'],
-    getHistory: () => history, saveHistory: value => { history = structuredClone(value); }, onHome: () => { homeCount++; } });
+    getHistory: () => history, saveHistory: value => { history = structuredClone(value); }, onHome: () => { homeCount++; },
+    speak: async (text, options) => { speech.push({ text, options }); return true; } });
   const click = action => {
     const target = root.querySelector(`[data-quest="${action}"]`);
     assert.ok(target, `${action} is available in the actual quest UI`);
@@ -49,7 +51,7 @@ async function fixture({ words = [{ text: 'alet' }, { text: 'ilan' }] } = {}) {
     click('next');
     assert.equal(root.querySelector('#quest').dataset.mechanic, 'write');
   };
-  return { window, doc: window.document, root, quests, click, draw, enterNotebook,
+  return { window, doc: window.document, root, quests, click, draw, enterNotebook, speech,
     history: () => history, homes: () => homeCount,
     done() {
       quests.destroy(); window.close();
@@ -59,6 +61,27 @@ async function fixture({ words = [{ text: 'alet' }, { text: 'ilan' }] } = {}) {
       }
     } };
 }
+
+test('quest sentence, word and quantity targets always request literal teaching audio', async () => {
+  const f = await fixture({ words: [{ text: 'alet', sentence: 'Ali alet al.' }, { text: 'ilan', sentence: 'Ali ilan et.' }] });
+  try {
+    for (const kind of ['letters', 'words', 'sentences', 'numbers']) {
+      f.quests.start(kind, { fresh: true });
+      if (kind === 'numbers') {
+        const quantity = f.quests.getSnapshot().plan.stages[0].quantity;
+        for (let index = 0; index < quantity; index++) f.root.querySelector(`[data-quest="collect"][data-index="${index}"]`).click();
+        f.click('check-count'); f.click('next');
+      }
+      const before = f.speech.length;
+      f.click('listen');
+      await new Promise(resolve => setImmediate(resolve));
+      assert.equal(f.speech.length, before + 1, `${kind} listens to the current target`);
+      const call = f.speech.at(-1);
+      assert.ok(call?.text, `${kind} supplies its real planned target`);
+      assert.deepEqual(call.options, { literal: true }, `${kind} is lesson text`);
+    }
+  } finally { f.done(); }
+});
 
 test('rewriting removes real ink and keeps review disabled after pause and saved resume', async () => {
   const f = await fixture();

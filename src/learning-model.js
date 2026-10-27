@@ -1,5 +1,5 @@
 import { normalizeSelectionState, orderContentPool } from './content-selection.js';
-import { normalizeTeacherLetters, normalizeTeacherSyllables, teacherContentFromList } from './teacher-content.js';
+import { normalizeTeacherLetters, normalizeTeacherSyllables, normalizeTeacherSentences, teacherContentFromList } from './teacher-content.js';
 
 // Learning observations are intentionally separate from stickers/completions.
 // The spacing rules below are adjustable product rules, not a diagnostic test.
@@ -91,7 +91,7 @@ export function parseWordList(value) {
 export function createLearningState(now = Date.now()) {
   return {
     version: 1, updatedAt: stamp(now),
-    lists: [{ id: 'starter', title: 'İlk kelimelerim', updatedAt: stamp(now), letters: [], syllables: [], words: STARTER_WORDS.map(word => ({ ...word, parts: [...word.parts] })) }],
+    lists: [{ id: 'starter', title: 'İlk kelimelerim', updatedAt: stamp(now), letters: [], syllables: [], sentences: [], words: STARTER_WORDS.map(word => ({ ...word, parts: [...word.parts] })) }],
     activeListId: 'starter', events: [], progress: Object.create(null), session: null,
   };
 }
@@ -233,7 +233,7 @@ export function normalizeLearningState(value, now = Date.now()) {
     }
     ids.add(source.id);
     lists.push({ id: source.id, title: cleanText(source.title, 80) || 'Kelime listem', updatedAt: stamp(source.updatedAt),
-      letters: normalizeTeacherLetters(source.letters), syllables: normalizeTeacherSyllables(source.syllables), words });
+      letters: normalizeTeacherLetters(source.letters), syllables: normalizeTeacherSyllables(source.syllables), sentences: normalizeTeacherSentences(source.sentences), words });
   }
   if (!lists.length) lists.push(...createLearningState(now).lists);
   const eventsById = new Map();

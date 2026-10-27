@@ -1,10 +1,26 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
-const source = fs.readFileSync(path.resolve(__dirname, '../src/content-selection.js'), 'utf8');
-const api = import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'));
+const { modelURL } = require('./model-loader.cjs');
+const api = import(modelURL('content-selection.js'));
 const NOW = Date.UTC(2026, 9, 27, 9);
+
+test('all valid authored sentence forms remain in the actual selection and exposure pool', async () => {
+  const { orderContentPool, recordContentExposure } = await api;
+  const pool = ['Anlat', 'Anne — nane al.', 'İnal, anten al.'];
+  assert.deepEqual(orderContentPool('sentences', pool, null), pool);
+  const state = recordContentExposure(null, { id: 'teacher-one-word', domain: 'sentences', items: ['Anlat'], pool, at: NOW });
+  assert.deepEqual(orderContentPool('sentences', pool, state), ['Anne — nane al.', 'İnal, anten al.', 'Anlat']);
+  assert.deepEqual(orderContentPool('sentences', ['Anne\u00a0nane al.', 'Anne\tnane al.', 'Anne\nnane al.', 'Anne\u2028nane al.', 'Anne\u200bnane al.'], null), ['Anne nane al.']);
+});
+
+test('longer saved teacher sentences participate in sentence rotation without losing authored case', async () => {
+  const { orderContentPool, recordContentExposure } = await api;
+  const long = 'Anne tane tane tane tane tane tane tane tane tane al.';
+  assert.deepEqual(orderContentPool('sentences', [long, 'İnal anten al.'], null), [long, 'İnal anten al.']);
+  const state = recordContentExposure(null, { id: 'full-sentence-read', domain: 'sentences', items: [long], pool: [long, 'İnal anten al.'], at: NOW });
+  assert.deepEqual(orderContentPool('sentences', [long, 'İnal anten al.'], state), ['İnal anten al.', long]);
+  assert.deepEqual(orderContentPool('sentences', ['Lale, “tane”…'], null), ['Lale, “tane”…']);
+});
 
 function memoryStorage(initial = {}) {
   const values = new Map(Object.entries(initial));
@@ -114,8 +130,8 @@ test('Turkish normalization preserves dotted and dotless i and canonicalizes onl
   assert.deepEqual(orderContentPool('words', ['IŞIK', 'İNCİ', ' ÇİLEK ', 'çiçek', 'hello-world'], null),
     ['ışık', 'inci', 'çilek', 'çiçek']);
   assert.deepEqual(orderContentPool('syllables', ['ŞI', 'şı', 'ne', '😀'], null), ['şı', 'ne']);
-  assert.deepEqual(orderContentPool('sentences', ['Ali  alet\tal.', 'Anne nane al.', 'tek', 'X al.'], null),
-    ['Ali alet al.', 'Anne nane al.']);
+  assert.deepEqual(orderContentPool('sentences', ['Ali  alet al.', 'Anne nane al.', 'tek', 'X al.'], null),
+    ['Ali alet al.', 'Anne nane al.', 'tek']);
   assert.deepEqual(orderContentPool('numbers', ['00', '01', '100', '101', '-1', '1.5', 3], null), ['0', '1', '100', '3']);
   assert.deepEqual(orderContentPool('activities', ['story-1', 'island:train:2', '../bad', '<script>', 'https://bad'], null),
     ['story-1', 'island:train:2']);

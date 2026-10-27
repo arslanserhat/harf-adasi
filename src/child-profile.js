@@ -41,7 +41,7 @@ export function createChildProfileStore({ storage, eventTarget } = {}) {
   const notify = () => { for (const listener of subscribers) listener(snapshot()); };
   const persist = next => {
     state = normalizeChildProfileState(next);
-    try { storage?.setItem(CHILD_PROFILE_KEY, JSON.stringify(state)); } catch { /* No network or alternate data destination is used. */ }
+    try { storage?.setItem(CHILD_PROFILE_KEY, JSON.stringify(state)); } catch { /* The local profile remains usable in memory. */ }
     notify(); return snapshot();
   };
   const select = id => persist({ ...state, activeId: state.profiles.some(profile => profile.id === id) ? id : '' });
@@ -70,6 +70,23 @@ export function createChildProfileStore({ storage, eventTarget } = {}) {
 let defaultStore;
 const sharedStore = () => defaultStore ||= createChildProfileStore();
 export function getCurrentChildName() { return sharedStore().getName(); }
+export function subscribeCurrentChildName(listener) {
+  const store = sharedStore();
+  let previous = store.getName();
+  return store.subscribe(() => {
+    const next = store.getName();
+    if (next === previous) return;
+    previous = next; listener(next);
+  });
+}
+
+/** A hero placeholder in prose, never a standalone learning word or Pırpır. */
+export function isPersonalizableNarration(value) {
+  const text = String(value ?? '');
+  if (text.includes('{{child}}')) return true;
+  const remainder = text.replace(/(?<![\p{L}\p{M}])(?:Alp\s+Arslan|Alparslan)(?:[’']?(?:dan|den|da|de|ın|in|un|ün|la|le|ı|i|u|ü|a|e))?(?=$|[^\p{L}\p{M}])/giu, '');
+  return remainder !== text && /\p{L}/u.test(remainder);
+}
 
 export function shouldShowChildWelcome({ state = sharedStore().getState(), atHome = false, dialogOpen = false, dismissed = false } = {}) {
   return atHome && !dialogOpen && !dismissed && normalizeChildProfileState(state).profiles.length === 0;
@@ -91,8 +108,8 @@ function nameWithSuffix(name, mark, suffix) {
   return `${name}${mark}${ending}`;
 }
 
-/** Visual copy only. Do not use this function for speech/data-text or learning
- * targets: personal names must not enter a third-party speech request. */
+/** Display wording. Speech sends the canonical approved template plus a name
+ * separately; learning targets must never be passed through this decorator. */
 export function personalizeText(value, name = getCurrentChildName()) {
   const raw = String(value ?? '');
   const safeName = validateChildName(name).okay ? validateChildName(name).name : '';
@@ -106,7 +123,7 @@ let panelSequence = 0;
 export function renderProfileControls({ state = sharedStore().getState(), editingNew = false, status = '', error = false } = {}) {
   const current = state.profiles.find(profile => profile.id === state.activeId);
   const key = ++panelSequence;
-  return `<section class="child-profile-controls" data-child-profile-controls><div><span class="child-profile-eyebrow">BU CİHAZDAKİ ÇOCUK PROFİLİ</span><h2>Kiminle oynayalım?</h2><p>Ad yalnız bu tarayıcıdaki hitaplarda kullanılır. Bu bir hesap girişi değildir; öğretmen listeleri ve ilerleme ortak mevcut kayıtta kalır.</p></div><label for="childProfileSelect-${key}">Seçili profil</label><select id="childProfileSelect-${key}" data-child-profile-select><option value="">Adsız oyna</option>${state.profiles.map(profile => `<option value="${escape(profile.id)}" ${state.activeId === profile.id ? 'selected' : ''}>${escape(profile.name)}</option>`).join('')}</select><label for="childProfileName-${key}">Çocuğun adı</label><input id="childProfileName-${key}" data-child-profile-name maxlength="40" autocomplete="off" spellcheck="false" value="${escape(editingNew ? '' : current?.name || '')}" placeholder="Ad" data-profile-edit-id="${escape(editingNew ? '' : current?.id || '')}"><div class="child-profile-actions"><button type="button" data-child-profile="save">${editingNew || !current ? 'Profili kaydet ve seç' : 'Adı kaydet'}</button><button type="button" data-child-profile="new">Yeni yerel profil</button><button type="button" data-child-profile="sign-out">Profilden çık</button></div><p class="child-profile-status" role="status" ${status ? '' : 'hidden'} data-error="${error}">${escape(status)}</p></section>`;
+  return `<section class="child-profile-controls" data-child-profile-controls><div><span class="child-profile-eyebrow">BU CİHAZDAKİ ÇOCUK PROFİLİ</span><h2>Kiminle oynayalım?</h2><p>Ad bu tarayıcıda hatırlanır. Sunuculu sürümde dinlediğiniz kişiselleştirilmiş hikâyeyi seslendirmek için seçili ad ElevenLabs’e gönderilir. Bu bir hesap girişi değildir; öğretmen listeleri ve ilerleme ortak mevcut kayıtta kalır.</p></div><label for="childProfileSelect-${key}">Seçili profil</label><select id="childProfileSelect-${key}" data-child-profile-select><option value="">Adsız oyna</option>${state.profiles.map(profile => `<option value="${escape(profile.id)}" ${state.activeId === profile.id ? 'selected' : ''}>${escape(profile.name)}</option>`).join('')}</select><label for="childProfileName-${key}">Çocuğun adı</label><input id="childProfileName-${key}" data-child-profile-name maxlength="40" autocomplete="off" spellcheck="false" value="${escape(editingNew ? '' : current?.name || '')}" placeholder="Ad" data-profile-edit-id="${escape(editingNew ? '' : current?.id || '')}"><div class="child-profile-actions"><button type="button" data-child-profile="save">${editingNew || !current ? 'Profili kaydet ve seç' : 'Adı kaydet'}</button><button type="button" data-child-profile="new">Yeni yerel profil</button><button type="button" data-child-profile="sign-out">Profilden çık</button></div><p class="child-profile-status" role="status" ${status ? '' : 'hidden'} data-error="${error}">${escape(status)}</p></section>`;
 }
 
 const SKIP_COPY = 'script,style,noscript,input,textarea,select,option,[data-child-profile-controls],[data-learning-content],.word,.target,.bank,.slots,.quest-bank,.quest-slots,.grid,.learn-word-edit,.teacher-library,.teacher-route,.learning-parent,.home-parent-tile[data-do="learning-parent"],.continuation-preview,.quest-summary-result,.quest-feedback,.learn-whole-word,.learn-bank,.learn-slots,.learn-review,.learn-task-header>p,#freePrompt,#questModel,#learningModel,[data-quest="choice"],[data-learning="choice"],[data-do="word"],[data-do="tile"],[data-quest="tile"],[data-learning="tile"]';
@@ -114,7 +131,7 @@ let mounted;
 
 function renderChildWelcome(illustration) {
   const key = ++panelSequence;
-  return `<div class="child-welcome-card"><div class="child-welcome-scene" aria-hidden="true">${illustration ? `<img src="${escape(illustration)}" alt="" width="1672" height="941">` : ''}<span class="child-welcome-letter">a</span><span class="child-welcome-island-name">Harf Adası</span></div><div class="child-welcome-copy"><button type="button" class="child-welcome-dismiss" data-child-welcome-dismiss aria-label="Şimdilik kapat">×</button><h2 id="childWelcomeTitle-${key}">Harf Adası’na <br>hoş geldin!</h2><p id="childWelcomeIntro-${key}" class="child-welcome-intro">Keşfe çıkmadan önce tanışalım.<br>Sana nasıl seslenelim?</p><form data-child-welcome-form novalidate><label for="childWelcomeName-${key}">Çocuğun adı</label><input id="childWelcomeName-${key}" data-child-welcome-name name="child-name" type="text" maxlength="40" autocomplete="off" autocapitalize="words" spellcheck="false" required aria-describedby="childWelcomeHint-${key} childWelcomeError-${key}" placeholder="Adını buraya yaz"><p id="childWelcomeHint-${key}" class="child-welcome-hint">Şifre gerekmez. Adın yalnızca bu tarayıcıda kullanılır.</p><p id="childWelcomeError-${key}" class="child-welcome-error" data-child-welcome-error role="alert" hidden></p><button type="submit" class="child-welcome-start">Kaydet ve adaya gir<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></button></form><p class="child-welcome-note">Kendi hızında, birlikte.</p></div></div>`;
+  return `<div class="child-welcome-card"><div class="child-welcome-scene" aria-hidden="true">${illustration ? `<img src="${escape(illustration)}" alt="" width="1672" height="941">` : ''}<span class="child-welcome-letter">a</span><span class="child-welcome-island-name">Harf Adası</span></div><div class="child-welcome-copy"><button type="button" class="child-welcome-dismiss" data-child-welcome-dismiss aria-label="Şimdilik kapat">×</button><h2 id="childWelcomeTitle-${key}">Harf Adası’na <br>hoş geldin!</h2><p id="childWelcomeIntro-${key}" class="child-welcome-intro">Keşfe çıkmadan önce tanışalım.<br>Sana nasıl seslenelim?</p><form data-child-welcome-form novalidate><label for="childWelcomeName-${key}">Çocuğun adı</label><input id="childWelcomeName-${key}" data-child-welcome-name name="child-name" type="text" maxlength="40" autocomplete="off" autocapitalize="words" spellcheck="false" required aria-describedby="childWelcomeHint-${key} childWelcomeError-${key}" placeholder="Adını buraya yaz"><p id="childWelcomeHint-${key}" class="child-welcome-hint">Şifre gerekmez. Adın bu tarayıcıda hatırlanır.</p><p id="childWelcomeError-${key}" class="child-welcome-error" data-child-welcome-error role="alert" hidden></p><button type="submit" class="child-welcome-start">Kaydet ve adaya gir<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></button></form><p class="child-welcome-note">Kendi hızında, birlikte.</p></div></div>`;
 }
 
 export function mountChildProfiles({ root = typeof document !== 'undefined' ? document.body : null, store = sharedStore() } = {}) {

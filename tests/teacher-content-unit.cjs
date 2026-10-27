@@ -1,17 +1,17 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
-const sourceDir = path.resolve(__dirname, '../src');
-const url = source => `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`;
-const teacherURL = url(fs.readFileSync(path.join(sourceDir, 'teacher-content.js'), 'utf8'));
-const teacher = import(teacherURL);
-const selectionURL = url(fs.readFileSync(path.join(sourceDir, 'content-selection.js'), 'utf8'));
-const learningURL = url(fs.readFileSync(path.join(sourceDir, 'learning-model.js'), 'utf8')
-  .replace("'./content-selection.js'", JSON.stringify(selectionURL))
-  .replace("'./teacher-content.js'", JSON.stringify(teacherURL)));
-const learning = import(learningURL);
+const { modelURL } = require('./model-loader.cjs');
+const teacher = import(modelURL('teacher-content.js'));
+const learning = import(modelURL('learning-model.js'));
 const NOW = Date.UTC(2026, 9, 27, 7);
+
+test('teacher sentences normalize typographic spaces while preserving line boundaries and rejecting controls', async () => {
+  const { parseTeacherSentences, normalizeTeacherSentences } = await teacher;
+  const result = parseTeacherSentences('Anne\u00a0\u202fnane al.\nİnal\u2007anten al.');
+  assert.deepEqual(result, { sentences: ['Anne nane al.', 'İnal anten al.'], errors: [] });
+  assert.deepEqual(normalizeTeacherSentences(['Anne\u00a0nane al.', 'Anne\nnane al.', '\u2028Anne nane al.', 'Anne\u200bnane al.', '\tAnne nane al.']), ['Anne nane al.']);
+  assert.equal(parseTeacherSentences('Anne\tnane al.').errors.length, 1);
+});
 
 test('teacher letters normalize Turkish case and NFC without conflating dotted and dotless i', async () => {
   const { parseTeacherLetters } = await teacher;
@@ -109,4 +109,40 @@ test('list conflict resolution retains typed teacher units from the actual newer
   const merged = mergeLearningStates(older, newer, NOW + 2000);
   assert.deepEqual(merged.lists[0].letters, ['n', 'e']);
   assert.deepEqual(merged.lists[0].syllables, ['ne', 'en']);
+});
+
+test('independent teacher sentences preserve Turkish capitals and punctuation while rejecting unsafe or oversized lines', async () => {
+  const { parseTeacherSentences } = await teacher;
+  assert.equal(typeof parseTeacherSentences, 'function');
+  const result = parseTeacherSentences('  Anne  elinle nane at.\nİnal anten al.\nİNAL ANTEN AL.\nLale tane tane anlat.\n<script>\nX al.\n' + 'a'.repeat(241));
+  assert.deepEqual(result.sentences, ['Anne elinle nane at.', 'İnal anten al.', 'Lale tane tane anlat.']);
+  assert.deepEqual(result.errors.map(error => error.line), [5, 6, 7]);
+  const bounded = parseTeacherSentences(Array.from({ length: 101 }, (_, index) => `Anne ${index} tane al.`).join('\n'));
+  assert.equal(bounded.sentences.length, 100); assert.equal(bounded.errors.length, 1);
+});
+
+test('sentence-only teacher lists survive normalization and block untaught letters without inventing vocabulary', async () => {
+  const { createLearningState, normalizeLearningState, getTeacherContent } = await learning;
+  const state = createLearningState(NOW);
+  state.lists = [{ id: 'sentences', title: 'Ders cümleleri', updatedAt: NOW, words: [], sentences: ['İnal anten al.', 'Lale tane tane anlat.', 'Şal al.'] }];
+  state.activeListId = 'sentences';
+  const saved = normalizeLearningState(JSON.parse(JSON.stringify(state)), NOW);
+  assert.deepEqual(saved.lists[0].sentences, ['İnal anten al.', 'Lale tane tane anlat.', 'Şal al.']);
+  assert.deepEqual(saved.lists[0].words, []);
+  const content = getTeacherContent(saved, ['a', 'n', 'e', 't', 'i', 'l']);
+  assert.deepEqual(content.sentences, ['İnal anten al.', 'Lale tane tane anlat.']);
+  assert.deepEqual(content.blockedSentences, [{ text: 'Şal al.', missingLetters: ['ş'] }]);
+  assert.deepEqual(normalizeLearningState(saved, NOW), saved);
+});
+
+test('teacher sentence library prioritizes independent lines and retains compatible word-linked sentences', async () => {
+  const { getTeacherLibrary } = await import(require('./model-loader.cjs').modelURL('teacher-library.js'));
+  const { createLearningState } = await learning;
+  const state = createLearningState(NOW);
+  state.lists[0].sentences = ['İnal anten al.', 'Anne nane al.', 'Şal al.'];
+  const library = getTeacherLibrary(state, ['a', 'n', 'e', 't', 'i', 'l']);
+  assert.equal(library.sentences[0].text, 'İnal anten al.');
+  assert.equal(library.sentences.filter(entry => entry.text === 'Anne nane al.').length, 1);
+  assert.ok(library.sentences.some(entry => entry.text === 'Ali lale al.'), 'old word-linked sentences still work');
+  assert.deepEqual(library.blockedSentences.find(entry => entry.text === 'Şal al.').missingLetters, ['ş']);
 });

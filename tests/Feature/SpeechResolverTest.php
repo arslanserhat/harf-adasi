@@ -32,6 +32,12 @@ class SpeechResolverTest extends TestCase
         File::put($this->fixture.'/catalog.json', json_encode(['version' => 1, 'revision' => 'irem-v4-v1', 'phrases' => [
             'hadi başlayalım.' => ['spoken' => 'Hadi, başlayalım!', 'file' => 'irem-v4-v1/start.mp3'],
             'minik aslan burada.' => ['spoken' => 'Minik Aslan burada.', 'file' => 'irem-v4-v1/lion.mp3'],
+            'alparslan ile pırpırın sipariş çantasını hazırlayalım.' => ['spoken' => 'Alp ile Pırpır’ın sipariş çantasını hazırlayalım.', 'file' => 'irem-v4-v1/hero.mp3'],
+            'alparslanın çantasını alparslana verelim. alparslandan alparslanla konuşalım.' => ['spoken' => 'Alp eski kayıt.', 'file' => 'irem-v4-v1/hero-suffix.mp3'],
+            'alp arslan ve pırpır birlikte çalışıyor.' => ['spoken' => 'Alp eski kayıt.', 'file' => 'irem-v4-v1/hero-spaced.mp3'],
+            '{{child}} ile pırpır bahçeye gidiyor.' => ['spoken' => 'Alp eski kayıt.', 'file' => 'irem-v4-v1/hero-placeholder.mp3'],
+            'ali' => ['spoken' => 'Ali', 'file' => 'irem-v4-v1/ali.mp3'],
+            'alparslan' => ['spoken' => 'Alparslan', 'file' => 'irem-v4-v1/hero-word.mp3'],
         ]], JSON_UNESCAPED_UNICODE));
         config(['services.elevenlabs' => [
             'enabled' => true, 'key' => 'test-key-never-public', 'voice_id' => 'approved-test-voice', 'model_id' => 'approved-test-model',
@@ -279,6 +285,95 @@ class SpeechResolverTest extends TestCase
         } finally {
             $this->app['env'] = $environment;
         }
+        Http::assertNothingSent();
+    }
+
+    public function test_personalized_catalog_narration_uses_the_full_entered_name_and_canonical_template_not_the_old_alp_clip(): void
+    {
+        $this->provider();
+        File::put($this->fixture.'/audio/irem-v4-v1/hero.mp3', 'ID3old-Alp-recording');
+        $canonical = 'Alparslan ile Pırpır’ın sipariş çantasını hazırlayalım.';
+        $this->postJson('/api/speech/resolve', ['text' => $canonical, 'profile_name' => 'Alpaslan'])->assertOk();
+        Http::assertSent(fn ($request) => $request['text'] === 'Alpaslan ile Pırpır’ın sipariş çantasını hazırlayalım.'
+            && ($request['language_code'] ?? null) === 'tr'
+            && ! array_key_exists('profile_name', $request->data()));
+        Http::assertSentCount(1);
+        $this->assertSame($this->teacherState(), LearningState::where('browser_id', 'browser-a')->first()->payload, 'display names never become server learning/profile identity');
+    }
+
+    public function test_selected_alp_is_spoken_as_alp_and_never_reuses_an_alpaslan_cache_entry(): void
+    {
+        $this->provider();
+        $canonical = 'Alparslan ile Pırpır’ın sipariş çantasını hazırlayalım.';
+        $alpaslan = $this->postJson('/api/speech/resolve', ['text' => $canonical, 'profile_name' => 'Alpaslan'])->assertOk()->json('url');
+        $alp = $this->postJson('/api/speech/resolve', ['text' => $canonical, 'profile_name' => 'Alp'])->assertOk()->json('url');
+        $requests = Http::recorded();
+        $this->assertSame('Alp ile Pırpır’ın sipariş çantasını hazırlayalım.', $requests->last()[0]['text']);
+        $this->assertNotSame(parse_url($alpaslan, PHP_URL_PATH), parse_url($alp, PHP_URL_PATH));
+        Http::assertSentCount(2);
+    }
+
+    public function test_personalized_suffixes_follow_the_full_name_vowel_harmony(): void
+    {
+        $canonical = 'Alparslan’ın çantasını Alparslan’a verelim. Alparslan’dan Alparslan’la konuşalım.';
+        config(['services.elevenlabs.session_daily_char_limit' => 500]);
+        $this->provider();
+        foreach ([
+            ['Deniz', 'Deniz’in çantasını Deniz’e verelim. Deniz’den Deniz’le konuşalım.'],
+            ['Ece', 'Ece’nin çantasını Ece’ye verelim. Ece’den Ece’yle konuşalım.'],
+            ['Ayşe', 'Ayşe’nin çantasını Ayşe’ye verelim. Ayşe’den Ayşe’yle konuşalım.'],
+        ] as [$name, $expected]) {
+            $this->postJson('/api/speech/resolve', ['text' => $canonical, 'profile_name' => $name])->assertOk();
+            Http::assertSent(fn ($request) => $request['text'] === $expected);
+        }
+        Http::assertSentCount(3);
+    }
+
+    public function test_blank_and_missing_names_use_neutral_narration_while_distinct_full_names_have_separate_cache(): void
+    {
+        $this->provider();
+        $canonical = 'Alp Arslan ve Pırpır birlikte çalışıyor.';
+        $neutral = $this->postJson('/api/speech/resolve', ['text' => $canonical])->assertOk()->json('url');
+        Http::assertSent(fn ($request) => $request['text'] === 'Minik Aslan ve Pırpır birlikte çalışıyor.');
+        $blank = $this->postJson('/api/speech/resolve', ['text' => $canonical, 'profile_name' => ''])->assertOk()->json('url');
+        $alpaslan = $this->postJson('/api/speech/resolve', ['text' => $canonical, 'profile_name' => 'Alpaslan'])->assertOk()->json('url');
+        $deniz = $this->postJson('/api/speech/resolve', ['text' => $canonical, 'profile_name' => 'Deniz'])->assertOk()->json('url');
+        $again = $this->postJson('/api/speech/resolve', ['text' => $canonical, 'profile_name' => 'Alpaslan'])->assertOk()->json('url');
+        $this->assertSame(parse_url($neutral, PHP_URL_PATH), parse_url($blank, PHP_URL_PATH));
+        $this->assertNotSame(parse_url($alpaslan, PHP_URL_PATH), parse_url($deniz, PHP_URL_PATH));
+        $this->assertSame(parse_url($alpaslan, PHP_URL_PATH), parse_url($again, PHP_URL_PATH));
+        Http::assertSentCount(3);
+    }
+
+    public function test_profile_name_scope_is_limited_to_authored_catalog_templates_and_valid_display_names(): void
+    {
+        Http::fake();
+        foreach (['nane', 'Ali', 'Alparslan', 'Hadi başlayalım.', 'Alparslan bilinmeyen metni okusun.'] as $text) {
+            $this->postJson('/api/speech/resolve', ['text' => $text, 'profile_name' => 'Alpaslan'])->assertUnprocessable();
+        }
+        foreach (['Alp<script>', 'Alp123', str_repeat('A', 41), ['Alpaslan'], 'https://example.test'] as $name) {
+            $this->postJson('/api/speech/resolve', ['text' => 'Alparslan ile Pırpır’ın sipariş çantasını hazırlayalım.', 'profile_name' => $name])->assertUnprocessable();
+        }
+        Http::assertNothingSent();
+    }
+
+    public function test_explicit_placeholder_template_preserves_full_multicomponent_display_name(): void
+    {
+        $this->provider();
+        $this->postJson('/api/speech/resolve', ['text' => '{{child}} ile Pırpır bahçeye gidiyor.', 'profile_name' => '  Alp   Arslan  '])->assertOk();
+        Http::assertSent(fn ($request) => $request['text'] === 'Alp Arslan ile Pırpır bahçeye gidiyor.');
+    }
+
+    public function test_personalized_expansion_keeps_the_upstream_text_bound(): void
+    {
+        $this->provider();
+        $canonical = str_repeat('Alparslan ', 99).'gel.';
+        $catalog = json_decode(File::get($this->fixture.'/catalog.json'), true);
+        $catalog['phrases'][str_repeat('alparslan ', 99).'gel.'] = ['spoken' => 'Alp eski kayıt.'];
+        File::put($this->fixture.'/catalog.json', json_encode($catalog, JSON_UNESCAPED_UNICODE));
+        config(['services.elevenlabs.daily_char_limit' => 10000, 'services.elevenlabs.monthly_char_limit' => 10000,
+            'services.elevenlabs.session_daily_char_limit' => 10000, 'services.elevenlabs.ip_daily_char_limit' => 10000]);
+        $this->postJson('/api/speech/resolve', ['text' => $canonical, 'profile_name' => str_repeat('A', 40)])->assertUnprocessable();
         Http::assertNothingSent();
     }
 }

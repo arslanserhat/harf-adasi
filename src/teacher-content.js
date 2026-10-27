@@ -7,6 +7,37 @@ const TURKISH = /^[abcçdefgğhıijklmnoöprsştuüvyz]+$/u;
 const CLUSTERS = new Set(['tr', 'pr', 'br', 'kr', 'gr', 'fr', 'pl', 'bl', 'kl', 'gl', 'fl', 'dr', 'sp', 'st', 'sk', 'str', 'spr', 'skr']);
 const lower = value => typeof value === 'string' ? value.normalize('NFC').trim().toLocaleLowerCase('tr-TR') : '';
 const unique = values => [...new Set(values)];
+const sentenceText = value => typeof value === 'string' && !/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}<>]/u.test(value)
+  ? value.normalize('NFC').replace(/\p{Zs}+/gu, ' ').trim() : '';
+const validSentence = text => text.length > 0 && text.length <= 240 && text.split(/\s+/u).length <= 40
+  && /[abcçdefgğhıijklmnoöprsştuüvyz]/u.test(lower(text))
+  && /^[abcçdefgğhıijklmnoöprsştuüvyz0-9 .,!?:;'’‘"“”„()\[\]\-–—…]+$/u.test(lower(text));
+
+export const TEACHER_SENTENCE_PRESET = Object.freeze([
+  'Anne elinle nane at.', 'İnal anten al.', 'Lale tane tane anlat.', 'Ali tatili ilan et.', 'Nil ala atlet al.',
+]);
+export function normalizeTeacherSentences(value) {
+  const seen = new Set(), sentences = [];
+  for (const raw of (Array.isArray(value) ? value : []).slice(0, 100)) {
+    const text = sentenceText(raw), key = lower(text);
+    if (!validSentence(text) || seen.has(key)) continue;
+    seen.add(key); sentences.push(text);
+  }
+  return sentences;
+}
+export function parseTeacherSentences(value) {
+  const sentences = [], errors = [], seen = new Set();
+  if (typeof value !== 'string' || value.length > 25000) return { sentences, errors: [{ line: 1, message: 'En fazla 100 kısa cümleyi düz metin olarak yazın.' }] };
+  value.split(/\r?\n/u).forEach((raw, index) => {
+    if (!raw.trim()) return;
+    const text = sentenceText(raw), key = lower(text);
+    if (!validSentence(text)) { errors.push({ line: index + 1, message: 'Cümle Türkçe harflerle, en fazla 240 karakter ve 40 kelime olmalı. HTML veya kontrol işareti kullanmayın.' }); return; }
+    if (seen.has(key)) return;
+    if (sentences.length >= 100) { errors.push({ line: index + 1, message: 'Bir listede en fazla 100 cümle olabilir.' }); return; }
+    seen.add(key); sentences.push(text);
+  });
+  return { sentences, errors };
+}
 
 export function isTeacherSyllable(value) {
   const text = lower(value);
@@ -65,6 +96,11 @@ export function teacherContentFromList(list, taughtLetters) {
     if (missingLetters.length) blockedSyllables.push({ text, missingLetters }); else explicitSyllables.push(text);
   }
   const derivedSyllables = unique(words.flatMap(word => word.parts).filter(isTeacherSyllable));
+  const suppliedSentences = normalizeTeacherSentences(list?.sentences), sentences = [], blockedSentences = [];
+  for (const text of suppliedSentences) {
+    const missingLetters = unique([...lower(text)].filter(letter => /\p{L}/u.test(letter) && !known.has(letter)));
+    if (missingLetters.length) blockedSentences.push({ text, missingLetters }); else sentences.push(text);
+  }
   return {
     id: list?.id || '', title: list?.title || 'Öğretmenimin listesi',
     lettersProvided: explicitLetters.length > 0, explicitLetters,
@@ -72,6 +108,7 @@ export function teacherContentFromList(list, taughtLetters) {
     blockedLetters: explicitLetters.filter(letter => !known.has(letter)),
     suppliedSyllables, explicitSyllables, derivedSyllables,
     syllables: unique([...explicitSyllables, ...derivedSyllables]), blockedSyllables,
+    suppliedSentences, sentences, blockedSentences,
     words, blockedWords,
   };
 }

@@ -59,16 +59,17 @@ async function fixture({ kind = 'build', support = 1, letters = LETTERS } = {}) 
   state.session = planSession(state, letters, NOW + 100, { entryKind: kind, focusText: 'nane' });
   state.session.storySeen = true;
   const initialTask = state.session.tasks[0];
+  const speech = [];
   assert.equal(initialTask.kind, kind);
   const { createLearning } = await import(controllerURL('learning.js'));
   const root = window.document.querySelector('#main');
   const create = () => createLearning({
     root, getState: () => state, setState: next => { state = normalizeLearningState(JSON.parse(JSON.stringify(next))); },
-    getLetters: () => taughtLetters, speak: async () => true,
+    getLetters: () => taughtLetters, speak: async (text, options) => { speech.push({ text, options }); return true; },
   });
   let learning = create(); learning.start();
   return {
-    root, window, initialTask,
+    root, window, initialTask, speech,
     state: () => state,
     click(action) { const button = root.querySelector(`[data-learning="${action}"]`); assert.ok(button, action); button.click(); },
     tile(text) { const button = [...root.querySelectorAll('[data-learning="tile"]')].find(item => item.textContent === text && !item.disabled); assert.ok(button, `available ${text} tile`); button.click(); },
@@ -85,12 +86,24 @@ async function fixture({ kind = 'build', support = 1, letters = LETTERS } = {}) 
     returnToTask() { learning.destroy(); learning.resume(); },
     reload() { learning.destroy(); state = normalizeLearningState(JSON.parse(JSON.stringify(state))); learning = create(); learning.start(); },
     setLetters(next) { taughtLetters = [...next]; },
+    openParent() { learning.renderParent(); },
     done() {
       learning.destroy(); window.close();
       for (const [key, descriptor] of previous) { if (descriptor) Object.defineProperty(globalThis, key, descriptor); else delete globalThis[key]; }
     },
   };
 }
+
+test('adaptive lesson audio is literal while authored scene narration retains its name intent', async () => {
+  const f = await fixture({ kind: 'listen' });
+  try {
+    f.click('listen'); await f.flush();
+    assert.deepEqual(f.speech, [{ text: 'nane', options: { literal: true } }]);
+    f.root.querySelector('[data-story-action="listen"]').click(); await f.flush();
+    assert.equal(f.speech.length, 2);
+    assert.equal(f.speech[1].options, undefined, 'story narration keeps personalization enabled');
+  } finally { f.done(); }
+});
 
 test('an unaided writing task conceals its answer in the reason and accessible writing label', async () => {
   const f = await fixture({ kind: 'write' });
@@ -199,5 +212,35 @@ test('changing taught letters abandons an ineligible saved task and its partial 
     assert.equal(f.slots().some(text => text === 'n'), false);
     assert.equal(f.state().events.some(event => event.id === f.initialTask.id), false);
     assert.equal(f.state().activeListId, 'starter');
+  } finally { f.done(); }
+});
+
+test('teacher editor saves standalone case-preserved sentences without requiring any vocabulary word', async () => {
+  const f = await fixture();
+  try {
+    f.openParent(); f.click('new-list');
+    const field = f.root.querySelector('#learningSentences'); assert.ok(field, 'sentences have an independent editor');
+    f.root.querySelector('#learningListTitle').value = 'Cümle çalışmam';
+    field.value = 'İnal anten al.\nLale tane tane anlat.';
+    f.click('save-list');
+    const saved = f.state().lists.find(list => list.id === f.state().activeListId);
+    assert.deepEqual(saved.words, []); assert.deepEqual(saved.sentences, ['İnal anten al.', 'Lale tane tane anlat.']);
+    f.returnToTask();
+    assert.equal(f.root.querySelector('#learningSentences').value, 'İnal anten al.\nLale tane tane anlat.');
+  } finally { f.done(); }
+});
+
+test('the five lesson sentences are an explicit append-only editor action and never overwrite saved lists', async () => {
+  const f = await fixture();
+  try {
+    f.openParent();
+    const original = JSON.stringify(f.state().lists), words = f.root.querySelector('#learningWords').value;
+    const field = f.root.querySelector('#learningSentences'); assert.ok(field);
+    field.value = 'Anne nane al.';
+    f.click('preset-sentences');
+    assert.deepEqual(field.value.split('\n'), ['Anne nane al.', 'Anne elinle nane at.', 'İnal anten al.', 'Lale tane tane anlat.', 'Ali tatili ilan et.', 'Nil ala atlet al.']);
+    assert.equal(f.root.querySelector('#learningWords').value, words);
+    assert.equal(JSON.stringify(f.state().lists), original, 'importing a draft is not an implicit save');
+    f.click('preset-sentences'); assert.equal(field.value.split('\n').length, 6);
   } finally { f.done(); }
 });

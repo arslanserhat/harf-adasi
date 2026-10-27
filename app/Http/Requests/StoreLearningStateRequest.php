@@ -26,6 +26,16 @@ class StoreLearningStateRequest extends FormRequest
                 'state' => 'Öğrenme kaydı en fazla 512 KB olabilir.',
             ]);
         }
+        $state = $this->input('state');
+        if (is_array($state) && is_array($state['lists'] ?? null)) {
+            foreach ($state['lists'] as &$list) {
+                if (is_array($list) && is_array($list['sentences'] ?? null)) {
+                    $list['sentences'] = array_map(fn ($sentence) => is_string($sentence) ? $this->normalizeTeacherSentence($sentence) : $sentence, $list['sentences']);
+                }
+            }
+            unset($list);
+            $this->merge(['state' => $state]);
+        }
     }
 
     public function rules(): array
@@ -40,7 +50,7 @@ class StoreLearningStateRequest extends FormRequest
             'state.updatedAt' => ['required', 'integer', 'min:0', 'max:32503680000000'],
             'state.activeListId' => ['required', 'string', 'max:80'],
             'state.lists' => ['present', 'array', 'list', 'max:20'],
-            'state.lists.*' => ['array:id,title,words,letters,syllables,updatedAt'],
+            'state.lists.*' => ['array:id,title,words,letters,syllables,sentences,updatedAt'],
             'state.lists.*.id' => ['required', 'string', 'max:80', 'distinct:strict'],
             'state.lists.*.title' => ['required', 'string', 'max:80'],
             'state.lists.*.updatedAt' => ['required', 'integer', 'min:0', 'max:32503680000000'],
@@ -48,6 +58,8 @@ class StoreLearningStateRequest extends FormRequest
             'state.lists.*.letters.*' => ['required', 'string', 'regex:/\A[abcçdefgğhıijklmnoöprsştuüvyz]\z/u'],
             'state.lists.*.syllables' => ['sometimes', 'array', 'list', 'max:100'],
             'state.lists.*.syllables.*' => ['required', 'string', 'regex:/\A[abcçdefgğhıijklmnoöprsştuüvyz]{1,6}\z/u'],
+            'state.lists.*.sentences' => ['sometimes', 'array', 'list', 'max:100'],
+            'state.lists.*.sentences.*' => ['required', 'string', 'max:240'],
             'state.lists.*.words' => ['present', 'array', 'list', 'max:100'],
             'state.lists.*.words.*' => ['array:text,parts,meaning,sentence,emoji'],
             'state.lists.*.words.*.text' => ['required', 'string', 'regex:'.self::WORD],
@@ -133,6 +145,21 @@ class StoreLearningStateRequest extends FormRequest
                             $validator->errors()->add("state.lists.$index.syllables.$unitIndex", 'Bağımsız hecede tek bir ünlü olmalı ve hece Türkçe harflerle yazılmalı.');
                         }
                     }
+                }
+                $seenSentences = [];
+                foreach (is_array($list['sentences'] ?? null) ? $list['sentences'] : [] as $sentenceIndex => $sentence) {
+                    if (! is_string($sentence)) {
+                        continue;
+                    }
+                    $path = "state.lists.$index.sentences.$sentenceIndex";
+                    if (! $this->validTeacherSentence($sentence)) {
+                        $validator->errors()->add($path, 'Cümle Türkçe harflerle tek satırda, en fazla 40 kelime olmalı.');
+                    }
+                    $key = mb_strtolower(str_replace(['I', 'İ'], ['ı', 'i'], $sentence), 'UTF-8');
+                    if (in_array($key, $seenSentences, true)) {
+                        $validator->errors()->add($path, 'Aynı öğretmen listesinde bir cümle yalnızca bir kez bulunabilir.');
+                    }
+                    $seenSentences[] = $key;
                 }
                 $texts = [];
                 foreach ($list['words'] as $wordIndex => $word) {
@@ -243,6 +270,7 @@ class StoreLearningStateRequest extends FormRequest
         if (array_key_exists('ui', $result) && ! $this->validTaskUi($result['ui'], $task, ($result['correct'] ?? false) === true)) {
             return false;
         }
+
         return true;
     }
 
@@ -296,6 +324,7 @@ class StoreLearningStateRequest extends FormRequest
             }
             $ids[] = $tile['id'];
         }
+
         return true;
     }
 
@@ -304,6 +333,7 @@ class StoreLearningStateRequest extends FormRequest
         if (preg_match('/\A([bcçdfgğhjklmnprsştvyz]{0,3})([aeıioöuü])([bcçdfgğhjklmnprsştvyz]{0,2})\z/u', $text, $parts) !== 1) {
             return false;
         }
+
         return mb_strlen($parts[1]) <= 1 || in_array($parts[1], [
             'tr', 'pr', 'br', 'kr', 'gr', 'fr', 'pl', 'bl', 'kl', 'gl', 'fl', 'dr', 'sp', 'st', 'sk', 'str', 'spr', 'skr',
         ], true);
@@ -341,7 +371,33 @@ class StoreLearningStateRequest extends FormRequest
                 return false;
             }
         }
+
         return true;
+    }
+
+    private function normalizeTeacherSentence(string $sentence): string
+    {
+        if (class_exists(\Normalizer::class)) {
+            $sentence = \Normalizer::normalize($sentence, \Normalizer::FORM_C) ?: $sentence;
+        } else {
+            $sentence = strtr($sentence, ["I\u{0307}" => 'İ', "c\u{0327}" => 'ç', "C\u{0327}" => 'Ç',
+                "s\u{0327}" => 'ş', "S\u{0327}" => 'Ş', "g\u{0306}" => 'ğ', "G\u{0306}" => 'Ğ',
+                "o\u{0308}" => 'ö', "O\u{0308}" => 'Ö', "u\u{0308}" => 'ü', "U\u{0308}" => 'Ü']);
+        }
+
+        // Collapse typographic spaces while keeping embedded controls/newlines
+        // intact so validation rejects them rather than silently joining lines.
+        return trim(preg_replace('/\p{Zs}+/u', ' ', $sentence) ?? $sentence);
+    }
+
+    private function validTeacherSentence(string $sentence): bool
+    {
+        $letters = 'abcçdefgğhıijklmnoöprsştuüvyzABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ';
+
+        return ! preg_match('/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}<>]/u', $sentence)
+            && preg_match('/\A['.$letters.'0-9 .,!?;:…‘’“”„\'"()\[\]\-–—]+\z/u', $sentence) === 1
+            && preg_match('/['.$letters.']/u', $sentence) === 1
+            && count(preg_split('/\s+/u', $sentence, -1, PREG_SPLIT_NO_EMPTY)) <= 40;
     }
 
     private function safeTree(mixed $value, int $depth, int &$nodes): bool
@@ -355,11 +411,13 @@ class StoreLearningStateRequest extends FormRequest
                     return false;
                 }
             }
+
             return true;
         }
         if (is_string($value)) {
             return mb_strlen($value) <= 8000 && ! preg_match('/[<>\x00-\x08\x0B\x0C\x0E-\x1F]/u', $value);
         }
+
         return $value === null || is_bool($value) || is_int($value) || (is_float($value) && is_finite($value));
     }
 }

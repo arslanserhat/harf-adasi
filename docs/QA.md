@@ -81,8 +81,12 @@ olaylarıyla cevaplar. Kayıtlı yarım eski planın yalnız havuz metadata'sı
 tamamlanır; konum/cevap/çizim değişmez, ikinci yenilemede yeniden sayılmaz.
 Görülen hedef seçimi başarı ödülü veya yeni öğrenme kaydı üretmez. Yerel
 profil testleri sentetik Türkçe/uzun adlar, kaydetme, seçme, yeniden adlandırma,
-çıkış, yenileme, güvenli metin ve kişisel adların ağ isteklerine gitmemesini
-doğrular. Gerçek kullanıcı hesabı/kimlik doğrulama testi değildir.
+çıkış, yenileme, güvenli metin ve o sürümde kişisel adların ağ isteklerine gitmemesini
+doğrular. Bu, aşağıda tarihi belirtilen eski sürümün görsel profil davranışıdır.
+Güncel kişiselleştirilmiş anlatımda, çocuğun seçili adı yalnızca izinli kanonik
+hikâye şablonunun okunması için ses isteğine eklenebilir; yeni ad/ses kapsamının
+kontrolü eski profil koşusundan ayrı yapılmalıdır. Gerçek kullanıcı hesabı/kimlik
+doğrulama testi değildir.
 
 Son eski-plan metadata düzeltmesinden önce aynı bütünleşik 5.5 özellikleriyle
 **107/107** ekrana dayalı senaryo geçti: macera 24, header 12, profil 3,
@@ -110,7 +114,7 @@ kontrol edildi. **9/9 canlı Chromium senaryosu**, dört süreç çıkış 0:
   oyunlar arasında gerçek hedef havuzu kapsaması, yeni döngü, yinelenmeyen
   devam kaydı ve değiştirilmiş havuz.
 - 390×660 yerel profil: adsız başlangıç, kaydet/değiştir/yenile/çıkış,
-  Türkçe/uzun adlar, güvenli metin ve kişisel ad içeren istek bulunmaması.
+  Türkçe/uzun adlar, güvenli metin ve o sürümde kişisel ad içeren istek bulunmaması.
 - Header altı boyutta: **360×640, 390×660, 768×1024, 1024×768, 844×390,
   1366×768**. Yatay taşma yok; ana CTA ilk görünümde, kontroller ayrı,
   altı hayvan korunuyor. Telefon header yüksekliği 67px, ada y=102.5px;

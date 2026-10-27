@@ -5,6 +5,14 @@ const path = require('node:path');
 const vm = require('node:vm');
 const { modelURL } = require('./model-loader.cjs');
 const source = fs.readFileSync(path.resolve(__dirname, '../src/game.js'), 'utf8');
+
+test('the game speech boundary forwards literal lesson intent without altering its text', async () => {
+  const calls = [];
+  const context = vm.createContext({ state: { muted: false }, audio: { speak: async (text, options) => { calls.push({ text, options }); return true; } } });
+  vm.runInContext(source.split('\n').find(line => line.startsWith('function speak(')), context);
+  assert.equal(await context.speak('Alparslan ile adım adım öğrenelim.', { literal: true }), true);
+  assert.deepEqual(calls, [{ text: 'Alparslan ile adım adım öğrenelim.', options: { literal: true } }]);
+});
 const models = Promise.all(['content-selection.js', 'learning-model.js', 'teacher-library.js'].map(name => import(modelURL(name))));
 
 // Run the actual result renderer, content pools, launchers and delegated click
@@ -35,7 +43,7 @@ async function fixture({ mode = 'syllables', source: contentSource = 'teacher', 
   learner.activeListId = learner.lists[0].id;
   const contentStore = content.createContentStore({ storage: null });
   for (const event of selection || []) contentStore.expose(event);
-  const main = { innerHTML: '' }, handlers = {}, launches = [], navigation = [];
+  const main = { innerHTML: '' }, handlers = {}, launches = [], navigation = [], speech = [];
   const types = { letters: 'letter', syllables: 'syllable', words: 'word', reading: 'reading', sentences: 'sentence', numbers: numMode === 'trace' ? 'digit' : numMode === 'count' ? 'count' : 'number' };
   const context = vm.createContext({
     ...content, ...learning, ...teacher, console, Date,
@@ -61,12 +69,14 @@ async function fixture({ mode = 'syllables', source: contentSource = 'teacher', 
     modal: (title, body) => { main.innerHTML = `<h2>${title}</h2>${body}`; }, toast() {},
     go: mode => navigation.push(mode),
     begin: (type, key, text, steps, options) => launches.push({ type, key, text, steps, options }),
+    sentencePractice: { start: (text, options) => launches.push({ type: 'sentence', text, options }) },
     audio: { playEffect() {} },
+    speak: (text, options) => { speech.push({ text, options }); },
     document: { addEventListener: (name, listener) => { handlers[name] = listener; } },
   });
   vm.runInContext([constant('esc'), constant('actionIcons'), constant('button'), ...functions.map(declaration), source.slice(clickStart, clickEnd)].join('\n'), context);
   return {
-    context, main, launches, navigation, contentStore,
+    context, main, launches, navigation, contentStore, speech,
     complete: () => context.complete(),
     actions() {
       const html = main.innerHTML.slice(main.innerHTML.indexOf('<div class="actions">'));
@@ -78,6 +88,25 @@ async function fixture({ mode = 'syllables', source: contentSource = 'teacher', 
     click(control) { handlers.click({ target: { closest: () => control } }); },
   };
 }
+
+test('free lesson controls use literal audio and the authored adventure listen control stays narration', async () => {
+  const app = await fixture();
+  const text = 'Alparslan ile adım adım öğrenelim.';
+  app.context.game.adventure = { story: text };
+  app.click({ id: 'storyListen', dataset: { do: 'speak', text } });
+  app.click({ dataset: { do: 'speak', text } });
+  assert.equal(app.speech[0].options, undefined, 'authored story listen is narration');
+  assert.deepEqual(JSON.parse(JSON.stringify(app.speech[1])), { text, options: { literal: true } }, 'the same text used as a lesson target retains its authored name');
+});
+
+test('the primary teacher sentence launcher accepts one-word instructions and spaced punctuation', async () => {
+  for (const text of ['Anlat', 'Anne — nane al.']) {
+    const app = await fixture({ mode: 'sentences', list: { id: 'independent', title: 'Cümlelerim', updatedAt: 1, words: [], sentences: [text] } });
+    app.context.nextPractice('sentences', 'teacher');
+    assert.equal(app.launches[0]?.text, text, 'an accepted teacher card remains selectable through the primary action');
+    assert.equal(app.launches[0].options.source, 'teacher');
+  }
+});
 
 for (const [mode, text, type, next] of [
   ['letters', 'a', 'letter', 'n'],

@@ -1,0 +1,11 @@
+Harf Adasi - Original Soft Tap v5
+
+Asset: fx-tap-soft-v5.wav
+Original procedural audio created specifically for Harf Adasi.
+No third-party recording, sample, melody, provider service, or externally sourced audio is incorporated.
+Use, modification and redistribution with the application follow its MIT licence.
+
+Synthesis: deterministic filtered noise and one rounded bipolar pressure transient;
+3 ms soft attack, short rounded decay, low-pass filtering and DC removal.
+Format: 44,100 Hz, 16-bit PCM, mono, 60 ms. Seed: 57105.
+This file replaces only the tap cue. Other effects retain their own licences.

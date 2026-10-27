@@ -107,7 +107,7 @@ export function createIsland({ root, getLetters, getCompleted, speak, stopSpeech
     const spoken = await speak(instruction());
     // A scene change cancels the whole voice chain, including a pending target.
     if (spoken === false || !withTarget || current !== session || generation !== epoch || muted()) return;
-    await speak(target);
+    await speak(target, { literal: true });
   }
   function listenTarget() {
     if (!current) return;
@@ -210,7 +210,7 @@ export function createIsland({ root, getLetters, getCompleted, speak, stopSpeech
       return;
     }
     current.selected.push(token);
-    if (!muted()) void speak(token.text);
+    if (!muted()) void speak(token.text, { literal: true });
     renderMission();
     if (current.selected.length === current.mission.tokens.length) void announceInstruction();
     feedback(current.selected.length === current.mission.tokens.length ? current.zone === 'train' ? 'Vagonlar hazır! Şimdi trenini kendin yola çıkar.' : 'Şifre hazır! Şimdi sandığı açabilirsin.' : 'Bir parça yerleşti. Sıradaki parçayı da bulalım.');

@@ -63,9 +63,9 @@ Bu endpointler uygulama içi anonim kayıt içindir; dışarıdan profil kimliğ
 
 ## Aynı Türkçe sesle metin okuma
 
-Yeni ses düzeninde tarayıcı önce `irem-v4-v1` kataloğundaki hazır MP3'ü oynatır.
+Yeni ses düzeninde olağan çalışmalar önce `irem-v4-v1` kataloğundaki hazır MP3'ü oynatır.
 Laravel sürümünde kayıt eksikse veya yüklenemezse `POST /api/speech/resolve`
-çağrılır. İstek yalnızca metin içerir:
+çağrılır. Olağan çalışma isteği yalnızca metin içerir:
 
 ```json
 {"text":"nane"}
@@ -73,8 +73,21 @@ Laravel sürümünde kayıt eksikse veya yüklenemezse `POST /api/speech/resolve
 
 Sunucu yalnızca sabit katalogdaki metinleri veya mevcut tarayıcı oturumuna
 kaydedilmiş izinli öğretmen harf/hece/kelime/cümlelerini kabul eder. İstemci
-sağlayıcı, ses/model, URL veya profil/tarayıcı kimliği seçemez. Çocuğun profil adı
-ses sağlayıcısına gönderilmez; öğretmen metinlerine kişisel bilgi yazılmamalıdır.
+sağlayıcı, ses/model, URL veya profil/tarayıcı kimliği seçemez.
+Katalogda kahramanın adını içeren özgün hikâye şablonlarında ayrıca `profile_name`
+gönderilebilir. Bu, en fazla 40 karakterlik seçili görüntü adıdır; kimlik veya
+yetkilendirme alanı değildir. Örneğin:
+
+```json
+{"text":"Alparslan ile adım adım öğrenelim.","profile_name":"Alpaslan"}
+```
+
+Sunucu kanonik şablonu doğrular ve Türkçe ekleri seçili ada uyarlar; eski bir
+kısaltılmış kaydı oynatmaz. Boş profil adı nötr kahraman adını kullanır. Başka
+profil alanları gönderilmez; ad öğrenme veritabanına yazılmaz. Üretilen ad içeren
+ses özel sunucu önbelleğinde tutulabilir. Pırpır ve öğretmenin harf/hece/kelime/
+cümle hedefleri yeniden adlandırılmaz. Öğretmen metinlerine kişisel bilgi
+yazılmamalıdır.
 Hazır kaydı olmayan izinli metin, hizmet etkinse ElevenLabs İrem sesiyle üretilir.
 Tamamlanmış önbellek kaydı yeniden üretim tüketimi oluşturmaz.
 

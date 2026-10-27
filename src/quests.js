@@ -246,7 +246,7 @@ export function createQuests({
     const text = task.skill === 'sentence' ? task.target : task.unitText || task.word || numericSpeech(task.quantity ?? Number(task.target));
     if (!requiresAudio(task)) current.ui.hints++;
     root.querySelector('[data-quest="listen"]')?.setAttribute('aria-busy', 'true');
-    const played = await speak(text);
+    const played = await speak(text, { literal: true });
     if (!current || current.plan !== plan || stage() !== task || epoch !== speechEpoch) return;
     root.querySelector('[data-quest="listen"]')?.setAttribute('aria-busy', 'false');
     if (played === false) { feedback('Türkçe ses bu metin için çalınamadı. “Birlikte oku” ile bir büyüğün yardım edebilir.', 'help'); return; }

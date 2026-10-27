@@ -7,13 +7,15 @@ const vm = require('node:vm');
 // Isolate browser/audio APIs without network or an actual audio output device.
 // Only the bundler import and BASE_URL expression are replaced; the production
 // module's voice selection, playback, cancellation and fallback run unchanged.
-function createAudio({ manifest = {}, voices = [], backend = false, csrfToken = 'session-csrf', resolver, speechLoading = false, clock = Date.now } = {}) {
+function createAudio({ manifest = {}, voices = [], backend = false, csrfToken = 'session-csrf', resolver, speechLoading = false, clock = Date.now, childName = '' } = {}) {
   const players = [];
   const spoken = [];
   const notices = [];
   const requests = [];
   const requestDetails = [];
   const scheduledTimers = [];
+  const localValues = new Map();
+  if (childName) localValues.set('harf-adasi-child-profiles-v1', JSON.stringify({ version: 1, activeId: 'child-active', profiles: [{ id: 'child-active', name: childName }] }));
   class FakeHowl {
     constructor(options) {
       this.options = options;
@@ -60,7 +62,8 @@ function createAudio({ manifest = {}, voices = [], backend = false, csrfToken = 
   const context = vm.createContext({
     Howl: FakeHowl,
     Howler: { ctx: { state: 'running' } },
-    window: { location: { origin: 'https://harf.test' }, speechSynthesis: engine, SpeechSynthesisUtterance: class { constructor(text) { this.text = text; } } },
+    window: { location: { origin: 'https://harf.test' }, addEventListener() {}, removeEventListener() {}, speechSynthesis: engine, SpeechSynthesisUtterance: class { constructor(text) { this.text = text; } } },
+    localStorage: { getItem: key => localValues.get(key) ?? null, setItem: (key, value) => localValues.set(key, value) },
     document: { querySelector(selector) {
       if (selector === 'meta[name="harf-backend"]') return backend ? { content: 'laravel' } : null;
       if (selector === 'meta[name="csrf-token"]') return csrfToken ? { content: csrfToken } : null;
@@ -76,14 +79,18 @@ function createAudio({ manifest = {}, voices = [], backend = false, csrfToken = 
     clearTimeout,
     queueMicrotask,
   });
+  const profileSource = fs.readFileSync(path.join(__dirname, '..', 'src', 'child-profile.js'), 'utf8').replace(/^export /gm, '');
+  vm.runInContext(`this.profileAPI = (() => { ${profileSource}\nreturn { getCurrentChildName, subscribeCurrentChildName, isPersonalizableNarration, store: sharedStore() }; })();`, context);
   const source = fs.readFileSync(path.join(__dirname, '..', 'src', 'audio.js'), 'utf8')
     .replace("import { Howl, Howler } from 'howler';", '')
+    .replace("import { getCurrentChildName, isPersonalizableNarration, subscribeCurrentChildName } from './child-profile.js';", '')
     .replace('import.meta.env?.BASE_URL', "'/harf-adasi/'")
     .replace(/^export /gm, '');
-  vm.runInContext(`${source}\nthis.exports = { audio, configureAudio, normalizeSpeechText };`, context);
+  vm.runInContext(`const { getCurrentChildName, isPersonalizableNarration, subscribeCurrentChildName } = this.profileAPI;\n${source}\nthis.exports = { audio, configureAudio, normalizeSpeechText };`, context);
   const api = context.exports;
   api.configureAudio({ onStatus: message => notices.push(message) });
-  return { ...api, players, spoken, notices, requests, requestDetails, scheduledTimers };
+  return { ...api, players, spoken, notices, requests, requestDetails, scheduledTimers,
+    setChildName(name) { if (name) context.profileAPI.store.save(name); else context.profileAPI.store.signOut(); } };
 }
 
 const tick = () => new Promise(resolve => setImmediate(resolve));
@@ -92,6 +99,104 @@ const unifiedManifest = phrases => ({ provider: 'elevenlabs', revision: 'irem-v4
 const resolvedUrl = hash => `/api/speech/audio/${hash.repeat(64)}?expires=1999999999&signature=${'f'.repeat(64)}`;
 const resolvedResponse = (url = resolvedUrl('a'), overrides = {}) => ({
   ok: true, json: async () => ({ url, revision: 'irem-v4-v1', expires_at: Math.floor(Date.now() / 1000) + 300, ...overrides }),
+});
+
+const heroTemplate = 'Alparslan ile Pırpır bahçeye gitti.';
+const heroKey = 'alparslan ile pırpır bahçeye gitti.';
+
+test('literal lesson hero prose bypasses the shortened stock voice and separates its cache from narration', async () => {
+  const text = 'Alparslan ile adım adım öğrenelim.';
+  let requests = 0;
+  const app = createAudio({ backend: true, childName: 'Alp', manifest: unifiedManifest({ [text.toLocaleLowerCase('tr-TR')]: 'irem-v4-v1/old-alp.mp3' }), resolver: async () => resolvedResponse(resolvedUrl(requests++ ? 'b' : 'a')) });
+  let finished = app.audio.speak(text, { literal: true }); await tick();
+  assert.deepEqual(JSON.parse(app.requestDetails.at(-1).options.body), { text, literal: true });
+  assert.equal(app.players[0].options.src[0], resolvedUrl('a')); app.players[0].emit('end'); assert.equal(await finished, true);
+  finished = app.audio.speak(text); await tick();
+  assert.deepEqual(JSON.parse(app.requestDetails.at(-1).options.body), { text, profile_name: 'Alp' });
+  assert.equal(app.players[1].options.src[0], resolvedUrl('b')); app.players[1].emit('end'); assert.equal(await finished, true);
+  finished = app.audio.speak(text, { literal: true }); await tick();
+  assert.equal(requests, 2, 'literal playback reuses only the literal URL');
+  assert.equal(app.players[0].playCount, 2); app.players[0].emit('end'); assert.equal(await finished, true);
+});
+
+test('ordinary literal lesson clips stay preferred and an uncached lesson sends no profile name', async () => {
+  const app = createAudio({ backend: true, childName: 'Alp', manifest: unifiedManifest({ ali: 'irem-v4-v1/ali.mp3' }), resolver: async () => resolvedResponse() });
+  let finished = app.audio.speak('Ali', { literal: true }); await tick();
+  assert.equal(app.requests.filter(url => url === '/api/speech/resolve').length, 0);
+  app.players[0].emit('end'); assert.equal(await finished, true);
+  finished = app.audio.speak('İnal anten al.', { literal: true }); await tick();
+  assert.deepEqual(JSON.parse(app.requestDetails.at(-1).options.body), { text: 'İnal anten al.', literal: true });
+  app.players.at(-1).emit('end'); assert.equal(await finished, true);
+});
+
+test('authored narration uses exact selected Alp, Alpaslan and entered case rather than its old canonical hero recording', async () => {
+  for (const childName of ['Alp', 'Alpaslan', 'ALP']) {
+    const app = createAudio({ backend: true, childName, manifest: unifiedManifest({ [heroKey]: 'irem-v4-v1/old-alp.mp3' }), resolver: async () => resolvedResponse() });
+    const finished = app.audio.speak(heroTemplate); await tick();
+    const request = app.requestDetails.find(item => item.url === '/api/speech/resolve');
+    assert.ok(request, 'the fixed recording cannot provide the selected exact name');
+    assert.deepEqual(JSON.parse(request.options.body), { text: heroTemplate, profile_name: childName });
+    assert.equal(app.players.length, 1); assert.equal(app.players[0].options.src[0], resolvedUrl('a'));
+    app.players[0].emit('end'); assert.equal(await finished, true);
+  }
+});
+
+test('normal learning targets and Pırpır stay canonical and never carry the child profile name', async () => {
+  const app = createAudio({ backend: true, childName: 'Alpaslan', manifest: unifiedManifest({ ali: 'irem-v4-v1/ali.mp3', anne: 'irem-v4-v1/anne.mp3', 'pırpırın sipariş çantası': 'irem-v4-v1/bird.mp3' }), resolver: async () => resolvedResponse() });
+  for (const [text, file] of [['Ali', 'ali.mp3'], ['anne', 'anne.mp3'], ['Pırpır’ın sipariş çantası', 'bird.mp3']]) {
+    const finished = app.audio.speak(text); await tick(); const clip = app.players.at(-1);
+    assert.ok(clip.options.src[0].endsWith(file)); clip.emit('end'); assert.equal(await finished, true);
+  }
+  assert.equal(app.requests.filter(url => url === '/api/speech/resolve').length, 0);
+  const custom = app.audio.speak('Şule'); await tick();
+  assert.deepEqual(JSON.parse(app.requestDetails.at(-1).options.body), { text: 'Şule' });
+  app.players.at(-1).emit('end'); assert.equal(await custom, true);
+});
+
+test('unlisted hero prose cannot send a profile and static Pages never plays an old hero name', async () => {
+  const app = createAudio({ backend: true, childName: 'Alpaslan', manifest: unifiedManifest({}), resolver: async () => ({ ok: false, status: 422 }) });
+  assert.equal(await app.audio.speak('Alparslan için kullanıcıdan yeni bir metin.'), false);
+  assert.deepEqual(JSON.parse(app.requestDetails.at(-1).options.body), { text: 'Alparslan için kullanıcıdan yeni bir metin.' });
+  const pages = createAudio({ childName: 'Alpaslan', manifest: unifiedManifest({ [heroKey]: 'irem-v4-v1/old-alp.mp3' }), voices: [{ lang: 'tr-TR', name: 'Device Turkish' }] });
+  let settled = false;
+  const finished = pages.audio.speak(heroTemplate).then(value => { settled = true; return value; }); await tick();
+  assert.equal(settled, true, 'unavailable personalized speech returns adult support without a wrong-name clip');
+  assert.equal(await finished, false); assert.equal(pages.players.length, 0); assert.equal(pages.spoken.length, 0);
+});
+
+test('blank profiles resolve a neutral hero template and profile names separate completed audio caches', async () => {
+  let requestNumber = 0;
+  const app = createAudio({ backend: true, manifest: unifiedManifest({ [heroKey]: 'irem-v4-v1/old-alp.mp3' }), resolver: async () => resolvedResponse(resolvedUrl(requestNumber++ ? 'b' : 'a')) });
+  let finished = app.audio.speak(heroTemplate); await tick();
+  assert.deepEqual(JSON.parse(app.requestDetails.at(-1).options.body), { text: heroTemplate, profile_name: '' });
+  app.players.at(-1).emit('end'); assert.equal(await finished, true);
+  app.setChildName('Ece'); finished = app.audio.speak(heroTemplate); await tick();
+  assert.equal(app.requests.filter(url => url === '/api/speech/resolve').length, 2);
+  assert.deepEqual(JSON.parse(app.requestDetails.at(-1).options.body), { text: heroTemplate, profile_name: 'Ece' });
+  assert.equal(app.players.at(-1).options.src[0], resolvedUrl('b'));
+  app.players.at(-1).emit('end'); assert.equal(await finished, true);
+});
+
+test('changing a profile cancels its pending lookup before a late old-name response can play', async () => {
+  const pending = [];
+  const app = createAudio({ backend: true, childName: 'Alpaslan', manifest: unifiedManifest({ [heroKey]: 'irem-v4-v1/old-alp.mp3' }), resolver: () => new Promise(resolve => pending.push(resolve)) });
+  let settled = false;
+  const first = app.audio.speak(heroTemplate).then(value => { settled = true; return value; }); await tick();
+  app.setChildName('Ayşe'); await tick();
+  assert.equal(settled, true); assert.equal(await first, false);
+  assert.equal(app.requestDetails.find(item => item.url === '/api/speech/resolve').options.signal.aborted, true);
+  const second = app.audio.speak(heroTemplate); await tick();
+  pending[0](resolvedResponse(resolvedUrl('a'))); await tick(); assert.equal(app.players.length, 0);
+  pending[1](resolvedResponse(resolvedUrl('b'))); await tick(); assert.equal(app.players.length, 1);
+  assert.deepEqual(JSON.parse(app.requestDetails.at(-1).options.body), { text: heroTemplate, profile_name: 'Ayşe' });
+  app.players[0].emit('end'); assert.equal(await second, true);
+});
+
+test('changing the selected profile immediately stops active personalized speech', async () => {
+  const app = createAudio({ backend: true, childName: 'Alpaslan', manifest: unifiedManifest({ [heroKey]: 'irem-v4-v1/old-alp.mp3' }), resolver: async () => resolvedResponse() });
+  const finished = app.audio.speak(heroTemplate); await tick();
+  app.setChildName('Deniz');
+  assert.equal(await finished, false); assert.equal(app.players[0].stopCount, 1);
 });
 
 test('manifest keys preserve Turkish dotted/dotless distinctions', () => {
@@ -189,16 +294,17 @@ test('saved effects opt-out prevents effect players and remains separate from sp
   assert.deepEqual(app.scheduledTimers, [], 'no deferred effect or notification is scheduled');
 });
 
-test('only requested Pixabay-v4 files are loaded lazily without any retired-cue fallback', async () => {
+test('only requested versioned feedback files are loaded lazily without any retired-cue fallback', async () => {
   const app = createAudio();
   await app.audio.preload();
   app.audio.unlock();
   assert.equal(app.players.length, 0, 'speech preload and initial user unlock do not preload effects');
   app.configureAudio({ effects: true, muted: false, volume: 1 });
+  const requestedFiles = { tap: 'fx-tap-soft-v5.wav', correct: 'fx-correct-pixabay-v4.mp3', retry: 'fx-retry-pixabay-v4.mp3', complete: 'fx-complete-pixabay-v4.mp3' };
   for (const name of ['tap', 'correct', 'retry', 'complete']) {
     app.audio.playEffect(name);
     const player = app.players.at(-1);
-    assert.equal(player.options.src[0], `/harf-adasi/audio/fx-${name}-pixabay-v4.mp3`);
+    assert.equal(player.options.src[0], `/harf-adasi/audio/${requestedFiles[name]}`);
     assert.equal(player.options.preload, false);
     assert.ok(player.currentVolume > 0 && player.currentVolume <= 0.40, 'feedback has bounded volume');
     assert.equal(player.loadCount, 1, 'the first request explicitly starts loading the cue');

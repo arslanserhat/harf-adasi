@@ -16,14 +16,30 @@ final class SpeechResolver
     public function resolve(string $text, Request $request): array
     {
         $browser = GameProgressController::browserId($request);
-        $allowed = $this->allowed(SpeechText::normalize($text), $browser);
+        $key = SpeechText::normalize($text);
+        $profileProvided = array_key_exists('profile_name', $request->all());
+        $literal = $request->boolean('literal');
+        $allowed = $this->allowed($key, $browser, $text, $profileProvided, $request->input('profile_name'), $literal);
         if ($allowed === null) {
             throw new SpeechFailure('speech_text_not_allowed', 422);
         }
-        [$spoken, $fixed] = $allowed;
+        [$spoken, $fixed, $personalized] = $allowed;
+        $spoken = SpeechText::providerText($spoken);
+        if (mb_strlen($spoken) > 1000) {
+            throw new SpeechFailure('speech_text_not_allowed', 422);
+        }
         $revision = $this->revision();
-        $hash = hash('sha256', json_encode([$spoken, config('services.elevenlabs.voice_id'),
-            config('services.elevenlabs.model_id'), config('services.elevenlabs.settings', []), $revision], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR));
+        $normalization = SpeechText::providerNormalization($spoken);
+        $identity = [$spoken, config('services.elevenlabs.voice_id'),
+            config('services.elevenlabs.model_id'), config('services.elevenlabs.settings', []), $revision];
+        $identity[] = ['reading_policy' => SpeechText::READING_POLICY,
+            'previous_text' => SpeechText::PREVIOUS_TEXT, 'next_text' => SpeechText::NEXT_TEXT,
+            'apply_text_normalization' => $normalization];
+        $identity[] = ['intent' => $literal ? 'literal' : 'narration'];
+        if ($personalized) {
+            $identity[] = ['canonical_template' => $key];
+        }
+        $hash = hash('sha256', json_encode($identity, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR));
         $local = 'speech/'.$revision.'/'.$hash.'.mp3';
 
         if ($fixed && is_file($fixed)) {
@@ -31,7 +47,7 @@ final class SpeechResolver
         } elseif (Storage::disk('local')->exists($local)) {
             $this->remember($hash, ['source' => 'local', 'path' => $local]);
         } else {
-            $this->generate($hash, $spoken, $local, $browser, (string) $request->ip());
+            $this->generate($hash, $spoken, $normalization, $local, $browser, (string) $request->ip());
         }
 
         $expiry = now()->addMinutes(10);
@@ -69,29 +85,64 @@ final class SpeechResolver
         return $revision;
     }
 
-    private function allowed(string $key, string $browser): ?array
+    private function allowed(string $key, string $browser, string $canonical, bool $profileProvided, ?string $profileName, bool $literal): ?array
     {
         $path = config('services.elevenlabs.catalog_path', resource_path('speech/catalog.json'));
         $catalog = is_file($path) ? json_decode(file_get_contents($path), true) : null;
         $entry = is_array($catalog) && ($catalog['version'] ?? null) === 1 && ($catalog['revision'] ?? null) === $this->revision()
             ? ($catalog['phrases'][$key] ?? null) : null;
         if (is_array($entry) && is_string($entry['spoken'] ?? null) && mb_strlen($entry['spoken']) <= 1000) {
+            if (SpeechText::personalizable($key)) {
+                if ($literal) {
+                    // A lesson reads the exact authorized canonical text, even
+                    // when a narration clip would rename or abbreviate its hero.
+                    return [$canonical, null, false];
+                }
+                // Only the canonical authored phrase was authorized. Old spoken
+                // overrides may abbreviate the hero to Alp; never reuse them.
+                $template = SpeechText::personalizable($canonical) ? $canonical : $key;
+                $spoken = SpeechText::personalize($template, $profileName);
+                if (mb_strlen($spoken) > 1000) {
+                    return null;
+                }
+
+                return [$spoken, null, true];
+            }
+            if ($profileProvided) {
+                return null;
+            }
             $fixed = null;
             if (is_string($entry['file'] ?? null) && preg_match('/\A'.preg_quote($this->revision(), '/').'\/[a-zA-Z0-9_-]+\.mp3\z/', $entry['file'])) {
                 $fixed = rtrim(config('services.elevenlabs.fixed_audio_path', public_path('audio')), '/\\').DIRECTORY_SEPARATOR.$entry['file'];
             }
 
-            return [$entry['spoken'], $fixed];
+            return [$entry['spoken'], $fixed, false];
         }
 
-        // The browser supplies no identity and cannot ask for arbitrary profile
-        // names or prose. Read only this session's already-saved active content.
+        // Display names are never authority to read or rewrite teacher targets.
+        if ($profileProvided) {
+            return null;
+        }
+        // Read only this session's already-saved active teaching content.
         $payload = LearningState::query()->where('browser_id', $browser)->first()?->payload;
         $active = collect($payload['lists'] ?? [])->firstWhere('id', $payload['activeListId'] ?? null);
         if (! is_array($active)) {
             return null;
         }
-        $texts = [...($active['letters'] ?? []), ...($active['syllables'] ?? [])];
+        $texts = [...($active['letters'] ?? []), ...($active['syllables'] ?? []), ...($active['sentences'] ?? [])];
+        foreach ($active['sentences'] ?? [] as $sentence) {
+            if (! is_string($sentence)) {
+                continue;
+            }
+            foreach (preg_split('/\s+/u', $sentence, -1, PREG_SPLIT_NO_EMPTY) ?: [] as $word) {
+                // Match the reader's whitespace tokens and trim edge punctuation
+                // only. Substrings and other lists never gain speech authority.
+                $token = preg_replace('/\A[^\p{L}\p{N}]+|[^\p{L}\p{N}]+\z/u', '', $word);
+                if ($token !== null && $token !== '') {
+                    $texts[] = $token;
+                }
+            }
+        }
         foreach ($active['words'] ?? [] as $word) {
             if (! is_array($word)) {
                 continue;
@@ -102,7 +153,7 @@ final class SpeechResolver
         }
         foreach ($texts as $candidate) {
             if (is_string($candidate) && $candidate !== '' && mb_strlen($candidate) <= 240 && SpeechText::normalize($candidate) === $key) {
-                return [$candidate, null];
+                return [$candidate, null, false];
             }
         }
 
@@ -119,7 +170,13 @@ final class SpeechResolver
         Cache::put('speech:clip:'.$hash, $record, now()->addDay());
     }
 
-    private function generate(string $hash, string $spoken, string $path, string $browser, string $ip): void
+    private function readingContext(): array
+    {
+        return config('services.elevenlabs.model_id') === 'eleven_v4'
+            ? ['previous_text' => SpeechText::PREVIOUS_TEXT, 'next_text' => SpeechText::NEXT_TEXT] : [];
+    }
+
+    private function generate(string $hash, string $spoken, string $normalization, string $path, string $browser, string $ip): void
     {
         if (! config('services.elevenlabs.enabled') || ! config('services.elevenlabs.key')
             || ! config('services.elevenlabs.voice_id') || ! config('services.elevenlabs.model_id')) {
@@ -152,7 +209,8 @@ final class SpeechResolver
                     ->post('https://api.elevenlabs.io/v1/text-to-speech/'.rawurlencode(config('services.elevenlabs.voice_id')).'?output_format=mp3_44100_128', [
                         'text' => $spoken, 'model_id' => config('services.elevenlabs.model_id'), 'language_code' => 'tr',
                         'voice_settings' => config('services.elevenlabs.settings', []),
-                    ]);
+                        'apply_text_normalization' => $normalization,
+                    ] + $this->readingContext());
                 $body = $response->body();
                 $type = strtolower((string) $response->header('Content-Type'));
                 if (! $response->successful() || ! str_starts_with($type, 'audio/') || strlen($body) < 3 || strlen($body) > 2097152

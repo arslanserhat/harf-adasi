@@ -10,6 +10,26 @@ const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'public',
 const alphabet = 'a b c ç d e f g ğ h ı i j k l m n o ö p r s ş t u ü v y z'.split(' ');
 const firstLetters = ['a', 'n', 'e', 't', 'i', 'l'];
 
+test('island target and wagon audio are literal while its instruction remains narration', async () => {
+  const { JSDOM } = require('jsdom');
+  const dom = new JSDOM('<main></main>');
+  const root = dom.window.document.querySelector('main'), speech = [];
+  const { createIsland } = await import(modelURL('island.js'));
+  const island = createIsland({ root, getLetters: () => firstLetters, getCompleted: () => [],
+    speak: async (text, options) => { speech.push({ text, options }); return true; },
+    celebrate() {}, onComplete() {}, onExit() {} });
+  try {
+    island.start('train'); await new Promise(resolve => setImmediate(resolve));
+    assert.ok(speech.length); assert.equal(speech[0].options, undefined, 'scene instruction remains narration');
+    root.querySelector('[data-island="listen"]').click();
+    await new Promise(resolve => setImmediate(resolve));
+    assert.deepEqual(speech.at(-1), { text: 'anne', options: { literal: true } });
+    const wagon = [...root.querySelectorAll('[data-island="wagon"]')].find(item => item.textContent.trim() === 'a');
+    assert.ok(wagon); wagon.click();
+    assert.deepEqual(speech.at(-1), { text: 'a', options: { literal: true } });
+  } finally { island.destroy(); dom.window.close(); }
+});
+
 test('served island missions use a persistent finite activity bag without awarding completion', async () => {
   const { getIslandMission, isIslandCompletion, deriveIslandWorld } = await api;
   const { normalizeSelectionState, recordContentExposure } = await selectionAPI;

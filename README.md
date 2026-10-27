@@ -5,7 +5,8 @@ Türkçe okuma, yazma ve sayı alıştırmaları için Laravel 13 uygulaması. A
 ## Ses, kutlama ve telefon düzeni
 
 Yeni ses düzeninde sabit MP3 kataloğu ve izin verilen yeni öğretmen metinleri
-aynı ElevenLabs İrem sesini (`irem-v4-v1`) kullanır. Önce hazır dosya oynatılır;
+aynı ElevenLabs İrem sesini (`irem-v4-v1`) kullanır. Kişiselleştirilmiş hikâyeler
+dışında önce hazır dosya oynatılır;
 hazır kaydı olmayan veya yüklenemeyen metinler Laravel ses hizmetine yönlendirilir.
 Yeni düzende tarayıcının cihaz sesi kullanılmaz. Sunucuda ses üretimi varsayılan
 olarak kapalıdır; etkinleştirmek için özel sunucu ayarları gerekir. ChatGPT Voice
@@ -37,7 +38,7 @@ aynı Türkçe anlatım kataloğunu kullanır.
 - **Hatırlama takibi:** aynı kelime farklı görevlerde geri gelir; sonraki günlere yayılan bağımsız hatırlama, ilk günkü tamamlamadan ayrı izlenir. Çalışılan harflerin yazma ve kart sıralama gözlemleri de ayrıca izlenir.
 - **Kaldığın yerden devam:** görev sırası, ipucu kayıtları ve sınırlı yazı taslağı bu tarayıcıda; Laravel'de ayrıca oturuma ayrılmış şifreli kayıt içinde korunur.
 
-[Araştırma ve tasarım kararları](docs/learning-design.md), kullanılan kaynakları, uyarlama kurallarını ve sınırlarını açıklar. Bu kurallar kendini yeniden yazan yapay zekâ veya öğrenme güçlüğü tanısı değildir. Sunuculu sürümde, ses hizmeti etkinse hazır kaydı olmayan kayıtlı öğretmen metni dinleme isteğiyle ElevenLabs'e gönderilir. Çocuğun profil adı gönderilmez; öğretmen alanına kişisel bilgi yazılmamalıdır. Ses kullanılamazsa yetişkin okuyabilir.
+[Araştırma ve tasarım kararları](docs/learning-design.md), kullanılan kaynakları, uyarlama kurallarını ve sınırlarını açıklar. Bu kurallar kendini yeniden yazan yapay zekâ veya öğrenme güçlüğü tanısı değildir. Sunuculu sürümde, ses hizmeti etkinse hazır kaydı olmayan kayıtlı öğretmen metni dinleme isteğiyle ElevenLabs'e gönderilir. Kişiselleştirilmiş hikâye dinlendiğinde, seçili adın girildiği biçimde okunması için profil adı ElevenLabs'e gönderilebilir; başka profil alanları gönderilmez. Profil adı bu tarayıcıda hatırlanır, hesap kimliği değildir ve öğrenme veritabanına yazılmaz. Adı içeren ses özel sunucu önbelleğinde tutulabilir. Öğretmenin çalışma hedefleri yeniden adlandırılmaz; öğretmen alanına kişisel bilgi yazılmamalıdır. Ses kullanılamazsa yetişkin okuyabilir.
 
 ## Korunan oyunlar ve araçlar
 
@@ -82,7 +83,7 @@ PHP testleri SQLite `:memory:` kullanır. Tarayıcı testleri `dist/` çıktıs�
 
 ## Yayın
 
-`npm run build` statik Pages çıktısını `dist/` içine, `npm run build:laravel` PHP sunucusunun Vite varlıklarını `public/build/` içine hazırlar. Pages artefaktında PHP giriş dosyası veya Laravel sunucu kodu bulunmaz. PHP API ve sunucu veritabanı GitHub Pages'te çalışmaz; statik sürüm tarayıcı kaydını kullanır. Pages'te yalnızca hazır sesler oynatılır; hazır kaydı olmayan veya yüklenemeyen metin için `speak()` sonucu `false` olur, okunabilir bildirim ve yetişkin desteği sunulur.
+`npm run build` statik Pages çıktısını `dist/` içine, `npm run build:laravel` PHP sunucusunun Vite varlıklarını `public/build/` içine hazırlar. Pages artefaktında PHP giriş dosyası veya Laravel sunucu kodu bulunmaz. PHP API ve sunucu veritabanı GitHub Pages'te çalışmaz; statik sürüm tarayıcı kaydını kullanır. Pages'te yalnızca hazır sesler oynatılır; hazır kaydı olmayan veya yüklenemeyen metin için `speak()` sonucu `false` olur, okunabilir bildirim ve yetişkin desteği sunulur. Kişiselleştirilmiş kahraman anlatımı sunuculu sürüm gerektirir; Pages eski veya başka bir adı okumaz.
 
 VPS kurulumu, kalıcı SQLite volume'u ve ayrı uygulama portu için [yayın belgesi](docs/deploy.md); API için [backend belgesi](docs/backend-api.md) kullanılır. Mevcut e-Tahlil uygulaması üzerinde değişiklik yapılmaz. HTTPS yayınını tamamlandı saymak için deployment kaydına ek olarak gerçek adreste etkileşimli bir oyun turu doğrulanmalıdır.
 

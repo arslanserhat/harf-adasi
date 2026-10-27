@@ -5,7 +5,7 @@ import {
   getEligibleWords, getTeacherContent, planSession, recordAttempt, summarizeLearning,
   learningTaskKey,
 } from './learning-model.js';
-import { parseTeacherLetters, parseTeacherSyllables } from './teacher-content.js';
+import { parseTeacherLetters, parseTeacherSyllables, parseTeacherSentences, TEACHER_SENTENCE_PRESET } from './teacher-content.js';
 import { renderStoryScene, mountStoryScene, getStoryBeat, STORY_TITLE } from './story-scene.js';
 import './world-learning.css';
 import { showCelebration, hideCelebration } from './celebration.js';
@@ -535,7 +535,7 @@ export function createLearning({
       feedback('Siparişi dinleyelim. Ardından kartını seçebilirsin.');
     }
     let success = false;
-    try { success = await speak(target); } catch { success = false; }
+    try { success = await speak(target, { literal: true }); } catch { success = false; }
     if (epoch !== speechEpoch || current !== taskUi) return;
     root.querySelector('[data-learning="listen"]')?.setAttribute('aria-busy', 'false');
     root.querySelectorAll('[data-learning="choice"]').forEach(button => { button.disabled = false; });
@@ -640,10 +640,10 @@ export function createLearning({
     const sync = getSyncStatus();
     const syncMessages = { local: 'Bu cihazdaki kayıtlarla çalışılıyor.', saved: 'Gelişim kaydı sunucuya da kaydedildi.', pending: 'Gelişim kaydı sunucuya gönderiliyor.', error: 'Sunucuya henüz ulaşılamadı. Çalışmalar bu cihazda korunuyor.' };
     const syncMessage = typeof sync === 'string' ? sync : sync?.label || syncMessages[sync?.mode] || syncMessages.local;
-    root.innerHTML = `<section id="learning" class="learning learning-parent" data-screen="parent">${nav(control('start', 'Çalışmaya dön', '', 'quiet'))}<div class="learn-intro"><span class="learn-eyebrow">Yetişkin alanı</span><h1>Öğretmenin içerikleri ve gelişim</h1><p>Harfleri, bağımsız heceleri ve kelimeleri ayrı ayrı ekleyin. Görevler okulda öğrenilen harflerle hazırlanır.</p></div><section data-child-profile-slot></section>
-      <div class="learn-parent-grid"><section class="learn-panel"><h2>Kelime listem</h2><label for="learningListSelect">Çalışılacak liste</label><select id="learningListSelect">${state.lists.map(item => `<option value="${escape(item.id)}" ${item.id === list?.id ? 'selected' : ''}>${escape(item.title)}</option>`).join('')}</select><div class="learn-inline">${control('new-list', 'Yeni liste oluştur', '', 'quiet')}</div><label for="learningListTitle">Listenin adı</label><input id="learningListTitle" maxlength="80" value="${escape(list?.title || '')}" placeholder="Örneğin: Bu haftanın kelimeleri"><label for="learningLetters">Öğretmenin verdiği harfler — isteğe bağlı</label><textarea id="learningLetters" rows="2" maxlength="200" spellcheck="false" placeholder="a n e t i l">${escape((list?.letters || []).join(' · '))}</textarea><label for="learningSyllables">Bağımsız heceler — kelime eklemek zorunlu değil</label><textarea id="learningSyllables" rows="3" maxlength="1200" spellcheck="false" placeholder="na&#10;ne&#10;an">${escape((list?.syllables || []).join('\n'))}</textarea><p class="learn-small">En fazla 29 harf ve 100 hece. Harf/heceyi boşluk, virgül, kısa çizgi veya yeni satırla ayırabilirsiniz. Bir hecede tek ünlü bulunur; kelimeler ve heceler birbirine dönüştürülmez.</p><label for="learningWords">Kelimeler — her satıra bir kelime</label><textarea id="learningWords" rows="7" maxlength="6000" spellcheck="false" placeholder="nane&#10;anne&#10;tane">${escape(list?.words.map(word => word.text).join('\n') || '')}</textarea><p class="learn-small">En fazla 100 kelime. Harfleri ve noktalı/noktasız i biçimlerini yazdığınız gibi koruruz. Liste değişince yeni yolculuk hazırlanır; önceki gözlemler korunur.</p><p class="learn-small">Hazır kaydı olmayan eklediğiniz çalışma metni, sunuculu sürümde ses hizmeti açıkken dinleme isteğinizle sese dönüştürülmek için ElevenLabs&#39;e gönderilir. Çocuğun profil adı gönderilmez. Lütfen kişisel bilgi yazmayın.</p>${control('save-list', 'Listeyi kaydet ve kullan', '', 'primary')}<div class="learn-inline"><button type="button" class="learn-button quiet" data-do="quest-start" data-quest-kind="letters">Harflerimle oyna</button><button type="button" class="learn-button quiet" data-do="quest-start" data-quest-kind="syllables">Hecelerimle oyna</button></div><div id="learningErrors" role="alert" class="learn-editor-status" hidden></div></section>
-      <section class="learn-panel"><h2>Okulda öğrendiğimiz harfler</h2><p class="learn-known-letters">${getLetters().map(escape).join(' · ')}</p>${control('settings', 'Öğrenilen harfleri düzenle', '', 'quiet')}<p>${eligible.length} kelime, ${content.letters.length} harf ve ${content.syllables.length} hece şu an çalışılabilir.</p>${content.blockedLetters.length ? `<div class="learn-blocked"><strong>Henüz seçilmeyen öğretmen harfleri</strong><p>${content.blockedLetters.map(escape).join(' · ')}</p></div>` : ''}${content.blockedSyllables.length ? `<div class="learn-blocked"><strong>Harfleri öğrenildiğinde açılacak heceler</strong>${content.blockedSyllables.map(item => `<p><b>${escape(item.text)}</b> — eksik harfler: ${item.missingLetters.map(escape).join(', ')}</p>`).join('')}</div>` : ''}${blocked.length ? `<div class="learn-blocked"><strong>Harfleri öğrenildiğinde katılacak kelimeler</strong>${blocked.map(word => `<p><b>${escape(word.text)}</b> — eksik harfler: ${word.missingLetters.map(escape).join(', ')}</p>`).join('')}</div>` : '<p class="learn-small">Listedeki bütün kelimeler seçili harflere uygun.</p>'}<p class="learn-small">Harfler otomatik açılmaz. Öğretmeninizin işlediği harfleri seçin.</p><div class="learn-sync-status" role="status">${escape(syncMessage)}</div></section></div>
-      <details class="learn-panel learn-authoring"><summary>Hece, anlam ve cümleleri düzenle</summary><p>Hece önerilerini öğretmeninizin verdiği biçime göre düzeltebilirsiniz. Anlam ve cümle isteğe bağlıdır. Cümle görevleri yalnızca seçili harflerle uygunsa hazırlanır.</p><div id="learningWordDetails">${detailRows(list?.words || [])}</div><p class="learn-small">Hazır kaydı olmayan eklediğiniz çalışma metni, sunuculu sürümde ses hizmeti açıkken dinleme isteğinizle sese dönüştürülmek için ElevenLabs&#39;e gönderilir. Çocuğun profil adı gönderilmez. Lütfen kişisel bilgi yazmayın.</p>${control('save-details', 'Kelime ayrıntılarını kaydet', '', 'primary')}</details>
+    root.innerHTML = `<section id="learning" class="learning learning-parent" data-screen="parent">${nav(control('start', 'Çalışmaya dön', '', 'quiet'))}<div class="learn-intro"><span class="learn-eyebrow">Yetişkin alanı</span><h1>Öğretmenin içerikleri ve gelişim</h1><p>Cümleleri, harfleri, bağımsız heceleri ve kelimeleri ayrı ayrı ekleyin. Görevler okulda öğrenilen harflerle hazırlanır.</p></div><section data-child-profile-slot></section>
+      <div class="learn-parent-grid"><section class="learn-panel"><h2>Öğretmenimin listesi</h2><label for="learningListSelect">Çalışılacak liste</label><select id="learningListSelect">${state.lists.map(item => `<option value="${escape(item.id)}" ${item.id === list?.id ? 'selected' : ''}>${escape(item.title)}</option>`).join('')}</select><div class="learn-inline">${control('new-list', 'Yeni liste oluştur', '', 'quiet')}</div><label for="learningListTitle">Listenin adı</label><input id="learningListTitle" maxlength="80" value="${escape(list?.title || '')}" placeholder="Örneğin: Bu haftanın kelimeleri"><label for="learningLetters">Öğretmenin verdiği harfler — isteğe bağlı</label><textarea id="learningLetters" rows="2" maxlength="200" spellcheck="false" placeholder="a n e t i l">${escape((list?.letters || []).join(' · '))}</textarea><label for="learningSyllables">Bağımsız heceler — kelime eklemek zorunlu değil</label><textarea id="learningSyllables" rows="3" maxlength="1200" spellcheck="false" placeholder="na&#10;ne&#10;an">${escape((list?.syllables || []).join('\n'))}</textarea><p class="learn-small">En fazla 29 harf ve 100 hece. Harf/heceyi boşluk, virgül, kısa çizgi veya yeni satırla ayırabilirsiniz. Bir hecede tek ünlü bulunur; kelimeler ve heceler birbirine dönüştürülmez.</p><label for="learningSentences">Cümleler — her satıra bir cümle</label><textarea id="learningSentences" rows="7" maxlength="25000" spellcheck="false" placeholder="Anne elinle nane at.&#10;İnal anten al.">${escape((list?.sentences || []).join('\n'))}</textarea><p class="learn-small">Kelime eklemeden cümle kaydedebilirsiniz. En fazla 100 cümle; her biri en fazla 240 karakter ve 40 kelime. Büyük harf ve noktalama korunur. Yalnızca okulda öğrenilen harflerle çalışılır.</p><div class="learn-inline">${control('preset-sentences', 'Örnek dersin beş cümlesini ekle', '', 'quiet')}</div><label for="learningWords">Kelimeler — her satıra bir kelime</label><textarea id="learningWords" rows="7" maxlength="6000" spellcheck="false" placeholder="nane&#10;anne&#10;tane">${escape(list?.words.map(word => word.text).join('\n') || '')}</textarea><p class="learn-small">En fazla 100 kelime. Harfleri ve noktalı/noktasız i biçimlerini yazdığınız gibi koruruz. Liste değişince yeni yolculuk hazırlanır; önceki gözlemler korunur.</p><p class="learn-small">Hazır kaydı olmayan çalışma metni, sunuculu sürümde ses hizmeti açıkken dinleme isteğinizle ElevenLabs&#39;e gönderilir. Kişiselleştirilmiş hikâyelerde seçili adın tam okunması için profil adı da seslendirmede kullanılır; diğer profil bilgileri gönderilmez. Çalışma kelimeleri değişmez. Öğretmen alanına kişisel bilgi yazmayın.</p>${control('save-list', 'Listeyi kaydet ve kullan', '', 'primary')}<div class="learn-inline"><button type="button" class="learn-button quiet" data-do="catalog" data-view="sentences">Cümlelerimi oku ve yaz</button><button type="button" class="learn-button quiet" data-do="quest-start" data-quest-kind="letters">Harflerimle oyna</button><button type="button" class="learn-button quiet" data-do="quest-start" data-quest-kind="syllables">Hecelerimle oyna</button></div><div id="learningErrors" role="alert" class="learn-editor-status" hidden></div></section>
+      <section class="learn-panel"><h2>Okulda öğrendiğimiz harfler</h2><p class="learn-known-letters">${getLetters().map(escape).join(' · ')}</p>${control('settings', 'Öğrenilen harfleri düzenle', '', 'quiet')}<p>${eligible.length} kelime, ${content.letters.length} harf, ${content.syllables.length} hece ve ${content.sentences.length} cümle şu an çalışılabilir.</p>${content.blockedLetters.length ? `<div class="learn-blocked"><strong>Henüz seçilmeyen öğretmen harfleri</strong><p>${content.blockedLetters.map(escape).join(' · ')}</p></div>` : ''}${content.blockedSyllables.length ? `<div class="learn-blocked"><strong>Harfleri öğrenildiğinde açılacak heceler</strong>${content.blockedSyllables.map(item => `<p><b>${escape(item.text)}</b> — eksik harfler: ${item.missingLetters.map(escape).join(', ')}</p>`).join('')}</div>` : ''}${blocked.length ? `<div class="learn-blocked"><strong>Harfleri öğrenildiğinde katılacak kelimeler</strong>${blocked.map(word => `<p><b>${escape(word.text)}</b> — eksik harfler: ${word.missingLetters.map(escape).join(', ')}</p>`).join('')}</div>` : '<p class="learn-small">Listedeki bütün kelimeler seçili harflere uygun.</p>'}<p class="learn-small">Harfler otomatik açılmaz. Öğretmeninizin işlediği harfleri seçin.</p><div class="learn-sync-status" role="status">${escape(syncMessage)}</div></section></div>
+      <details class="learn-panel learn-authoring"><summary>Hece, anlam ve cümleleri düzenle</summary><p>Hece önerilerini öğretmeninizin verdiği biçime göre düzeltebilirsiniz. Anlam ve cümle isteğe bağlıdır. Cümle görevleri yalnızca seçili harflerle uygunsa hazırlanır.</p><div id="learningWordDetails">${detailRows(list?.words || [])}</div><p class="learn-small">Hazır kaydı olmayan çalışma metni, sunuculu sürümde ses hizmeti açıkken dinleme isteğinizle ElevenLabs&#39;e gönderilir. Kişiselleştirilmiş hikâyelerde seçili adın tam okunması için profil adı da seslendirmede kullanılır; diğer profil bilgileri gönderilmez. Çalışma kelimeleri değişmez. Öğretmen alanına kişisel bilgi yazmayın.</p>${control('save-details', 'Kelime ayrıntılarını kaydet', '', 'primary')}</details>
       <section class="learn-panel learn-progress-panel"><h2>Nerede desteğe ihtiyaç duyuyor?</h2><p>Bu kayıtlar etkinliklerdeki gözlemlerdir. Yazma, birlikte kontrol edilmeden doğrulanmaz. Bir kez tamamlanan görev, kalıcı öğrenme olarak işaretlenmez.</p>${reportRows(state)}</section>${letterReport(state)}
     </section>`;
     if (parentDraft && parentDraft.baseListId === list?.id) {
@@ -652,6 +652,7 @@ export function createLearning({
       root.querySelector('#learningWords').value = parentDraft.words;
       root.querySelector('#learningLetters').value = parentDraft.letters ?? (list?.letters || []).join(' · ');
       root.querySelector('#learningSyllables').value = parentDraft.syllables ?? (list?.syllables || []).join('\n');
+      root.querySelector('#learningSentences').value = parentDraft.sentences ?? (list?.sentences || []).join('\n');
       for (const [word, details] of Object.entries(parentDraft.details)) {
         const field = [...root.querySelectorAll('.learn-word-edit')].find(element => element.dataset.word === word);
         if (!field) continue;
@@ -673,24 +674,25 @@ export function createLearning({
     const parsed = parseWordList(text);
     const parsedLetters = parseTeacherLetters(root.querySelector('#learningLetters')?.value || '');
     const parsedSyllables = parseTeacherSyllables(root.querySelector('#learningSyllables')?.value || '');
+    const parsedSentences = parseTeacherSentences(root.querySelector('#learningSentences')?.value || '');
     if (!title) { reportParent('Listeye bir ad verin.', true); return; }
     if (/[<>]/.test(title)) { reportParent('Liste adını HTML işaretleri kullanmadan düz metin olarak yazın.', true); return; }
     if (parsed.errors.length) { reportParent(parsed.errors.map(error => `${error.line}. satır: ${error.message}`).join('\n'), true); return; }
-    if (parsedLetters.errors.length || parsedSyllables.errors.length) {
-      reportParent([...parsedLetters.errors.map(error => `Harf ${error.line}. satır: ${error.message}`), ...parsedSyllables.errors.map(error => `Hece ${error.line}. satır: ${error.message}`)].join('\n'), true); return;
+    if (parsedLetters.errors.length || parsedSyllables.errors.length || parsedSentences.errors.length) {
+      reportParent([...parsedLetters.errors.map(error => `Harf ${error.line}. satır: ${error.message}`), ...parsedSyllables.errors.map(error => `Hece ${error.line}. satır: ${error.message}`), ...parsedSentences.errors.map(error => `Cümle ${error.line}. satır: ${error.message}`)].join('\n'), true); return;
     }
-    if (!parsed.words.length && !parsedLetters.letters.length && !parsedSyllables.syllables.length) { reportParent('En az bir harf, hece veya kelime yazın.', true); return; }
+    if (!parsed.words.length && !parsedLetters.letters.length && !parsedSyllables.syllables.length && !parsedSentences.sentences.length) { reportParent('En az bir harf, hece, kelime veya cümle yazın.', true); return; }
     const previous = state.lists.find(list => list.id === editListId);
     if (!previous && state.lists.length >= 20) { reportParent('En fazla 20 liste saklanabilir. Mevcut bir listeyi düzenleyebilirsiniz.', true); return; }
     const otherWords = state.lists.filter(item => item.id !== previous?.id).reduce((total, item) => total + item.words.length, 0);
     if (otherWords + parsed.words.length > 1000) { reportParent('Bütün listelerde toplam en fazla 1000 kelime saklanabilir. Mevcut bir listeyi kısaltıp yeniden deneyin.', true); return; }
     const words = parsed.words.map(word => previous?.words.find(item => item.text === word.text) || word);
-    const list = { id: previous?.id || uid(), title, words, letters: parsedLetters.letters, syllables: parsedSyllables.syllables, updatedAt: Date.now() };
+    const list = { id: previous?.id || uid(), title, words, letters: parsedLetters.letters, syllables: parsedSyllables.syllables, sentences: parsedSentences.sentences, updatedAt: Date.now() };
     const lists = previous ? state.lists.map(item => item.id === previous.id ? list : item) : [...state.lists, list];
     persist({ ...state, lists, activeListId: list.id, session: null });
     parentDraft = null;
     renderParent();
-    reportParent('Öğretmen listeniz kaydedildi. Harfler, heceler ve kelimeler kendi oyunlarına katılacak.');
+    reportParent('Öğretmen listeniz kaydedildi. Cümleleri okuyup yazabilir; harf, hece ve kelimelerle de çalışabilirsiniz.');
   }
   function saveDetails() {
     const state = snapshot();
@@ -698,8 +700,10 @@ export function createLearning({
     if (!list) return;
     const enteredLetters = parseTeacherLetters(root.querySelector('#learningLetters')?.value || '');
     const enteredSyllables = parseTeacherSyllables(root.querySelector('#learningSyllables')?.value || '');
+    const enteredSentences = parseTeacherSentences(root.querySelector('#learningSentences')?.value || '');
     if (editListId !== list.id || root.querySelector('#learningWords')?.value.trim() !== list.words.map(word => word.text).join('\n')
-      || enteredLetters.errors.length || enteredSyllables.errors.length
+      || enteredLetters.errors.length || enteredSyllables.errors.length || enteredSentences.errors.length
+      || enteredSentences.sentences.join('\n') !== (list.sentences || []).join('\n')
       || enteredLetters.letters.join('|') !== (list.letters || []).join('|') || enteredSyllables.syllables.join('|') !== (list.syllables || []).join('|')) {
       reportParent('Önce öğretmen listenizi kaydedin; sonra kelimelerin hece, anlam ve cümlelerini düzenleyin.', true); return;
     }
@@ -805,12 +809,18 @@ export function createLearning({
       root.querySelector('#learningReview').hidden = true; countHint(); feedback('Birlikte harflerine bakalım; sonra yeniden deneyebilirsin.', 'help');
     } else if (action === 'letter-help' && taskUi) {
       countHint(); const letter = taskUi.task.word[0]; destroy(); onPracticeLetter(letter);
+    } else if (action === 'preset-sentences') {
+      const field = root.querySelector('#learningSentences');
+      const lines = field.value.trim() ? field.value.trim().split(/\r?\n/u) : [];
+      const seen = new Set(lines.map(line => line.normalize('NFC').replace(/\s+/gu, ' ').trim().toLocaleLowerCase('tr-TR')));
+      field.value = [...lines, ...TEACHER_SENTENCE_PRESET.filter(line => !seen.has(line.toLocaleLowerCase('tr-TR')))].join('\n');
+      reportParent('Dersin beş cümlesi taslağa eklendi. Mevcut içerikler korunuyor; kullanmak için listeyi kaydedin.');
     } else if (action === 'save-list') saveList();
     else if (action === 'save-details') saveDetails();
     else if (action === 'new-list') {
       editListId = ''; root.querySelector('#learningListTitle').value = ''; root.querySelector('#learningWords').value = '';
-      root.querySelector('#learningLetters').value = ''; root.querySelector('#learningSyllables').value = '';
-      root.querySelector('#learningListTitle').focus(); reportParent('Yeni listenizin adını ve kelimelerini yazın.');
+      root.querySelector('#learningLetters').value = ''; root.querySelector('#learningSyllables').value = ''; root.querySelector('#learningSentences').value = '';
+      root.querySelector('#learningListTitle').focus(); reportParent('Yeni listenizin adını ve çalışma içeriklerini yazın.');
     }
   }
   function destroy() {
@@ -822,7 +832,7 @@ export function createLearning({
       parentDraft = {
         baseListId: activeList(snapshot())?.id,
         id: editListId, title: root.querySelector('#learningListTitle')?.value || '',
-        words: root.querySelector('#learningWords')?.value || '', letters: root.querySelector('#learningLetters')?.value || '', syllables: root.querySelector('#learningSyllables')?.value || '', details,
+        words: root.querySelector('#learningWords')?.value || '', letters: root.querySelector('#learningLetters')?.value || '', syllables: root.querySelector('#learningSyllables')?.value || '', sentences: root.querySelector('#learningSentences')?.value || '', details,
       };
     }
     stop();

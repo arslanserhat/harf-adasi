@@ -42,15 +42,89 @@ async function fixture({ eligible = true, speak = async () => false, saved } = {
     done() { film.destroy(); window.close(); for (const name of names) { if (previous.get(name)) Object.defineProperty(global, name, previous.get(name)); else delete global[name]; } } };
 }
 
-async function toRecall(f) {
+async function toLeaves(f) {
   f.film.start(); await f.click('start-learn'); await f.skip();
   await f.click('garden', 'right'); await f.click('next'); await f.skip();
   await f.click('branch', 'lion'); await f.click('next'); await f.skip();
   await f.click('token', 'la'); await f.click('token', 'le'); await f.click('check');
   await f.click('next'); await f.skip();
+}
+
+async function toRecall(f) {
+  await toLeaves(f);
   for (let index = 0; index < 4; index++) await f.click('leaf', String(index));
   await f.click('cause', 'leaves'); await f.click('next'); await f.skip();
 }
+
+function instructionAreas(f) {
+  return [...f.root.querySelectorAll('.film-subtitle,.film-task-title,.film-leaf-instruction')]
+    .filter(element => !element.closest('[hidden]') && f.window.getComputedStyle(element).display !== 'none');
+}
+
+function addFilmStyles(f) {
+  const style = f.window.document.createElement('style');
+  style.textContent = fs.readFileSync(path.join(__dirname, '../src/story-film.css'), 'utf8');
+  f.window.document.head.append(style);
+}
+
+test('leaf instructions use one visible card before and after replay, collection and restoration', async () => {
+  const spoken = [];
+  const f = await fixture({ speak: async text => { spoken.push(text); return false; } });
+  try {
+    addFilmStyles(f); await toLeaves(f);
+    assert.equal(instructionAreas(f).length, 1, 'leaves must not repeat a caption, task heading and helper paragraph');
+    assert.equal(f.root.querySelectorAll('.film-instruction').length, 1);
+    assert.equal(f.root.querySelector('.film-leaf-instruction'), null);
+    assert.match(instructionAreas(f)[0].textContent, /Dört yaprağı sepete topla/);
+    assert.ok(f.root.querySelector('.film-instruction [data-film="replay"]'));
+    await f.click('replay');
+    assert.equal(instructionAreas(f).length, 1);
+    assert.equal(instructionAreas(f)[0].textContent, spoken.at(-1), 'the same instruction text becomes the actual spoken line');
+    assert.match(instructionAreas(f)[0].textContent, /Ben tek başıma çekemedim/);
+    assert.equal(f.window.getComputedStyle(f.root.querySelector('.film-subtitle')).display, 'none', 'author display styles must not override the hidden caption');
+    assert.equal(f.root.querySelector('.film-subtitle').textContent, '', 'the redundant caption also stays out of accessible text');
+    await f.click('leaf', '0');
+    assert.equal(instructionAreas(f).length, 1);
+    await f.click('replay'); await f.click('pause'); await f.click('resume');
+    assert.equal(instructionAreas(f).length, 1);
+    f.film.destroy(); f.film.resume();
+    assert.equal(instructionAreas(f).length, 1, 'returning from host settings restores only one task instruction');
+    assert.equal(f.root.querySelectorAll('[data-film="leaf"]').length, 3);
+  } finally { f.done(); }
+});
+
+test('character dialogue keeps its caption bar while task phases use only their instruction card', async () => {
+  const f = await fixture();
+  try {
+    addFilmStyles(f); f.film.start(); await f.click('start-learn');
+    assert.equal(f.root.querySelector('.film-subtitle').hidden, false);
+    assert.match(f.root.querySelector('.film-subtitle p').textContent, /Harf Adası’nda yeni bir gün/);
+    assert.equal(f.root.querySelector('.film-instruction'), null);
+    assert.equal(instructionAreas(f).length, 1);
+    await f.skip();
+    assert.equal(f.root.querySelector('.film-subtitle').hidden, true);
+    assert.equal(instructionAreas(f).length, 1);
+    assert.match(f.root.querySelector('.film-task-title').textContent, /Çiçeğimiz için bir bahçe/);
+    await f.click('garden', 'left'); await f.click('next');
+    assert.equal(f.root.querySelector('.film-subtitle').hidden, false);
+    assert.equal(f.root.querySelector('.film-instruction'), null);
+    assert.equal(instructionAreas(f).length, 1);
+  } finally { f.done(); }
+});
+
+test('assisted task speech updates the one instruction card without exposing an unaided answer', async () => {
+  const f = await fixture();
+  try {
+    await toRecall(f);
+    assert.doesNotMatch(f.root.textContent, /lale/iu);
+    assert.equal(instructionAreas(f).length, 1);
+    await f.click('help');
+    assert.equal(instructionAreas(f).length, 1);
+    assert.match(f.root.querySelector('.film-task-title').textContent, /^Çiçeğimizin adı lale\./);
+    assert.equal(f.save().tasks.recall.hints, 1);
+    assert.equal(f.save().tasks.recall.assisted, true);
+  } finally { f.done(); }
+});
 
 test('the cover never starts speech and unavailable teacher content offers watch mode without credit', async () => {
   let calls = 0; const f = await fixture({ eligible: false, speak: async () => { calls++; return false; } });

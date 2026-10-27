@@ -92,10 +92,20 @@ export function createStoryFilm({ root, getLetters = () => [], getLearningState 
   function paintCaption() {
     const subtitle = root.querySelector('.film-subtitle');
     if (!subtitle) return;
-    const fallback = taskText(getFilmTask(state));
-    subtitle.querySelector('.film-speaker').textContent = shownLine ? speakerName[shownLine.speaker] : '';
-    subtitle.querySelector('p').textContent = shownLine?.text || fallback;
-    subtitle.dataset.speaker = shownLine?.speaker || 'narrator';
+    const dialogue = state.phase === 'dialogue';
+    subtitle.hidden = !dialogue;
+    subtitle.querySelector('.film-speaker').textContent = dialogue && shownLine ? speakerName[shownLine.speaker] : '';
+    subtitle.querySelector('p').textContent = dialogue ? shownLine?.text || '' : '';
+    subtitle.dataset.speaker = dialogue && shownLine ? shownLine.speaker : 'narrator';
+    const instruction = root.querySelector('.film-instruction');
+    if (instruction && !dialogue) {
+      const speaker = instruction.querySelector('.film-task-speaker');
+      speaker.hidden = !shownLine;
+      speaker.textContent = shownLine ? speakerName[shownLine.speaker] : '';
+      instruction.dataset.speaker = shownLine?.speaker || '';
+      instruction.querySelector('.film-task-title').textContent = shownLine?.text || taskText(getFilmTask(state));
+      instruction.querySelector('[data-film="replay"]')?.setAttribute('aria-busy', String(busy));
+    }
     const status = root.querySelector('.film-audio-note');
     if (status) status.textContent = busy ? 'Dinliyoruz…' : state.phase === 'dialogue' ? 'Hazır olduğunda sıradaki söze geçebilirsin.' : '';
     root.querySelectorAll('[data-film="caption-next"]').forEach(item => { item.disabled = busy; });
@@ -142,14 +152,13 @@ export function createStoryFilm({ root, getLetters = () => [], getLearningState 
       else if (task === 'branch') html = `<div class="film-actions">${button('branch', 'Pırpır yukarıdan baksın', 'data-value="bird"', 'film-choice')}${button('branch', 'Minik Aslan kıyıdan yürüsün', 'data-value="lion"', 'film-choice')}</div>`;
       else if (task === 'guided') html = state.mode === 'learn' ? tokenControls(task) : `<div class="film-word-model"><span>la</span><small>+</small><span>le</span><small>=</small><b>lale</b></div>${button('watch-guided', 'Örneği birlikte yerleştirelim', '', 'primary')}`;
       else if (task === 'leaves') {
-        html = '<p class="film-leaf-instruction">Kanaldaki yapraklara dokunarak sepete topla.</p>';
         root.querySelector('.film-world-actions').innerHTML = `<div class="film-leaf-buttons">${Array.from({ length: 4 }, (_, index) => state.tasks.leaves.removed.includes(index) ? '' : button('leaf', '<svg viewBox="0 0 40 44" aria-hidden="true"><path d="M20 39C0 31 1 9 29 3c14 20 11 31-9 36Z"/><path d="m8 44 20-33M20 28 13 20M24 21l8-1"/></svg>', `data-value="${index}" aria-label="${index + 1}. yaprağı sepete al"`, 'film-leaf')).join('')}</div>`;
       } else if (task === 'cause') html = `<div class="film-cause-choices">${button('cause', 'Yapraklar suyun yolunu kapattı.', 'data-value="leaves"', 'film-choice')}${button('cause', 'Bahçedeki çiçek büyüdü.', 'data-value="flower"', 'film-choice')}${button('cause', 'Pırpır uykuya daldı.', 'data-value="sleep"', 'film-choice')}</div>${button('help', 'Olanları hatırlayalım', '', 'quiet')}`;
       else if (task === 'recall') html = state.mode === 'learn' ? tokenControls(task) : `<p>Bu bölümde çiçeğin adını birlikte hatırlıyoruz.</p>${button('watch-recall', 'Örneği göster', '', 'primary')}`;
       else if (task === 'write') html = state.mode === 'learn' ? writingMarkup() : `<div class="film-word-model"><b>lale</b></div><p>Yazı çalışması öğrenme modunda, bir yetişkinin kontrolüyle yapılır.</p>${button('watch-writing', 'Birlikte devam edelim', '', 'primary')}`;
       else if (task === 'connected') html = `<p class="film-connected-line">Lale al.</p><p class="film-small">Bir büyüğünle birlikte oku. Bu düğme bağımsız okuma başarısı kaydetmez.</p><div class="film-actions">${button('read-line', 'Cümleyi dinleyelim', '', 'quiet')}${button('read-done', 'Birlikte okuduk', '', 'primary')}</div>`;
       else if (task === 'ribbon') html = `<div class="film-actions film-ribbons">${['teal', 'coral', 'gold'].map(color => button('ribbon', `<i class="film-ribbon-${color}" aria-hidden="true"></i>${{ teal: 'Turkuaz', coral: 'Mercan', gold: 'Sarı' }[color]}`, `data-value="${color}"`, 'film-choice')).join('')}</div>`;
-      html = `<h2 class="film-task-title" tabindex="-1">${esc(taskText(task))}</h2>${task ? `<div class="film-task-replay">${button('replay', 'Yönergeyi dinle', '', 'quiet')}</div>` : ''}${html}<p class="film-feedback" role="status">${esc(feedback)}</p><div class="film-scene-next">${button('next', state.scene === 5 ? 'Hikâyeyi bitir' : 'Hikâyeye devam et', filmCanAdvance(state) ? '' : 'disabled', 'primary')}</div>`;
+      html = `<div class="film-instruction" role="region" aria-labelledby="filmTaskInstruction"><div class="film-instruction-copy" aria-live="polite" aria-atomic="true"><span class="film-task-speaker" hidden></span><h2 id="filmTaskInstruction" class="film-task-title" tabindex="-1">${esc(taskText(task))}</h2></div>${task ? `<div class="film-task-replay">${button('replay', 'Yönergeyi dinle', '', 'quiet')}</div>` : ''}</div>${html}<p class="film-feedback" role="status">${esc(feedback)}</p><div class="film-scene-next">${button('next', state.scene === 5 ? 'Hikâyeyi bitir' : 'Hikâyeye devam et', filmCanAdvance(state) ? '' : 'disabled', 'primary')}</div>`;
     }
     panel.innerHTML = `${notice ? `<p class="film-notice" role="status">${esc(notice)}</p>` : ''}${html}`;
     if (state.phase !== 'dialogue') { stage?.setPaused(true); stage?.setSpeaking(null); }

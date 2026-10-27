@@ -5,7 +5,7 @@ export const FILM_LINES = [
   { id: 's1-promise', scene: 0, speaker: 'lion', text: 'Bu küçücük soğandan bir lale büyüyecek. Ona güzel bir yer seçelim.' },
   { id: 's1-garden', scene: 0, speaker: 'bird', text: 'Soldaki bahçe mi, sağdaki bahçe mi? Hangisini seçersen oraya gideceğiz.' },
   { id: 's2-wind', scene: 1, speaker: 'narrator', text: 'Tam o sırada rüzgâr çıktı. Kuru yapraklar su kanalına doldu. Çark yavaşladı ve durdu.', cue: 'wind' },
-  { id: 's2-empty', scene: 1, speaker: 'bird', text: 'Bir damla... Bir damla daha... Aa! Bahçeye su gelmiyor!' },
+  { id: 's2-empty-revised', scene: 1, speaker: 'bird', text: 'Bir damla... Bir damla daha... Hay aksi! Bahçeye su gelmiyor!' },
   { id: 's2-plan', scene: 1, speaker: 'lion', text: 'Suyun yolunu izleyelim. Pırpır yukarıdan uçabilir. Ben de kıyıdan yürüyebilirim.' },
   { id: 's3-bird', scene: 2, speaker: 'bird', text: 'Yukarıdan bakınca gördüm! Yapraklar küçük kapağın arkasında birikmiş.', cue: 'inspect-bird' },
   { id: 's3-lion', scene: 2, speaker: 'lion', text: 'Kıyıdaki izi takip ettim. Su, küçük kapağın arkasında birikmiş.', cue: 'inspect-lion' },
@@ -35,7 +35,7 @@ export const FILM_LINES = [
 
 export const FILM_SCENES = [
   { id: 'garden', title: 'Bahçeye bir söz', lines: ['s1-morning', 's1-promise', 's1-garden'] },
-  { id: 'wind', title: 'Çark neden sustu?', lines: ['s2-wind', 's2-empty', 's2-plan'] },
+  { id: 'wind', title: 'Çark neden sustu?', lines: ['s2-wind', 's2-empty-revised', 's2-plan'] },
   { id: 'investigate', title: 'İzin peşinde', lines: ['s3-bird', 's3-lion', 's3-label', 's3-guided'] },
   { id: 'channel', title: 'Yaprakların sırrı', lines: ['s4-open', 's4-leaves'] },
   { id: 'water', title: 'Su yeniden yolda', lines: ['s5-wheel', 's5-recall'] },

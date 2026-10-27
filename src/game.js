@@ -40,7 +40,7 @@ document.addEventListener('pointerdown', () => audio.unlock(), { passive: true }
 document.addEventListener('keydown', () => audio.unlock(), { passive: true });
 
 'use strict';
-window.HARF_ADASI_READY=false;window.HARF_ADASI_VERSION='5.6.1';
+window.HARF_ADASI_READY=false;window.HARF_ADASI_VERSION='5.6.2';
 function report(e){document.getElementById('error').hidden=false;document.getElementById('errorText').textContent=String(e&&e.message||e);document.getElementById('ready').textContent='Başlatma sorunu';}
 window.addEventListener('error',e=>report(e.error||e.message));window.addEventListener('unhandledrejection',e=>report(e.reason));
 (()=>{try{

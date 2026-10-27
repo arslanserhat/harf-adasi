@@ -175,6 +175,13 @@
       "speaker": "bird",
       "spoken": "Bir damla... Bir damla daha... Aa! Bahçeye su gelmiyor!"
     },
+    "bir damla... bir damla daha... hay aksi! bahçeye su gelmiyor!": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+2%",
+      "pitch": "+12Hz",
+      "speaker": "bird",
+      "spoken": "Bir damla... Bir damla daha... Hay aksi! Bahçeye su gelmiyor!"
+    },
     "bir davet kartını daha hazırladın. pırpır onu şenlik çantasına yerleştirdi.": {
       "voice": "tr-TR-EmelNeural",
       "rate": "+1%",
@@ -1060,6 +1067,7 @@
     "bir daha deneyelim.": "voice-f8640826477397f94d08.mp3",
     "bir daha deneyelim. acelemiz yok.": "voice-2141f47f74d8eedd71ea.mp3",
     "bir damla... bir damla daha... aa! bahçeye su gelmiyor!": "story-watermill-v1/s2-empty.mp3",
+    "bir damla... bir damla daha... hay aksi! bahçeye su gelmiyor!": "story-watermill-v1/s2-empty-revised.mp3",
     "bir davet kartını daha hazırladın. pırpır onu şenlik çantasına yerleştirdi.": "voice-732856596a47c0431dba.mp3",
     "bir dost seç.": "voice-64001485844ff1393905.mp3",
     "bir etiket daha hazır. alparslan yol işaretini yerine taktı.": "voice-3eaffb3b9217bf73b11b.mp3",

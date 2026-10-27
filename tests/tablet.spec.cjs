@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { assert, getPlaywright, startServer, open, tap, home, catalog, letter, match, next, assertNoAdvance, touch, stroke, paths, traceAll, ink, review, fill, assertClean } = require('./helpers.cjs');
+const { assert, getPlaywright, startServer, open, tap, home, catalog, tapStandard, letter, match, next, assertNoAdvance, touch, stroke, paths, traceAll, ink, review, fill, assertClean } = require('./helpers.cjs');
 
 const cases = [];
 const scenario = (name, fn) => cases.push({ name, fn });
@@ -105,7 +105,7 @@ scenario('writing studio: native touch gestures cannot scroll; controls fit and 
 
 scenario('regression slots: empty taps preserve work, filled taps undo from the tapped position', async ({ page }) => {
   await catalog(page, 'words');
-  await tap(page, 'word', '[data-text="anne"]');
+  await tapStandard(page, 'word', '[data-text="anne"]');
   await page.locator('#bank [data-do="tile"]').filter({ hasText: /^a$/ }).tap();
   await page.locator('#bank [data-do="tile"]:not([disabled])').filter({ hasText: /^n$/ }).first().tap();
   assert.equal(await page.locator('.slot.filled').count(), 2);
@@ -130,12 +130,12 @@ scenario('regression settings: home and selected catalog refresh while an active
   await page.locator('.mini [data-letter="b"]').waitFor({ state: 'visible' });
   await catalog(page, 'syllables');
   await tap(page, 'tab', '[data-key="filter"][data-value="selected"]');
-  assert.equal(await page.locator('[data-do="word"][data-text="an"]').count(), 1);
+  assert.equal(await page.locator('[data-standard-library="syllables"] [data-do="word"][data-text="an"]').count(), 1);
   await tap(page, 'settings');
   await tap(page, 'select-letter', '[data-letter="a"]');
   await page.getByRole('button', { name: 'Kapat', exact: true }).tap();
-  await page.locator('[data-do="word"][data-text="an"]').waitFor({ state: 'detached' });
-  await tap(page, 'word', '[data-text="ti"]');
+  await page.locator('[data-standard-library="syllables"] [data-do="word"][data-text="an"]').waitFor({ state: 'detached' });
+  await tapStandard(page, 'word', '[data-text="ti"]');
   await page.locator('#bank [data-do="tile"]').filter({ hasText: /^t$/ }).tap();
   const step = await page.locator('.steps').getAttribute('aria-label');
   await tap(page, 'settings');
@@ -175,7 +175,7 @@ scenario('all 58 Turkish uppercase/lowercase guides trace with real touch', asyn
 
 scenario('syllable, anne/etti/inat, duplicate cards, undo/restart, hints, break, settings and persistence', async ({ page, cdp }) => {
   await catalog(page, 'syllables');
-  await tap(page, 'word', '[data-text="ti"]');
+  await tapStandard(page, 'word', '[data-text="ti"]');
   await page.locator('#bank [data-do="tile"]').filter({ hasText: /^i$/ }).tap();
   assert.equal(await page.locator('.slot.filled').count(), 0, 'wrong card stays available');
   await fill(page, ['t', 'i']);
@@ -197,7 +197,7 @@ scenario('syllable, anne/etti/inat, duplicate cards, undo/restart, hints, break,
   await next(page);
   for (const word of ['anne', 'etti', 'inat']) {
     await catalog(page, 'words');
-    await tap(page, 'word', `[data-text="${word}"]`);
+    await tapStandard(page, 'word', `[data-text="${word}"]`);
     await fill(page, [...word]);
     await next(page);
     await review(page, cdp);
@@ -224,7 +224,7 @@ scenario('syllable, anne/etti/inat, duplicate cards, undo/restart, hints, break,
 
 scenario('reading-picture wrong/correct answer and sentence order', async ({ page, cdp }) => {
   await catalog(page, 'reading');
-  await tap(page, 'word', '[data-text="elma"]');
+  await tapStandard(page, 'word', '[data-text="elma"]');
   await page.locator('[data-do="read"]:not([aria-label="elma resmi"])').first().tap();
   assert.equal(await page.locator('#next').isEnabled(), false);
   await page.getByRole('button', { name: 'elma resmi', exact: true }).tap();
@@ -234,7 +234,7 @@ scenario('reading-picture wrong/correct answer and sentence order', async ({ pag
   await next(page);
   assert.equal(await page.locator('.party').isVisible(), true);
   await catalog(page, 'sentences');
-  await tap(page, 'sentence', '[data-index="16"]');
+  await tapStandard(page, 'sentence', '[data-index="16"]');
   await fill(page, ['İnan', 'inat', 'etti.']);
   await next(page);
   await review(page, cdp);
@@ -301,7 +301,7 @@ scenario('blocked storage and unavailable speech keep all game controls usable',
 
 scenario('Turkish audio: nine and every word have bundled recordings; celebration and sound effects resolve', async ({ page }) => {
   await catalog(page, 'words');
-  const words = await page.locator('.grid [data-do="word"]').evaluateAll(cards => cards.map(card => card.dataset.text));
+  const words = await page.locator('[data-standard-library="words"] .grid [data-do="word"]').evaluateAll(cards => cards.map(card => card.dataset.text));
   assert.ok(words.length >= 80, 'the complete word catalog is retained');
   const result = await page.evaluate(async () => {
     const response = await fetch(new URL('audio/manifest.json', location.href));
@@ -334,7 +334,7 @@ scenario('Turkish audio: nine and every word have bundled recordings; celebratio
 
 scenario('Turkish fallback: an English-only device never speaks nine as English', async ({ page }) => {
   await catalog(page, 'words');
-  await tap(page, 'word', '[data-text="nine"]');
+  await tapStandard(page, 'word', '[data-text="nine"]');
   await tap(page, 'speak');
   await page.waitForTimeout(1500);
   assert.deepEqual(await page.evaluate(() => window.__testSpeechCalls), [], 'English voice is never used as a fallback');

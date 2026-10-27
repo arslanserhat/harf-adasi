@@ -127,11 +127,11 @@ async function draw(app) {
 async function ownList(app) {
   await press(app, '[data-do="learning-parent"]');
   await app.page.locator('#learningListTitle').fill('Öğretmenimin haftalık kelimeleri');
-  await app.page.locator('#learningWords').fill('nane\nanne');
+  await app.page.locator('#learningWords').fill('alet\nilan');
   await press(app, '[data-learning="save-list"]');
   const saved = await learning(app.page);
   const list = saved.lists.find(item => item.id === saved.activeListId);
-  assert.deepEqual(list.words.map(item => item.text), ['nane', 'anne']);
+  assert.deepEqual(list.words.map(item => item.text), ['alet', 'ilan']);
   await press(app, '[data-learning="home"]');
 }
 async function preserveWriting(app) {
@@ -259,7 +259,7 @@ async function solve(app, task, { wrongAndHint = false, resumeWriting = false } 
         const plan = (await active(page)).plan;
         assert.equal(plan.stages.length, 6);
         assert.equal(new Set(plan.stages.map(stage => stage.id)).size, 6);
-        if (custom) assert.deepEqual(new Set(plan.wordTexts), new Set(['nane', 'anne']), 'the actual teacher list determines the new adventure');
+        if (custom) assert.deepEqual(new Set(plan.wordTexts), new Set(['alet', 'ilan']), 'teacher words absent from the starter list determine the new adventure');
         for (let index = 0; index < 6; index++) {
           const live = await active(page), task = live.plan.stages[live.index];
           assert.equal(live.index, index);

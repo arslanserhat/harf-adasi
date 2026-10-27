@@ -157,11 +157,15 @@ export function createQuests({
     const history = historyOf(getHistory());
     const key = signature();
     const saved = options.fresh ? null : history.active;
-    const plan = validSaved(saved, kind, key) ? saved.plan : buildQuestPlan(kind, { learningState: getLearningState(), letters: getLetters(), history, now: Date.now() });
-    current = { plan, signature: key, index: validSaved(saved, kind, key) ? saved.index : 0,
-      answers: validSaved(saved, kind, key) && Array.isArray(saved.answers) ? saved.answers.slice(0, 6) : [],
-      ui: null, startedAt: validSaved(saved, kind, key) ? Number(saved.startedAt) || Date.now() : Date.now(), completed: false, paused: false };
-    if (plan.available && plan.stages?.length) current.ui = normalizeUi(validSaved(saved, kind, key) ? saved.ui : null, stage());
+    const resume = validSaved(saved, kind, key);
+    const plan = resume ? saved.plan : buildQuestPlan(kind, { learningState: getLearningState(), letters: getLetters(), history, now: Date.now() });
+    current = { plan, signature: key, index: resume ? saved.index : 0,
+      answers: resume && Array.isArray(saved.answers) ? saved.answers.slice(0, 6) : [],
+      ui: null, startedAt: resume ? Number(saved.startedAt) || Date.now() : Date.now(), completed: false, paused: false };
+    if (plan.available && plan.stages?.length) {
+      current.ui = normalizeUi(resume ? saved.ui : null, stage());
+      if (!resume && saved?.kind === kind && saved.signature !== key) current.ui.feedback = 'Öğretmeninin yeni kelimeleri hazır. Bu maceraya güncel listenle başlıyoruz.';
+    }
     document.body.classList.add('quest-playing');
     mountViewport();
     render();

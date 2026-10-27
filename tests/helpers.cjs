@@ -153,6 +153,23 @@ async function home(page) {
 async function catalog(page, view) {
   await home(page);
   await tap(page, 'catalog', `[data-view="${view}"]`);
+  await openStandardLibrary(page);
+}
+async function openStandardLibrary(page) {
+  const standard = page.locator('[data-standard-library]');
+  if (!await standard.count()) return null;
+  assert.equal(await standard.count(), 1, 'one explicit standard library belongs to the opened catalog');
+  if (!await standard.evaluate(element => element.open)) {
+    await standard.locator(':scope > summary').tap();
+  }
+  assert.equal(await standard.evaluate(element => element.open), true, 'the legacy test explicitly opens the standard source');
+  return standard;
+}
+async function tapStandard(page, action, attrs = '') {
+  await dismissCelebration(page);
+  const standard = await openStandardLibrary(page);
+  assert.ok(standard, 'legacy word/sentence selection stays inside the standard library');
+  await standard.locator(`[data-do="${action}"]${attrs}`).first().tap();
 }
 async function letter(page, value) {
   await catalog(page, 'letters');
@@ -251,4 +268,4 @@ async function assertClean(page, errors) {
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true, 'no horizontal overflow');
 }
 
-module.exports = { assert, getPlaywright, startServer, open, tap, home, catalog, letter, match, next, assertNoAdvance, touch, stroke, paths, traceAll, ink, review, fill, assertClean };
+module.exports = { assert, getPlaywright, startServer, open, tap, home, catalog, openStandardLibrary, tapStandard, letter, match, next, assertNoAdvance, touch, stroke, paths, traceAll, ink, review, fill, assertClean };

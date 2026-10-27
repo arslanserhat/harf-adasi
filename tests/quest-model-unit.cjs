@@ -255,3 +255,105 @@ test('variety uses only validated completed runs; unfinished animation cannot al
   assert.notEqual(changed, next);
   assert.notEqual(changed, 'words');
 });
+
+const TEACHER_WORDS = ['kalem', 'kitap', 'okul', 'masa', 'kedi', 'elma', 'limon', 'simit'];
+async function fullTeacherState() {
+  return custom(TEACHER_WORDS.map((text, index) => ({
+    text, meaning: `Öğretmenin ${index + 1}. nesne açıklaması.`, sentence: `Ali ${text} al.`,
+  })));
+}
+function finishPlan(plan, index, listId = 'school') {
+  return completed(plan.kind, { id: `real-plan-${index}-${plan.id}`, listId,
+    wordTexts: [...plan.wordTexts], completedAt: NOW + index * 1000,
+    results: plan.stages.map(stage => ({ id: stage.id, word: stage.word, skill: stage.skill, correct: true })) });
+}
+
+test('every eligible teacher word becomes a target across repeated tours, rather than alternating the first pair forever', async () => {
+  const { buildQuestPlan } = await questAPI;
+  const { ALPHABET } = await learningAPI;
+  for (const kind of ['words', 'syllables', 'reading', 'sentences']) {
+    const state = await fullTeacherState(), history = [], seen = new Set();
+    for (let round = 0; round < 6; round++) {
+      const plan = buildQuestPlan(kind, { learningState: state, letters: ALPHABET, history, now: NOW + round * 1000 });
+      assert.equal(plan.available, true, `${kind}: ${plan.reason}`);
+      for (const stage of plan.stages) if (stage.word) seen.add(stage.word);
+      history.push(finishPlan(plan, round));
+    }
+    assert.deepEqual([...seen].sort(), [...TEACHER_WORDS].sort(), `${kind}: words at the end of the teacher list must become actual targets, not just distractors`);
+  }
+});
+
+test('teacher-word exposure follows the child between worlds instead of restarting the same first pair', async () => {
+  const { buildQuestPlan } = await questAPI;
+  const { ALPHABET } = await learningAPI;
+  const state = await fullTeacherState(), history = [], seen = new Set();
+  const sequence = ['words', 'syllables', 'reading', 'sentences', 'words', 'syllables'];
+  let previousPair;
+  for (let round = 0; round < sequence.length; round++) {
+    const plan = buildQuestPlan(sequence[round], { learningState: state, letters: ALPHABET, history, now: NOW + round * 1000 });
+    const pair = [...plan.wordTexts].sort();
+    if (round === 1) assert.notDeepEqual(pair, previousPair, 'changing the world must not silently reset vocabulary coverage');
+    for (const word of plan.wordTexts) seen.add(word);
+    history.push(finishPlan(plan, round)); previousPair = pair;
+  }
+  assert.deepEqual([...seen].sort(), [...TEACHER_WORDS].sort());
+});
+
+test('an observed difficulty returns when due while new teacher words still receive their own practice', async () => {
+  const { buildQuestPlan } = await questAPI;
+  const { ALPHABET, recordAttempt } = await learningAPI;
+  let state = await fullTeacherState();
+  state.progress.kalem = { recall: { attempts: 1, recent: [0], lastAt: NOW - 15 * 60000, nextDueAt: NOW - 5 * 60000 } };
+  const history = [], seen = new Set();
+  for (let round = 0; round < 6; round++) {
+    const now = NOW + round * 10000;
+    const plan = buildQuestPlan('words', { learningState: state, letters: ALPHABET, history, now });
+    if (round === 0) assert.ok(plan.wordTexts.includes('kalem'), 'a due observed recall difficulty receives real practice');
+    for (const word of plan.wordTexts) seen.add(word);
+    for (const [index, stage] of plan.stages.entries()) state = recordAttempt(state, {
+      id: `${stage.id}:complete`, word: stage.word, skill: stage.skill, correct: true,
+      independent: true, writingReviewed: stage.mechanic === 'write', mistakes: 0, hints: 0, at: now + index,
+    }, now + index);
+    history.push(finishPlan(plan, round));
+  }
+  assert.deepEqual([...seen].sort(), [...TEACHER_WORDS].sort(), 'review needs cannot permanently hide words later in the list');
+  assert.ok(state.progress.kalem.recall.nextDueAt > NOW + 60000, 'success schedules a later review instead of instant repeated drilling');
+});
+
+test('newly added teacher words get a turn, and removed or switched-list words never leak into new choices', async () => {
+  const { buildQuestPlan } = await questAPI;
+  const { ALPHABET } = await learningAPI;
+  const state = await fullTeacherState(), history = [];
+  for (let round = 0; round < 6; round++) {
+    const plan = buildQuestPlan('words', { learningState: state, letters: ALPHABET, history, now: NOW + round * 1000 });
+    history.push(finishPlan(plan, round));
+  }
+  state.lists[0].words.push({ text: 'balon' });
+  const added = buildQuestPlan('words', { learningState: state, letters: ALPHABET, history, now: NOW + 10000 });
+  assert.ok(added.wordTexts.includes('balon'), 'a new word cannot be hidden behind earlier completed rotations');
+  state.lists[0].words = [{ text: 'masa' }, { text: 'elma' }];
+  const current = buildQuestPlan('words', { learningState: state, letters: ALPHABET, history, now: NOW + 11000 });
+  assert.deepEqual([...current.wordTexts].sort(), ['elma', 'masa']);
+  assert.ok(current.stages.every(stage => ['elma', 'masa'].includes(stage.word)
+    && stage.options.every(option => ['elma', 'masa'].includes(option.value))), 'removed entries cannot remain as targets or distractors');
+  state.lists.push({ id: 'next-week', title: 'Gelecek hafta', words: [{ text: 'balon' }, { text: 'kayık' }] });
+  state.activeListId = 'next-week';
+  const switched = buildQuestPlan('words', { learningState: state, letters: ALPHABET, history, now: NOW + 12000 });
+  assert.deepEqual([...switched.wordTexts].sort(), ['balon', 'kayık']);
+  assert.ok(switched.stages.every(stage => stage.options.every(option => ['balon', 'kayık'].includes(option.value))));
+});
+
+test('coverage never bypasses the taught-letter filter to reach blocked teacher words', async () => {
+  const { buildQuestPlan } = await questAPI;
+  const state = await custom([{ text: 'alet' }, { text: 'ilan' }, { text: 'ışık' }, { text: 'kitap' }]);
+  const history = [];
+  for (let round = 0; round < 6; round++) {
+    const plan = buildQuestPlan('words', { learningState: state, letters: LETTERS, history, now: NOW + round * 1000 });
+    assert.deepEqual([...plan.wordTexts].sort(), ['alet', 'ilan']);
+    for (const stage of plan.stages) {
+      assert.ok(['alet', 'ilan'].includes(stage.word));
+      assert.ok(stage.options.every(option => ['alet', 'ilan'].includes(option.value)));
+    }
+    history.push(finishPlan(plan, round));
+  }
+});

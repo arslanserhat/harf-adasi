@@ -245,6 +245,36 @@ export function getEligibleWords(value, letters) {
   return { eligible, blocked };
 }
 
+/** Balance vocabulary coverage with spaced review. A review may occupy one
+ * slot, while the other goes to the least-practised eligible word. History
+ * contains completed target words, never distractors or animation progress. */
+export function orderPracticeWords(state, pool, { now = Date.now(), runs = [] } = {}) {
+  const history = Array.isArray(runs) ? runs : [];
+  const latest = history.at(-1);
+  const recentTargets = new Set(Array.isArray(latest?.wordTexts) ? latest.wordTexts : []);
+  const entries = pool.map((word, index) => {
+    const progress = Object.values(state.progress?.[word.text] || {}).filter(item => item?.attempts > 0);
+    const appearances = history.map((run, order) => ({ run, order }))
+      .filter(({ run }) => Array.isArray(run.wordTexts) && run.wordTexts.includes(word.text));
+    const lastAt = Math.max(0, ...progress.map(item => item.lastAt || 0), ...appearances.map(({ run }) => Number(run.completedAt) || 0));
+    const exposure = Math.max(appearances.length, progress.length ? 1 : 0);
+    const dueAt = Math.min(Infinity, ...progress.filter(item => item.nextDueAt > 0 && item.nextDueAt <= now).map(item => item.nextDueAt));
+    const weak = progress.some(item => item.recent?.at(-1) !== 2);
+    // Even an older, still-due skill cannot force the same word back into
+    // every immediate tour after a different skill has just been practised.
+    const cooling = lastAt > 0 && now - lastAt < 10 * 60000;
+    const review = !cooling && !recentTargets.has(word.text) && (Number.isFinite(dueAt) || weak);
+    return { word, index, lastAt, exposure, dueAt, review, recent: recentTargets.has(word.text), lastOrder: appearances.at(-1)?.order ?? -1 };
+  });
+  const balanced = [...entries].sort((a, b) => a.exposure - b.exposure || Number(a.recent) - Number(b.recent)
+    || a.lastAt - b.lastAt || a.lastOrder - b.lastOrder || a.index - b.index);
+  const review = entries.filter(item => item.review).sort((a, b) => a.dueAt - b.dueAt || a.exposure - b.exposure || a.lastAt - b.lastAt || a.index - b.index)[0];
+  const first = review || balanced[0];
+  if (!first) return [];
+  const remaining = balanced.filter(item => item !== first);
+  return [first, ...remaining].map(item => item.word);
+}
+
 export function recordAttempt(value, attempt, now = Date.now()) {
   const state = normalizeLearningState(value, now), event = normalizeEvent(attempt, now);
   if (!event || state.events.some(previous => previous.id === event.id)) return state;
@@ -271,7 +301,7 @@ function levelFor(state, word, skill) {
 }
 
 function optionsFor(word, pool, letters) {
-  const candidates = unique([...pool.map(entry => entry.text), ...STARTER_WORDS.map(entry => entry.text)])
+  const candidates = unique(pool.map(entry => entry.text))
     .filter(text => text !== word.text && fits(text, letters));
   candidates.sort((a, b) => Math.abs(a.length - word.text.length) - Math.abs(b.length - word.text.length) || a.localeCompare(b, 'tr'));
   return [word.text, ...candidates.slice(0, 2)];
@@ -321,9 +351,7 @@ export function planSession(value, letters, now = Date.now(), options = {}) {
   if (!eligible.length) return plan;
   const lastAt = word => Math.max(0, ...Object.values(state.progress[word.text] || {}).map(progress => progress.lastAt));
   const due = word => Object.values(state.progress[word.text] || {}).some(progress => progress.nextDueAt > 0 && progress.nextDueAt <= now);
-  const weak = word => Object.values(state.progress[word.text] || {}).some(progress => progress.attempts && progress.recent.at(-1) !== 2);
-  const rank = word => due(word) ? 0 : weak(word) && now - lastAt(word) >= 30 * 60000 ? 1 : !lastAt(word) ? 2 : 3;
-  const ranked = eligible.map((word, index) => ({ word, index })).sort((a, b) => rank(a.word) - rank(b.word) || lastAt(a.word) - lastAt(b.word) || a.index - b.index).map(item => item.word);
+  const ranked = orderPracticeWords(state, eligible, { now });
   const focusScore = word => Math.max(0, ...focusTokens.map(token => {
     if (word.text === token) return 100;
     if (word.parts.includes(token)) return 70;
@@ -337,12 +365,9 @@ export function planSession(value, letters, now = Date.now(), options = {}) {
     first = ranked.find(word => makeTask(word, entryKind, state, eligible, selected, 'preview')) || first;
   }
   const alternatives = ranked.filter(word => word.text !== first.text);
-  // Connect new words with something familiar while giving due/difficult work
-  // priority. The active teacher list supplies every target; context never adds
-  // an invented word or silently promotes a syllable to a vocabulary item.
-  const second = alternatives.find(word => rank(word) < 2)
-    || alternatives.find(word => Boolean(lastAt(word)) !== Boolean(lastAt(first)))
-    || alternatives[0] || first;
+  // The review slot above must not consume both places. The least-practised
+  // alternative keeps new teacher words moving through the whole list.
+  const second = alternatives[0] || first;
   const possible = (word, kind) => Boolean(makeTask(word, kind, state, eligible, selected, 'preview'));
   const usableKinds = word => SKILLS.filter(kind => (kind !== 'syllables' || word.parts.length > 1) && possible(word, kind));
   const weakSkill = usableKinds(first).filter(skill => skill !== focusSkill).filter(skill => {

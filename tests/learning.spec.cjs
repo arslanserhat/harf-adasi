@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const { assert, getPlaywright, startServer, open, touch, stroke, assertClean, fill, next: legacyNext, review: legacyReview } = require('./helpers.cjs');
+const { assert, getPlaywright, startServer, open, openStandardLibrary, touch, stroke, assertClean, fill, next: legacyNext, review: legacyReview } = require('./helpers.cjs');
 
 const cases = [];
 const scenario = (name, run, browserOptions = {}) => cases.push({ name, run, browserOptions });
@@ -425,7 +425,8 @@ scenario('legacy continuation: the next journey follows the completed word inste
   assert.equal(old.tasks[0].word, 'nane');
   await press(app, '[data-learning="home"]');
   await press(app, '[data-do="catalog"][data-view="words"]');
-  await press(app, '[data-do="word"][data-text="anne"]');
+  await openStandardLibrary(app.page);
+  await press(app, '[data-standard-library="words"] [data-do="word"][data-text="anne"]');
   await fill(app.page, [...'anne']);
   await legacyNext(app.page);
   await legacyReview(app.page, app.cdp);
@@ -546,7 +547,8 @@ scenario('existing learning areas remain reachable after an adaptive session is 
   await app.page.locator('.games').waitFor();
   for (const view of ['letters', 'syllables', 'words', 'reading', 'sentences', 'numbers']) {
     await press(app, `[data-do="catalog"][data-view="${view}"]`);
-    assert.ok(await app.page.locator('#main .grid').count(), `${view} still contains its actual exercises`);
+    const standard = await openStandardLibrary(app.page);
+    assert.ok(await (standard || app.page.locator('#main')).locator('.grid').count(), `${view} still contains its actual exercises`);
     await press(app, '#main [data-do="home"]');
     await app.page.locator('.games').waitFor();
   }

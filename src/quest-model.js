@@ -1,4 +1,4 @@
-import { ALPHABET, getEligibleWords, normalizeLearningState } from './learning-model.js';
+import { ALPHABET, getEligibleWords, normalizeLearningState, orderPracticeWords } from './learning-model.js';
 
 /** Authored missions use the teacher's data; this planner never awards progress. */
 export const QUEST_KINDS = Object.freeze([
@@ -91,22 +91,9 @@ export function buildQuestPlan(kind, { learningState, letters = [], history = []
   const runs = completedRuns(history);
   const matching = runs.filter(run => run.kind === kind);
   const rotation = matching.length;
-  const { eligible } = getEligibleWords(state, [...selected]);
+  const { eligible, blocked } = getEligibleWords(state, [...selected]);
   const last = matching.at(-1);
-  const rank = word => {
-    const skills = Object.values(state.progress[word.text] || {});
-    const due = skills.some(progress => progress.nextDueAt > 0 && progress.nextDueAt <= now);
-    const weak = skills.some(progress => progress.attempts > 0 && progress.recent.at(-1) !== 2);
-    const lastAt = Math.max(0, ...skills.map(progress => progress.lastAt || 0));
-    return [due ? 0 : weak ? 1 : lastAt ? 3 : 2, lastAt];
-  };
-  const ranked = eligible.map((word, index) => ({ word, index, rank: rank(word) })).sort((a, b) => a.rank[0] - b.rank[0] || a.rank[1] - b.rank[1] || a.index - b.index).map(item => item.word);
-  const rotate = pool => {
-    if (pool.length < 2) return [...pool];
-    const firstPrevious = Array.isArray(last?.wordTexts) ? last.wordTexts[0] : '';
-    const first = pool.find(word => word.text !== firstPrevious) || pool[rotation % pool.length];
-    return [first, ...pool.filter(word => word !== first)];
-  };
+  const ranked = orderPracticeWords(state, eligible, { now, runs });
   let pool = ranked;
   let reason = '';
   if (kind === 'syllables') pool = pool.filter(word => word.parts.length > 1);
@@ -116,12 +103,13 @@ export function buildQuestPlan(kind, { learningState, letters = [], history = []
     return tokens.length >= 2 && tokens.length <= 8 && word.sentence.length <= 160
       && allowedText(word.sentence, selected) && tokens.some(token => lexical(token) === word.text);
   });
-  pool = rotate(pool);
+  pool = orderPracticeWords(state, pool, { now, runs });
   if (kind === 'letters' && !selected.size) reason = 'Fener Atölyesi için önce okulda öğrendiğin harfleri seçelim.';
   else if (kind === 'reading' && pool.length < 2) reason = 'Orman Dedektifi için öğretmen listesine en az iki farklı resim veya anlam ekleyelim. Bilmediğimiz bir kelimeye anlam uydurmayacağız.';
   else if (kind === 'sentences' && !pool.length) reason = 'Postane için öğretmen listesindeki bir kelimeye, öğrenilen harflerle yazılmış 2–8 kelimelik bir cümle ekleyelim.';
   else if (kind === 'syllables' && !pool.length) reason = 'Hece Ekspresi için öğretmen listesinde öğrenilen harflerle yazılmış en az iki heceli bir kelime olmalı.';
   else if (kind !== 'letters' && kind !== 'numbers' && !pool.length) reason = 'Bu dünyaya öğretmen listesindeki kelimelerle gireceğiz. Önce kelimeleri ve okulda öğrenilen harfleri birlikte kontrol edelim.';
+  if (reason && blocked.length) reason += ` Henüz açılmayan kelimeler: ${blocked.slice(0, 6).map(word => `${word.text} (${word.missingLetters.join(', ')})`).join('; ')}. Bu harfleri okulda öğrendiğinde ayarlardan seçebilirsin.`;
   const id = `quest-${kind}-${hash(JSON.stringify(kind === 'numbers' ? { rotation, last: last?.id || '' }
     : { list: state.activeListId, letters: [...selected].sort(), pool, rotation, last: last?.id || '', progress: state.events.at(-1)?.id || '' }))}`;
   const plan = { id, kind, title: meta.title, story: meta.story, goal: meta.goal, stages: [], available: !reason, reason, wordTexts: [] };
@@ -141,9 +129,11 @@ export function buildQuestPlan(kind, { learningState, letters = [], history = []
   const message = (word, prompt, model = '') => add('assemble', word, 'sentence', prompt, word.sentence, { tokens: tokensOf(word.sentence), model, guided: Boolean(model) });
   if (kind === 'letters') {
     const choicesLetters = [...selected];
-    const a = first?.text[0] || choicesLetters[rotation % choicesLetters.length];
-    const b = second?.text.split('').find(letter => letter !== a) || choicesLetters.find(letter => letter !== a) || a;
     const letter = value => ({ text: value, parts: [value] });
+    const letterPool = unique(pool.flatMap(word => [...word.text]));
+    const orderedLetters = orderPracticeWords(state, (letterPool.length ? letterPool : choicesLetters).map(letter), { now, runs });
+    const a = orderedLetters[0].text;
+    const b = orderedLetters[1]?.text || a;
     const choose = value => choices([value, ...choicesLetters], value);
     add('find', letter(a), 'build', 'Fenerin ilk işaretini dinle ve doğru parçayı bul.', a, { options: choose(a) });
     add('write', letter(a), 'write', 'Bulduğun işareti tabelaya çiz. Sonra bir büyüğünle kontrol et.', a, { model: a, guided: true });

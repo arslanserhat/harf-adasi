@@ -313,7 +313,7 @@ test('a long teacher sentence cannot create an impossible or server-incompatible
   assert.equal(normalizeLearningState(state, NOW).session.tasks[0].tokens.length, 40);
 });
 
-test('the next completed round mixes new and practiced words and changes its task progression', async () => {
+test('a completed round opens new teacher words before the previous words return at their review time', async () => {
   const { createLearningState, planSession, recordAttempt } = await api;
   let state = createLearningState(NOW);
   const first = planSession(state, LETTERS, NOW);
@@ -329,10 +329,35 @@ test('the next completed round mixes new and practiced words and changes its tas
   const signature = plan => plan.tasks.map(task => `${task.word}:${task.kind}`).join('|');
   assert.notEqual(signature(next), signature(first));
   assert.ok(next.wordTexts.some(word => !first.wordTexts.includes(word)), 'new teacher content joins the next round');
-  assert.ok(next.wordTexts.some(word => first.wordTexts.includes(word)), 'a practiced word returns in a different context');
+  assert.ok(next.wordTexts.every(word => !first.wordTexts.includes(word)), 'an immediate round cannot keep the previous pair while unseen teacher words wait');
   assert.ok(new Set(next.tasks.map(task => task.kind)).size >= 4);
   assert.equal(next.tasks.length, 8);
   assert.deepEqual(next, planSession(state, LETTERS, NOW + 60000), 'history-driven selection stays reproducible');
+  const review = planSession(state, LETTERS, NOW + 11 * 60000);
+  assert.ok(review.wordTexts.some(word => first.wordTexts.includes(word)), 'supported words return when their actual review time arrives');
+  assert.ok(review.wordTexts.some(word => !first.wordTexts.includes(word)), 'review leaves space for another teacher word');
+});
+
+test('all eight teacher words become targets across real completed journeys and distractors stay inside that list', async () => {
+  const { ALPHABET, createLearningState, parseWordList, planSession, recordAttempt } = await api;
+  let state = createLearningState(NOW);
+  const words = parseWordList('kalem\nkitap\nokul\nmasa\nkedi\ntop\nelma\nlimon').words;
+  state.lists[0].words = words;
+  const seen = new Set();
+  for (let round = 0; round < 4; round++) {
+    const clock = NOW + round * 60000;
+    const plan = planSession(state, ALPHABET, clock);
+    state.session = plan;
+    for (const [index, task] of plan.tasks.entries()) {
+      seen.add(task.word);
+      if (task.kind === 'listen') assert.ok(task.options.every(option => words.some(word => word.text === option)), 'no starter distractor leaks into the teacher list');
+      const at = clock + index * 1000;
+      state = recordAttempt(state, attempt({ id: task.id, word: task.word, skill: task.skill, at,
+        hints: task.support >= 2 ? 1 : 0, independent: task.support < 2, writingReviewed: task.kind === 'write' }), at);
+    }
+    state.session.index = plan.tasks.length;
+  }
+  assert.deepEqual([...seen].sort(), words.map(word => word.text).sort());
 });
 
 test('continuing a completed word changes the first skill instead of replaying that activity', async () => {

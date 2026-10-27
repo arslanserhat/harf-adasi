@@ -16,7 +16,7 @@ function chest(open = false, opening = false) {
   return `<svg class="island-chest${open ? ' is-open' : ''}${opening ? ' is-opening' : ''}" viewBox="0 0 200 180" aria-hidden="true"><ellipse cx="100" cy="165" rx="83" ry="10" fill="#67553c25"/><g class="island-chest-lid"><path d="M26 81V58C26 8 174 8 174 58v23Z" fill="#bc7b42" stroke="#85502d" stroke-width="7"/><path d="M48 77V45m103 32V45" stroke="#ffd47e" stroke-width="13"/><path d="M27 74h146" stroke="#ffd47e" stroke-width="13"/></g><path d="M24 82h152v73H24Z" fill="#c38b4e" stroke="#85502d" stroke-width="7" stroke-linejoin="round"/><path d="M48 86v66m103-66v66M27 148h147" stroke="#ffda83" stroke-width="13"/><rect x="86" y="80" width="28" height="40" rx="7" fill="#ffe8a4" stroke="#b98a34" stroke-width="3"/><circle cx="100" cy="95" r="5" fill="#976d36"/><path d="M98 99h4v9h-4" fill="#976d36"/></svg>`;
 }
 
-export function createIsland({ root, getLetters, getCompleted, speak, stopSpeech = () => {}, celebrate, onComplete, onExit, isMuted = () => false }) {
+export function createIsland({ root, getLetters, getCompleted, speak, stopSpeech = () => {}, celebrate, onComplete, onExit, isMuted = () => false, getContentState, onContentExposure = () => {} }) {
   let current = null;
   let generation = 0;
   let listening = false;
@@ -66,13 +66,13 @@ export function createIsland({ root, getLetters, getCompleted, speak, stopSpeech
   function start(zone) {
     reset();
     bind();
-    const selected = getIslandMission(zone, getLetters(), getCompleted());
+    const selected = getIslandMission(zone, getLetters(), getCompleted(), getContentState?.());
     if (!selected) {
       renderMap();
       feedback('Bir büyüğünle okulda öğrendiğin harfleri seçebilir, sonra birlikte oynayabilirsin.');
       return;
     }
-    const mission = { ...selected, startedAt: performance.now() };
+    const mission = { ...selected, startedAt: performance.now(), exposureId: crypto.randomUUID() };
     const options = [...new Set(mission.options || [mission.target])];
     current = {
       mission, zone, phase: zone === 'care' ? 'companion' : zone === 'treasure' ? 'path' : 'build',
@@ -86,6 +86,7 @@ export function createIsland({ root, getLetters, getCompleted, speak, stopSpeech
       return shuffle([target, ...shuffle([...new Set(pool)].filter(value => value !== target)).slice(0, 2)]);
     });
     renderMission();
+    onContentExposure({ id: mission.exposureId, domain: 'activities', items: [mission.contentActivity], pool: mission.contentPools.activities });
     void announceInstruction();
   }
   function currentTarget() {
@@ -143,6 +144,13 @@ export function createIsland({ root, getLetters, getCompleted, speak, stopSpeech
     else if (zone === 'train') body = renderTrain();
     else body = renderTreasure();
     root.innerHTML = shell(zone, phase, body);
+    if (!current.completed && !['companion', 'play', 'placement'].includes(phase)) {
+      const target = currentTarget();
+      const domain = phase === 'path' && target !== current.mission.target
+        ? target.length === 1 ? 'letters' : 'syllables' : current.mission.targetDomain;
+      onContentExposure({ id: `${current.mission.exposureId}:${phase}:${current.pathIndex}`, domain,
+        items: [target], pool: current.mission.contentPools[domain] || [] });
+    }
     if (current.completed) feedback('Emek verdin! Adana yeni bir hatıra bıraktın.');
     else if (zone === 'care' && phase === 'play') feedback('Kasesi doldu, karnı doydu. Şimdi birlikte oynayalım!');
   }

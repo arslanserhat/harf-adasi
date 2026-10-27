@@ -1,3 +1,5 @@
+import { orderContentPool } from './content-selection.js';
+
 const ALPHABET = 'a b c ç d e f g ğ h ı i j k l m n o ö p r s ş t u ü v y z'.split(' ');
 const PLACEMENTS = ['beach', 'garden', 'station'];
 
@@ -192,7 +194,14 @@ export function isIslandCompletion(value) {
   return completionDetails(value) !== null;
 }
 
-export function getIslandMission(zone, letters, completed = []) {
+export function getIslandActivityKey(key) {
+  const mission = BY_KEY.get(key);
+  if (!mission) return '';
+  return /^[a-z0-9-]+$/iu.test(key) ? `island:${key}`
+    : `island:unit-${mission.zone}-${[...mission.target].map(letter => letter.codePointAt(0).toString(36)).join('-')}`;
+}
+
+export function getIslandMission(zone, letters, completed = [], selection) {
   if (!ISLAND_ZONES.some(item => item.id === zone)) return null;
   const known = knownLetters(letters);
   if (!known.length) return null;
@@ -203,7 +212,9 @@ export function getIslandMission(zone, letters, completed = []) {
   const last = [...history].reverse().map(completionDetails)
     .find(item => item && eligible.some(mission => `island:${mission.key}` === item.key));
   const previous = last ? eligible.findIndex(mission => `island:${mission.key}` === last.key) : -1;
-  const index = (previous + 1) % eligible.length;
+  const activityPool = eligible.map(mission => getIslandActivityKey(mission.key));
+  const nextActivity = selection === undefined ? '' : orderContentPool('activities', activityPool, selection)[0];
+  const index = nextActivity ? eligible.findIndex(mission => getIslandActivityKey(mission.key) === nextActivity) : (previous + 1) % eligible.length;
   const mission = eligible[index];
   const options = [...new Set([mission.target, ...mission.options, ...known])].filter(allowed).slice(0, 3);
   // Do not put the correct parcel/stone in the same position in every scene.
@@ -212,7 +223,19 @@ export function getIslandMission(zone, letters, completed = []) {
     ...mission, kind: zone, tokens: [...mission.tokens], reward: { ...mission.reward },
     options: [...options.slice(offset), ...options.slice(0, offset)],
     level: index + 1, total: eligible.length,
+    targetDomain: islandTargetDomain(mission.target),
+    contentActivity: getIslandActivityKey(mission.key),
+    contentPools: { activities: activityPool, letters: known,
+      syllables: [...new Set(eligible.flatMap(entry => [...entry.tokens.filter(token => token.length > 1), ...(islandTargetDomain(entry.target) === 'syllables' ? [entry.target] : [])]))],
+      words: [...new Set(eligible.filter(entry => islandTargetDomain(entry.target) === 'words').map(entry => entry.target))] },
   };
+}
+
+// Authored word labels are a closed list. Sound-only targets stay syllables;
+// this classification only records served content, never learning success.
+function islandTargetDomain(target) {
+  if (target.length === 1) return 'letters';
+  return ['nane', 'anne', 'lale', 'et', 'su', 'elma', 'at', 'el', 'saat', 'arı'].includes(target) ? 'words' : 'syllables';
 }
 
 export function deriveIslandWorld(completed = []) {

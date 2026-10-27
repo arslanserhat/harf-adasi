@@ -4,11 +4,33 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 // Import the unchanged browser ES module without adding package-wide ESM mode.
-const source = fs.readFileSync(path.join(__dirname, '..', 'src', 'adventures.js'), 'utf8');
-const api = import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
+const { modelURL } = require('./model-loader.cjs');
+const api = import(modelURL('adventures.js'));
+const selectionAPI = import(modelURL('content-selection.js'));
 const alphabet = 'a b c ç d e f g ğ h ı i j k l m n o ö p r s ş t u ü v y z'.split(' ');
 const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'public', 'audio', 'manifest.json'), 'utf8'));
 const normalize = text => text.normalize('NFC').toLocaleLowerCase('tr-TR').trim();
+
+test('served short stories cover the finite pool before repeating even without a completion', async () => {
+  const { chooseAdventure } = await api;
+  const { normalizeSelectionState, recordContentExposure } = await selectionAPI;
+  let selection = normalizeSelectionState(null);
+  const seen = [];
+  for (let index = 0; index < 9; index++) {
+    const adventure = chooseAdventure(alphabet, '', selection);
+    assert.equal(seen.includes(adventure.key), false, 'abandoning a served story cannot restart a two-story loop');
+    seen.push(adventure.key);
+    selection = recordContentExposure(selection, { id: `served-story-${index}`, domain: 'activities',
+      items: [adventure.contentActivity], pool: adventure.contentPools.activities });
+    selection = normalizeSelectionState(JSON.parse(JSON.stringify(selection)));
+  }
+  assert.equal(chooseAdventure(alphabet, '', selection).key, seen[0], 'the finite pool deliberately wraps after coverage');
+  const fallback = chooseAdventure(['ı'], '', selection);
+  assert.match(fallback.contentActivity, /^[a-z0-9_.:-]+$/iu, 'Turkish fallback letters have a persistent ASCII activity identity');
+  const recorded = recordContentExposure(selection, { id: 'served-single-letter', domain: 'activities',
+    items: [fallback.contentActivity], pool: fallback.contentPools.activities });
+  assert.ok(recorded.domains.activities.items[fallback.contentActivity]);
+});
 
 function checkTargets(adventure, known) {
   assert.equal(adventure.steps.length, 3);

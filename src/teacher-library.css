@@ -7,3 +7,5 @@
 
 .standard-library>summary{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:48px;padding:13px 16px;border:1px solid #d7dfcd;border-radius:14px;background:#f5f6eb;color:#45634c;cursor:pointer;list-style:none;font-size:17px;font-weight:850;touch-action:manipulation}.standard-library>summary::-webkit-details-marker{display:none}.standard-library>summary:after{content:"+";font-size:24px;line-height:1}.standard-library[open]>summary:after{content:"−"}.standard-library>summary:focus-visible{outline:3px solid #ee9c58;outline-offset:3px}.standard-library>p{margin:15px 3px 18px}
 .read-options .choice:has(.teacher-reading-meaning){min-width:150px;max-width:280px;flex:1 1 160px;padding:15px;white-space:normal}.read-options .choice .teacher-reading-meaning{display:block;font-size:16px;line-height:1.5}
+
+.teacher-library-journey{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.teacher-library .grid.letters{grid-template-columns:repeat(auto-fit,minmax(72px,1fr))}.teacher-library .grid.letters .item{min-height:104px}.teacher-library .grid.letters .item b{font-size:38px}

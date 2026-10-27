@@ -1,3 +1,6 @@
+import { normalizeSelectionState, orderContentPool } from './content-selection.js';
+import { normalizeTeacherLetters, normalizeTeacherSyllables, teacherContentFromList } from './teacher-content.js';
+
 // Learning observations are intentionally separate from stickers/completions.
 // The spacing rules below are adjustable product rules, not a diagnostic test.
 export const ALPHABET = 'a b c ç d e f g ğ h ı i j k l m n o ö p r s ş t u ü v y z'.split(' ');
@@ -88,7 +91,7 @@ export function parseWordList(value) {
 export function createLearningState(now = Date.now()) {
   return {
     version: 1, updatedAt: stamp(now),
-    lists: [{ id: 'starter', title: 'İlk kelimelerim', updatedAt: stamp(now), words: STARTER_WORDS.map(word => ({ ...word, parts: [...word.parts] })) }],
+    lists: [{ id: 'starter', title: 'İlk kelimelerim', updatedAt: stamp(now), letters: [], syllables: [], words: STARTER_WORDS.map(word => ({ ...word, parts: [...word.parts] })) }],
     activeListId: 'starter', events: [], progress: Object.create(null), session: null,
   };
 }
@@ -202,7 +205,8 @@ export function normalizeLearningState(value, now = Date.now()) {
       words.push(word); texts.add(word.text); totalWords++;
     }
     ids.add(source.id);
-    lists.push({ id: source.id, title: cleanText(source.title, 80) || 'Kelime listem', updatedAt: stamp(source.updatedAt), words });
+    lists.push({ id: source.id, title: cleanText(source.title, 80) || 'Kelime listem', updatedAt: stamp(source.updatedAt),
+      letters: normalizeTeacherLetters(source.letters), syllables: normalizeTeacherSyllables(source.syllables), words });
   }
   if (!lists.length) lists.push(...createLearningState(now).lists);
   const eventsById = new Map();
@@ -245,18 +249,28 @@ export function getEligibleWords(value, letters) {
   return { eligible, blocked };
 }
 
+export function getTeacherContent(value, letters) {
+  const state = normalizeLearningState(value);
+  const list = state.lists.find(item => item.id === state.activeListId) || state.lists[0];
+  return teacherContentFromList(list, letters);
+}
+
 /** Balance vocabulary coverage with spaced review. A review may occupy one
  * slot, while the other goes to the least-practised eligible word. History
  * contains completed target words, never distractors or animation progress. */
-export function orderPracticeWords(state, pool, { now = Date.now(), runs = [] } = {}) {
+export function orderPracticeWords(state, pool, { now = Date.now(), runs = [], selection } = {}) {
   const history = Array.isArray(runs) ? runs : [];
   const latest = history.at(-1);
   const recentTargets = new Set(Array.isArray(latest?.wordTexts) ? latest.wordTexts : []);
+  const ledger = selection === undefined ? null : normalizeSelectionState(selection);
+  const ordered = ledger ? orderContentPool('words', pool.map(word => word.text), ledger) : [];
+  const bagOrder = new Map(ordered.map((word, index) => [word, index]));
   const entries = pool.map((word, index) => {
     const progress = Object.values(state.progress?.[word.text] || {}).filter(item => item?.attempts > 0);
     const appearances = history.map((run, order) => ({ run, order }))
       .filter(({ run }) => Array.isArray(run.wordTexts) && run.wordTexts.includes(word.text));
-    const lastAt = Math.max(0, ...progress.map(item => item.lastAt || 0), ...appearances.map(({ run }) => Number(run.completedAt) || 0));
+    const lastAt = Math.max(0, ...progress.map(item => item.lastAt || 0), ...appearances.map(({ run }) => Number(run.completedAt) || 0),
+      ledger?.domains.words.items[word.text]?.lastAt || 0);
     const exposure = Math.max(appearances.length, progress.length ? 1 : 0);
     const dueAt = Math.min(Infinity, ...progress.filter(item => item.nextDueAt > 0 && item.nextDueAt <= now).map(item => item.nextDueAt));
     const weak = progress.some(item => item.recent?.at(-1) !== 2);
@@ -266,8 +280,9 @@ export function orderPracticeWords(state, pool, { now = Date.now(), runs = [] } 
     const review = !cooling && !recentTargets.has(word.text) && (Number.isFinite(dueAt) || weak);
     return { word, index, lastAt, exposure, dueAt, review, recent: recentTargets.has(word.text), lastOrder: appearances.at(-1)?.order ?? -1 };
   });
-  const balanced = [...entries].sort((a, b) => a.exposure - b.exposure || Number(a.recent) - Number(b.recent)
-    || a.lastAt - b.lastAt || a.lastOrder - b.lastOrder || a.index - b.index);
+  const balanced = [...entries].sort((a, b) => ledger ? bagOrder.get(a.word.text) - bagOrder.get(b.word.text)
+    : a.exposure - b.exposure || Number(a.recent) - Number(b.recent)
+      || a.lastAt - b.lastAt || a.lastOrder - b.lastOrder || a.index - b.index);
   const review = entries.filter(item => item.review).sort((a, b) => a.dueAt - b.dueAt || a.exposure - b.exposure || a.lastAt - b.lastAt || a.index - b.index)[0];
   const first = review || balanced[0];
   if (!first) return [];
@@ -351,7 +366,7 @@ export function planSession(value, letters, now = Date.now(), options = {}) {
   if (!eligible.length) return plan;
   const lastAt = word => Math.max(0, ...Object.values(state.progress[word.text] || {}).map(progress => progress.lastAt));
   const due = word => Object.values(state.progress[word.text] || {}).some(progress => progress.nextDueAt > 0 && progress.nextDueAt <= now);
-  const ranked = orderPracticeWords(state, eligible, { now });
+  const ranked = orderPracticeWords(state, eligible, { now, selection: options.selection });
   const focusScore = word => Math.max(0, ...focusTokens.map(token => {
     if (word.text === token) return 100;
     if (word.parts.includes(token)) return 70;

@@ -2,10 +2,9 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const directory = path.resolve(__dirname, '..', 'src');
-const learningURL = `data:text/javascript;base64,${Buffer.from(fs.readFileSync(path.join(directory, 'learning-model.js'), 'utf8')).toString('base64')}`;
-const questSource = fs.readFileSync(path.join(directory, 'quest-model.js'), 'utf8').replace("'./learning-model.js'", JSON.stringify(learningURL));
-const questAPI = import(`data:text/javascript;base64,${Buffer.from(questSource).toString('base64')}`);
+const { modelURL } = require('./model-loader.cjs');
+const learningURL = modelURL('learning-model.js');
+const questAPI = import(modelURL('quest-model.js'));
 const learningAPI = import(learningURL);
 const NOW = Date.UTC(2026, 9, 26, 12);
 const LETTERS = ['a', 'n', 'e', 't', 'i', 'l'];
@@ -50,15 +49,16 @@ test('each world has a different real six-action circuit and a bounded string-ba
   assert.equal(new Set(fingerprints).size, 6, 'six labels cannot wrap the same sequence of mechanics');
 });
 
-test('teacher syllable edits and repeated letters remain actual separate token occurrences', async () => {
+test('teacher word segmentation stays editable while train targets use valid syllables and repeated letters stay separate', async () => {
   const { buildQuestPlan } = await questAPI;
   const state = await custom([
     { text: 'nane', parts: ['n', 'ane'], meaning: 'Bir bitki.', emoji: '🌿', sentence: 'Anne nane al.' },
     { text: 'anne', parts: ['an', 'ne'], meaning: 'Bir kişinin annesi.', emoji: '👩', sentence: 'Anne nane al.' },
   ]);
   const hece = buildQuestPlan('syllables', { learningState: state, letters: LETTERS });
-  assert.deepEqual(hece.stages[0].tokens, ['n', 'ane']);
+  assert.deepEqual(hece.stages[0].tokens, ['an', 'ne'], 'letter chunks or multi-syllable chunks are not presented as a Turkish syllable');
   const words = buildQuestPlan('words', { learningState: state, letters: LETTERS });
+  assert.deepEqual(words.stages[1].parts, ['n', 'ane'], 'the adult-authored segmentation is retained as word metadata');
   assert.deepEqual(words.stages[1].tokens, ['n', 'a', 'n', 'e']);
   assert.equal(words.stages[1].tokens.filter(token => token === 'n').length, 2);
   assert.equal(words.stages.at(-1).mechanic, 'write');
@@ -147,7 +147,7 @@ test('number quests contain real collect/balance quantities and never masquerade
   assert.equal(plan.available, true);
   assert.equal(plan.stages.length, 6);
   assert.deepEqual(plan.wordTexts, []);
-  assert.ok(plan.stages.every(stage => stage.skill === null && stage.word === '' && stage.quantity >= 2 && stage.quantity <= 6 && stage.target === String(stage.quantity)));
+  assert.ok(plan.stages.every(stage => stage.skill === null && stage.word === '' && stage.quantity >= 0 && stage.quantity <= 10 && stage.target === String(stage.quantity)));
   const balances = plan.stages.filter(stage => stage.mechanic === 'balance');
   assert.ok(balances.some(stage => stage.initialQuantity > stage.quantity));
   assert.ok(balances.some(stage => stage.initialQuantity < stage.quantity));

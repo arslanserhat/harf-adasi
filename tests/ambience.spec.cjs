@@ -25,7 +25,8 @@ async function open(browser, url, viewport) {
   await page.goto(url);
   assert.equal(page.url(), new URL(url).href, 'the requested published/local URL is used without a fallback');
   await page.locator('#ready').filter({ hasText: 'Oyun hazır' }).waitFor();
-  await page.waitForFunction(() => document.querySelectorAll('.home-shell .world-site-pet').length >= 4);
+  await page.waitForFunction(() => document.querySelectorAll('.world-site-pet').length === 6
+    && document.querySelectorAll('body > footer .world-site-pet').length === 4);
   return { context, page, errors };
 }
 
@@ -81,6 +82,9 @@ scenario('six different animals load and remain outside the illustration and con
   });
   assert.deepEqual(new Set(assets.map(asset => asset.species)), new Set(species), 'lion, bird, rabbit, fox, squirrel and turtle are all present');
   assert.equal(assets.length, 6, 'returning to the home page does not duplicate the animal cast');
+  assert.deepEqual(new Set(await page.locator('body > footer .world-site-pet').evaluateAll(pets => pets.map(pet => pet.dataset.species))),
+    new Set(['lion', 'bird', 'squirrel', 'turtle']), 'the former greeting animals share the existing footer perch');
+  assert.equal(await page.locator('.home-kicker-row, .world-pet-perch-home').count(), 0, 'there is no extra animal/greeting row above the island');
   assert.equal(new Set(assets.map(asset => asset.source)).size, 6, 'each species uses its own artwork');
   for (const asset of assets) {
     assert.equal(asset.status, 200, `${asset.species} artwork is actually published`);
@@ -147,7 +151,8 @@ scenario('a task keeps its bird outside the scene and away from controls; writin
 });
 
 scenario('the motion control stops both poses and movement; system reduced motion keeps static animals', async ({ page }) => {
-  const birdSprite = page.locator('.world-pet-perch-home .world-site-pet-bird .world-site-pet-sprite');
+  const birdSprite = page.locator('body > footer .world-pet-perch-footer .world-site-pet-bird .world-site-pet-sprite');
+  await page.locator('body > footer').scrollIntoViewIfNeeded();
   const firstPose = await birdSprite.evaluate(element => getComputedStyle(element).backgroundPosition);
   await page.waitForTimeout(190);
   let laterPose = await birdSprite.evaluate(element => getComputedStyle(element).backgroundPosition);

@@ -1,4 +1,5 @@
-import { ALPHABET, getEligibleWords, normalizeLearningState, orderPracticeWords } from './learning-model.js';
+import { ALPHABET, getEligibleWords, normalizeLearningState, orderPracticeWords, getTeacherContent } from './learning-model.js';
+import { orderContentPool } from './content-selection.js';
 
 /** Authored missions use the teacher's data; this planner never awards progress. */
 export const QUEST_KINDS = Object.freeze([
@@ -79,9 +80,17 @@ function meaningChoices(word, pool) {
     text: entry.meaning || 'Resimli paket', ...(entry.emoji ? { image: entry.emoji } : {}) })), word.text);
 }
 
+function reviewReady(state, value, domain, selection, now, runs) {
+  const progress = Object.values(state.progress?.[value] || {}).filter(item => item?.attempts > 0);
+  if (!progress.length) return false;
+  const lastAt = Math.max(0, selection?.domains?.[domain]?.items?.[value]?.lastAt || 0, ...progress.map(item => item.lastAt || 0));
+  if (lastAt && now - lastAt < 10 * 60000 || runs.at(-1)?.wordTexts?.includes(value)) return false;
+  return progress.some(item => item.nextDueAt > 0 && item.nextDueAt <= now || item.recent?.at(-1) !== 2);
+}
+
 /** Reproducible from its inputs. Animation, elapsed time, and sticker counts
  * cannot change either learning observations or a quest's completion count. */
-export function buildQuestPlan(kind, { learningState, letters = [], history = [], now: clock } = {}) {
+export function buildQuestPlan(kind, { learningState, letters = [], history = [], selection, now: clock } = {}) {
   const meta = Object.hasOwn(QUEST_KIND_BY_ID, kind) ? QUEST_KIND_BY_ID[kind] : null;
   if (!meta) return { id: 'quest-unavailable', kind: String(kind ?? ''), title: 'Bir dünya seçelim', story: '', goal: '', stages: [], available: false, reason: 'Bu oyun dünyası bulunamadı.', wordTexts: [] };
   const selected = new Set((Array.isArray(letters) ? letters : typeof letters === 'string' ? [...letters] : []).map(lower).filter(letter => ALPHABET.includes(letter)));
@@ -93,31 +102,73 @@ export function buildQuestPlan(kind, { learningState, letters = [], history = []
   const rotation = matching.length;
   const { eligible, blocked } = getEligibleWords(state, [...selected]);
   const last = matching.at(-1);
-  const ranked = orderPracticeWords(state, eligible, { now, runs });
-  let pool = ranked;
-  let reason = '';
-  if (kind === 'syllables') pool = pool.filter(word => word.parts.length > 1);
-  if (kind === 'reading') pool = semanticPool(pool);
-  if (kind === 'sentences') pool = pool.filter(word => {
+  const teacherContent = getTeacherContent(state, [...selected]);
+  const teacherLetters = teacherContent.explicitLetters;
+  const letterPool = teacherContent.letters;
+  const explicitSyllables = teacherContent.explicitSyllables;
+  const sentencePool = eligible.filter(word => {
     const tokens = tokensOf(word.sentence);
     return tokens.length >= 2 && tokens.length <= 8 && word.sentence.length <= 160
       && allowedText(word.sentence, selected) && tokens.some(token => lexical(token) === word.text);
   });
-  pool = orderPracticeWords(state, pool, { now, runs });
-  if (kind === 'letters' && !selected.size) reason = 'Fener Atölyesi için önce okulda öğrendiğin harfleri seçelim.';
+  const contentPools = {
+    letters: kind === 'numbers' ? [] : letterPool,
+    syllables: kind === 'numbers' ? [] : [...teacherContent.syllables],
+    words: kind === 'numbers' ? [] : eligible.map(word => word.text),
+    sentences: kind === 'numbers' ? [] : unique(sentencePool.map(word => word.sentence.replace(/\s+/gu, ' '))),
+    numbers: Array.from({ length: 11 }, (_, index) => String(index)),
+  };
+  const ranked = orderPracticeWords(state, eligible, { now, runs, selection });
+  let pool = ranked;
+  let reason = '';
+  if (kind === 'syllables') pool = pool.filter(word => word.parts.length > 1 && word.parts.every(part => contentPools.syllables.includes(part)));
+  if (kind === 'reading') pool = semanticPool(pool);
+  if (kind === 'sentences') {
+    const seen = new Set();
+    pool = pool.filter(word => {
+      const sentence = word.sentence.replace(/\s+/gu, ' ');
+      if (!sentencePool.some(entry => entry.text === word.text) || seen.has(sentence)) return false;
+      seen.add(sentence); return true;
+    });
+  }
+  pool = orderPracticeWords(state, pool, { now, runs, selection });
+  const firstReview = pool[0] && reviewReady(state, pool[0].text, 'words', selection, now, runs) ? pool[0] : null;
+  if (selection && kind === 'syllables' && !explicitSyllables.length) {
+    const syllableOrder = orderContentPool('syllables', contentPools.syllables, selection);
+    const priority = word => Math.min(Infinity, ...word.parts.map(part => syllableOrder.indexOf(part)).filter(index => index >= 0));
+    const originalOrder = new Map(pool.map((word, index) => [word.text, index]));
+    const wordBucket = selection.domains?.words;
+    const served = word => Number(wordBucket?.items?.[word.text]?.round === wordBucket?.round);
+    pool.sort((a, b) => served(a) - served(b) || priority(a) - priority(b) || originalOrder.get(a.text) - originalOrder.get(b.text));
+  }
+  if (selection && kind === 'sentences') {
+    const messageOrder = orderContentPool('sentences', contentPools.sentences, selection);
+    const wordBucket = selection.domains?.words;
+    const served = word => Number(wordBucket?.items?.[word.text]?.round === wordBucket?.round);
+    pool.sort((a, b) => served(a) - served(b)
+      || messageOrder.indexOf(a.sentence.replace(/\s+/gu, ' ')) - messageOrder.indexOf(b.sentence.replace(/\s+/gu, ' ')));
+  }
+  if (firstReview && ['syllables', 'sentences'].includes(kind)) pool = [firstReview, ...pool.filter(word => word !== firstReview)];
+  // Explicit syllables and one-syllable teacher words remain real units; an
+  // unrelated invented word is never required just to enter the train.
+  const unitMode = kind === 'syllables' && contentPools.syllables.length > 0 && (explicitSyllables.length > 0 || !pool.length);
+  if (kind === 'letters' && !letterPool.length) reason = 'Fener Atölyesi için önce okulda öğrendiğin harfleri seçelim.';
   else if (kind === 'reading' && pool.length < 2) reason = 'Orman Dedektifi için öğretmen listesine en az iki farklı resim veya anlam ekleyelim. Bilmediğimiz bir kelimeye anlam uydurmayacağız.';
   else if (kind === 'sentences' && !pool.length) reason = 'Postane için öğretmen listesindeki bir kelimeye, öğrenilen harflerle yazılmış 2–8 kelimelik bir cümle ekleyelim.';
-  else if (kind === 'syllables' && !pool.length) reason = 'Hece Ekspresi için öğretmen listesinde öğrenilen harflerle yazılmış en az iki heceli bir kelime olmalı.';
-  else if (kind !== 'letters' && kind !== 'numbers' && !pool.length) reason = 'Bu dünyaya öğretmen listesindeki kelimelerle gireceğiz. Önce kelimeleri ve okulda öğrenilen harfleri birlikte kontrol edelim.';
+  else if (kind === 'syllables' && !pool.length && !unitMode) reason = 'Hece Ekspresi için öğretmeninin verdiği heceleri veya öğrenilen harflerle yazılmış en az iki heceli kelimeleri ekleyelim.';
+  else if (kind !== 'letters' && kind !== 'numbers' && !pool.length && !unitMode) reason = 'Bu dünyaya öğretmen listesindeki kelimelerle gireceğiz. Önce kelimeleri ve okulda öğrenilen harfleri birlikte kontrol edelim.';
+  if (reason && kind === 'letters' && teacherContent.blockedLetters.length) reason += ` Henüz seçilmeyen okul harfleri: ${teacherContent.blockedLetters.join(', ')}.`;
+  if (reason && kind === 'syllables' && teacherContent.blockedSyllables.length) reason += ` Harflerini henüz açmadığımız heceler: ${teacherContent.blockedSyllables.slice(0, 8).map(unit => `${unit.text} (${unit.missingLetters.join(', ')})`).join('; ')}.`;
   if (reason && blocked.length) reason += ` Henüz açılmayan kelimeler: ${blocked.slice(0, 6).map(word => `${word.text} (${word.missingLetters.join(', ')})`).join('; ')}. Bu harfleri okulda öğrendiğinde ayarlardan seçebilirsin.`;
-  const id = `quest-${kind}-${hash(JSON.stringify(kind === 'numbers' ? { rotation, last: last?.id || '' }
-    : { list: state.activeListId, letters: [...selected].sort(), pool, rotation, last: last?.id || '', progress: state.events.at(-1)?.id || '' }))}`;
-  const plan = { id, kind, title: meta.title, story: meta.story, goal: meta.goal, stages: [], available: !reason, reason, wordTexts: [] };
+  const id = `quest-${kind}-${hash(JSON.stringify(kind === 'numbers' ? { rotation, last: last?.id || '', sequence: selection?.sequence || 0 }
+    : { list: state.activeListId, letters: [...selected].sort(), pool, teacherLetters, explicitSyllables, rotation,
+      sequence: selection?.sequence || 0, last: last?.id || '', progress: state.events.at(-1)?.id || '' }))}`;
+  const plan = { id, kind, title: meta.title, story: meta.story, goal: meta.goal, stages: [], available: !reason, reason, wordTexts: [], focusTexts: [], contentPools };
   if (reason) return plan;
   const first = pool[0], second = pool[1] || first;
   const add = (mechanic, word, skill, prompt, target, details = {}) => {
     const stage = { id: `${id}:${plan.stages.length}`, mechanic, skill, word: word?.text || '', prompt,
-      target: String(target), options: [], tokens: [], parts: [...(word?.parts || [])], model: '', guided: false, ...details };
+      target: String(target), options: [], tokens: [], parts: [...(word?.parts || [])], sentence: word?.sentence || '', itemType: word ? kind === 'letters' ? 'letter' : 'word' : 'number', model: '', guided: false, ...details };
     stage.target = String(stage.target);
     stage.options = choices(stage.options, stage.target);
     stage.options.sort((a, b) => parseInt(hash(`${stage.id}:${a.value}`), 36) - parseInt(hash(`${stage.id}:${b.value}`), 36));
@@ -128,10 +179,14 @@ export function buildQuestPlan(kind, { learningState, letters = [], history = []
   const assemble = (word, parts, skill, prompt, model = '') => add('assemble', word, skill, prompt, parts.join(''), { tokens: [...parts], model, guided: Boolean(model) });
   const message = (word, prompt, model = '') => add('assemble', word, 'sentence', prompt, word.sentence, { tokens: tokensOf(word.sentence), model, guided: Boolean(model) });
   if (kind === 'letters') {
-    const choicesLetters = [...selected];
+    const choicesLetters = [...letterPool];
     const letter = value => ({ text: value, parts: [value] });
-    const letterPool = unique(pool.flatMap(word => [...word.text]));
-    const orderedLetters = orderPracticeWords(state, (letterPool.length ? letterPool : choicesLetters).map(letter), { now, runs });
+    const wordLetters = unique(pool.flatMap(word => [...word.text]));
+    const preferred = unique([...wordLetters.filter(value => choicesLetters.includes(value)), ...choicesLetters]);
+    let orderedLetters = selection ? orderContentPool('letters', preferred, selection).map(letter)
+      : orderPracticeWords(state, preferred.map(letter), { now, runs });
+    const reviewLetter = orderedLetters.find(entry => reviewReady(state, entry.text, 'letters', selection, now, runs));
+    if (reviewLetter) orderedLetters = [reviewLetter, ...orderedLetters.filter(entry => entry !== reviewLetter)];
     const a = orderedLetters[0].text;
     const b = orderedLetters[1]?.text || a;
     const choose = value => choices([value, ...choicesLetters], value);
@@ -141,6 +196,20 @@ export function buildQuestPlan(kind, { learningState, letters = [], history = []
     add('write', letter(b), 'write', 'İkinci tabelayı da kendi elinle hazırlayalım.', b, { model: b, guided: true });
     add('route', letter(a), 'recall', 'İlk tabelaya geri döndük. Başta bulduğun işareti yeniden seç.', a, { options: choose(a) });
     add('write', letter(a), 'write', 'İlk işareti bu kez örneksiz yaz. Bir büyüğünle birlikte bakalım.', a);
+  } else if (kind === 'syllables' && unitMode) {
+    const unitPool = orderContentPool('syllables', contentPools.syllables, selection);
+    const a = unitPool[0], b = unitPool[1] || a;
+    const unitChoices = value => choices([value, ...unitPool], value);
+    const unit = (mechanic, value, prompt, details = {}) => add(mechanic, null, 'syllables', prompt, value,
+      { itemType: 'syllable', unitText: value, parts: [value], ...details });
+    plan.goal = unitPool.length > 1 ? 'Öğretmeninin iki hecesiyle yükleri hazırla, ilkini yeniden hatırla.' : 'Öğretmeninin hecesini farklı görevlerde kullan.';
+    unit('find', a, 'Öğretmeninin ilk hecesini dinle ve doğru yükü bul.', { options: unitChoices(a) });
+    unit('assemble', a, 'İlk heceyi kendi harflerinden kur; yük etiketini hazırlayalım.', { tokens: [...a] });
+    unit('deliver', a, 'Hazırladığın heceyle aynı etiketi taşıyan durağı seç.', { options: unitChoices(a) });
+    unit('find', b, b !== a ? 'Başka bir hece geldi. Dinle ve doğru yükü seç.' : 'Aynı heceyi bu kez yeni yükünde bul. Dinleyip seçebilirsin.', { options: unitChoices(b) });
+    unit('assemble', b, b !== a ? 'İkinci hecenin harflerini de sıraya yerleştir.' : 'Aynı heceyi başka bir vagonda harflerinden yeniden kur.', { tokens: [...b] });
+    unit('route', a, 'İlk heceye yeniden dön. Doğru duraktan yükünü gönder.', { options: unitChoices(a) });
+    plan.focusTexts = unique([a, b]);
   } else if (kind === 'syllables') {
     assemble(first, first.parts, 'syllables', 'İlk yükün hecelerini vagonlara sırayla yerleştir.');
     findWord('deliver', first, 'build', 'Vagonlar birleşti. Yükünün adını taşıyan durağı seç.');
@@ -173,22 +242,54 @@ export function buildQuestPlan(kind, { learningState, letters = [], history = []
     message(first, 'İlk mesajı bu kez örneksiz yeniden kur.');
     add('deliver', first, 'sentence', 'İlk mektubunun doğru yazılmış mesajını bul ve postacıya teslim et.', first.sentence, { options: sentenceChoices(first, pool) });
   } else if (kind === 'numbers') {
-    const a = 2 + rotation % 3, b = a + 2;
-    const countChoices = quantity => choices([String(quantity), String(quantity + 1), String(Math.max(0, quantity - 1))], String(quantity));
+    const numericOrder = selection ? orderContentPool('numbers', contentPools.numbers, selection)
+      : [...contentPools.numbers.slice(2), ...contentPools.numbers.slice(0, 2)].slice(rotation * 2 % 11).concat([...contentPools.numbers.slice(2), ...contentPools.numbers.slice(0, 2)].slice(0, rotation * 2 % 11));
+    const a = Number(numericOrder[0]), b = Number(numericOrder[1] ?? numericOrder[0]);
+    const countChoices = quantity => choices([String(quantity), ...contentPools.numbers.filter(value => Number(value) !== quantity)
+      .sort((left, right) => Math.abs(Number(left) - quantity) - Math.abs(Number(right) - quantity))], String(quantity));
+    const initialA = a <= 8 ? a + 2 : a - 2;
+    const initialB = b > 0 ? b - 1 : 1;
     add('collect', null, null, `İlk şenlik sepetine ${a} tane nesne yerleştir. Tek tek sayabilirsin.`, a, { quantity: a, initialQuantity: 0 });
     add('deliver', null, null, 'Doldurduğun ilk sepetin sayı etiketini seçip teslim et.', a, { quantity: a, options: countChoices(a) });
-    add('balance', null, null, `İlk sepete biraz fazla konmuş. ${a} tane kalacak şekilde düzenle.`, a, { quantity: a, initialQuantity: a + 2 });
+    add('balance', null, null, initialA > a ? `İlk sepete biraz fazla konmuş. ${a} tane kalacak şekilde düzenle.` : `İlk sepette eksik var. ${a} tane olana kadar tamamla.`, a, { quantity: a, initialQuantity: initialA });
     add('collect', null, null, `Şimdi başka bir sepeti ${b} tane nesneyle dolduralım.`, b, { quantity: b, initialQuantity: 0 });
-    add('balance', null, null, `İkinci sepette eksik var. ${b} tane olana kadar tamamla.`, b, { quantity: b, initialQuantity: b - 1 });
+    add('balance', null, null, initialB < b ? `İkinci sepette eksik var. ${b} tane olana kadar tamamla.` : 'İkinci sepette hiç nesne kalmamalı. Fazla nesneyi geri koy.', b, { quantity: b, initialQuantity: initialB });
     add('route', null, null, 'İlk sepetin miktarını hatırla. Doğru sayı tabelasından şenliğe geç.', a, { quantity: a, options: countChoices(a) });
   }
   plan.wordTexts = unique(plan.stages.map(stage => stage.word).filter(Boolean));
+  if (!plan.focusTexts.length) plan.focusTexts = kind === 'numbers' ? unique(plan.stages.map(stage => stage.target)) : [...plan.wordTexts];
   return plan;
+}
+
+/** Only served targets enter the selection ledger; alternatives never do.
+ * Older saved plans without contentPools remain resumable without inventing
+ * a historical exposure from an edited teacher list. */
+export function getQuestContentExposures(plan, stage) {
+  if (!plan || !stage || !plan.contentPools) return [];
+  const observations = [];
+  const add = (domain, values) => {
+    const pool = Array.isArray(plan.contentPools[domain]) ? plan.contentPools[domain].filter(value => typeof value === 'string').slice(0, 4096) : [];
+    const canonical = value => domain === 'sentences' ? text(value).replace(/\s+/gu, ' ') : String(value ?? '');
+    const items = unique(values.map(canonical).filter(value => pool.includes(value)));
+    if (items.length) observations.push({ id: stage.id, domain, items, pool: [...pool] });
+  };
+  if (plan.kind === 'numbers') add('numbers', [stage.target]);
+  else if (plan.kind === 'letters') add('letters', [stage.word || stage.target]);
+  else {
+    if (stage.word) add('words', [stage.word]);
+    if (stage.itemType === 'syllable') add('syllables', [stage.unitText || stage.target]);
+    else if (plan.kind === 'syllables') {
+      if (stage.mechanic === 'assemble' && stage.skill === 'syllables' || stage.mechanic === 'assemble' && stage.skill === 'recall') add('syllables', stage.parts || stage.tokens || []);
+      else if (stage.skill === 'syllables') add('syllables', [stage.target]);
+    }
+    if (plan.kind === 'sentences' && stage.sentence) add('sentences', [stage.sentence]);
+  }
+  return observations;
 }
 
 /** Choose an available next world from observed needs, without pretending that
  * numeracy practice supplies reading evidence. Clock is explicit for tests. */
-export function recommendQuestKind({ learningState, letters = [], history = [], excludeKind, now: clock } = {}) {
+export function recommendQuestKind({ learningState, letters = [], history = [], selection, excludeKind, now: clock } = {}) {
   const now = Number.isFinite(clock) ? Math.max(0, clock)
     : Number.isFinite(learningState?.updatedAt) ? Math.max(0, learningState.updatedAt) : 0;
   const state = normalizeLearningState(learningState, now);
@@ -199,7 +300,7 @@ export function recommendQuestKind({ learningState, letters = [], history = [], 
   const runs = completedRuns(history);
   const summaries = getQuestSummaries(runs);
   const lastKind = KINDS.has(excludeKind) ? excludeKind : runs.at(-1)?.kind;
-  let candidates = QUEST_KINDS.filter(meta => buildQuestPlan(meta.id, { learningState: state, letters: [...selected], history, now }).available);
+  let candidates = QUEST_KINDS.filter(meta => buildQuestPlan(meta.id, { learningState: state, letters: [...selected], history, selection, now }).available);
   const alternatives = candidates.filter(meta => meta.id !== lastKind);
   if (alternatives.length) candidates = alternatives;
   const skillWorlds = (skill, word) => {

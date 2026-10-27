@@ -95,6 +95,63 @@ class LearningStateTest extends TestCase
         $this->assertDatabaseCount('learning_states', 1);
     }
 
+    public function test_independent_teacher_letters_and_syllables_round_trip_without_vocabulary_words(): void
+    {
+        $state = $this->snapshot();
+        $state['lists'][0]['words'] = [];
+        $state['lists'][0]['letters'] = ['a', 'n', 'e', 'ı', 'i', 'ş', 'ğ'];
+        $state['lists'][0]['syllables'] = ['na', 'ne', 'an', 'in', 'let', 'tren', 'ğaç'];
+
+        $this->saveState($state)->assertCreated()
+            ->assertJsonPath('state.lists.0.words', [])
+            ->assertJsonPath('state.lists.0.letters.3', 'ı')
+            ->assertJsonPath('state.lists.0.syllables.4', 'let');
+        $this->getJson('/api/learning')->assertOk()
+            ->assertJsonPath('state.lists.0.syllables', $state['lists'][0]['syllables']);
+        $this->assertSame($state, LearningState::query()->first()->payload);
+    }
+
+    public function test_invalid_or_duplicate_teacher_units_are_rejected_without_creating_state(): void
+    {
+        foreach (['n', 'tr', 'anne', 'saat', 'bma', 'xan'] as $invalid) {
+            $state = $this->snapshot();
+            $state['lists'][0]['syllables'] = [$invalid];
+            $this->saveState($state)->assertUnprocessable()
+                ->assertJsonValidationErrors('state.lists.0.syllables.0');
+        }
+        $state = $this->snapshot();
+        $state['lists'][0]['letters'] = ['an'];
+        $this->saveState($state)->assertUnprocessable()
+            ->assertJsonValidationErrors('state.lists.0.letters.0');
+        $state['lists'][0]['letters'] = ['a', 'a'];
+        $state['lists'][0]['syllables'] = ['na', 'na'];
+        $this->saveState($state)->assertUnprocessable()
+            ->assertJsonValidationErrors(['state.lists.0.letters.1', 'state.lists.0.syllables.1']);
+        $this->assertDatabaseCount('learning_states', 0);
+    }
+
+    public function test_teacher_unit_limits_and_separate_list_boundaries_are_enforced(): void
+    {
+        $state = $this->snapshot();
+        $state['lists'][0]['letters'] = ['a'];
+        $state['lists'][0]['syllables'] = ['na'];
+        $state['lists'][] = [
+            'id' => 'teacher-week-2', 'title' => 'İkinci hafta', 'updatedAt' => $state['updatedAt'],
+            'words' => [], 'letters' => ['a'], 'syllables' => ['na'],
+        ];
+        $this->saveState($state)->assertCreated();
+        $tooMany = [];
+        foreach (mb_str_split('bcçdfghjklmnprsştvyz') as $consonant) {
+            foreach (mb_str_split('aeıioöuü') as $vowel) {
+                $tooMany[] = $consonant.$vowel;
+            }
+        }
+        $state['lists'][0]['syllables'] = array_slice($tooMany, 0, 101);
+        $this->saveState($state, 1)->assertUnprocessable()
+            ->assertJsonValidationErrors('state.lists.0.syllables');
+        $this->getJson('/api/learning')->assertOk()->assertJsonPath('revision', 1);
+    }
+
     public function test_snapshot_and_reset_are_scoped_to_the_server_session(): void
     {
         $first = (string) Str::uuid();

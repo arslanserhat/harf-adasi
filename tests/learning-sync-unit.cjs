@@ -3,10 +3,9 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const encode = source => `data:text/javascript;base64,${Buffer.from(source).toString('base64')}`;
-const modelUrl = encode(fs.readFileSync(path.join(__dirname, '../src/learning-model.js'), 'utf8'));
-const storeUrl = encode(fs.readFileSync(path.join(__dirname, '../src/learning-sync.js'), 'utf8')
-  .replace("'./learning-model.js'", JSON.stringify(modelUrl)));
+const { modelURL } = require('./model-loader.cjs');
+const modelUrl = modelURL('learning-model.js');
+const storeUrl = modelURL('learning-sync.js');
 const api = Promise.all([import(modelUrl), import(storeUrl)]);
 const response = (status, data) => ({ status, ok: status >= 200 && status < 300, json: async () => data });
 const defer = () => { let resolve; const promise = new Promise(done => { resolve = done; }); return { promise, resolve }; };

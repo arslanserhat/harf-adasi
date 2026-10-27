@@ -3,11 +3,36 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const source = fs.readFileSync(path.join(__dirname, '..', 'src', 'island-model.js'), 'utf8');
-const api = import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
+const { modelURL } = require('./model-loader.cjs');
+const api = import(modelURL('island-model.js'));
+const selectionAPI = import(modelURL('content-selection.js'));
 const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'public', 'audio', 'manifest.json'), 'utf8'));
 const alphabet = 'a b c ç d e f g ğ h ı i j k l m n o ö p r s ş t u ü v y z'.split(' ');
 const firstLetters = ['a', 'n', 'e', 't', 'i', 'l'];
+
+test('served island missions use a persistent finite activity bag without awarding completion', async () => {
+  const { getIslandMission, isIslandCompletion, deriveIslandWorld } = await api;
+  const { normalizeSelectionState, recordContentExposure } = await selectionAPI;
+  let selection = normalizeSelectionState(null);
+  for (const zone of ['care', 'train', 'treasure']) {
+    const seen = [];
+    for (let index = 0; index < 6; index++) {
+      const mission = getIslandMission(zone, alphabet, [], selection);
+      assert.equal(seen.includes(mission.key), false, 'actual served missions rotate without relying on a reward');
+      seen.push(mission.key);
+      assert.equal(isIslandCompletion(`island:${mission.key}`), true, 'the existing authored completion validator stays authoritative');
+      selection = recordContentExposure(selection, { id: `served-${zone}-${index}`, domain: 'activities',
+        items: [mission.contentActivity], pool: mission.contentPools.activities });
+      selection = normalizeSelectionState(JSON.parse(JSON.stringify(selection)));
+    }
+    assert.equal(getIslandMission(zone, alphabet, [], selection).key, seen[0], 'the finite subpool wraps after all six choices');
+  }
+  assert.equal(deriveIslandWorld([]).total, 0, 'selection exposure alone cannot create an island reward');
+  const fallback = getIslandMission('care', ['ğ'], [], selection);
+  const recorded = recordContentExposure(selection, { id: 'served-turkish-letter', domain: 'activities',
+    items: [fallback.contentActivity], pool: fallback.contentPools.activities });
+  assert.ok(recorded.domains.activities.items[fallback.contentActivity], 'Turkish fallback targets persist without changing completion keys');
+});
 
 function checkMission(mission, known) {
   assert.ok(mission);

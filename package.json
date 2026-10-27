@@ -1,6 +1,6 @@
 {
   "name": "harf-adasi",
-  "version": "5.4.1",
+  "version": "5.5.0",
   "private": true,
   "description": "Harf Adası Laravel öğrenme uygulaması",
   "scripts": {
@@ -8,10 +8,13 @@
     "build": "vite build",
     "build:laravel": "vite build --mode laravel",
     "test": "npm run build && npm run test:unit && node tests/learning.spec.cjs && node tests/island.spec.cjs && node tests/tablet.spec.cjs",
-    "test:unit": "node tests/audio-unit.cjs && node tests/adventures-unit.cjs && node tests/island-unit.cjs && node tests/learning-unit.cjs && node tests/learning-sync-unit.cjs && node tests/story-unit.cjs && node tests/quest-model-unit.cjs",
+    "test:unit": "node tests/audio-unit.cjs && node tests/adventures-unit.cjs && node tests/island-unit.cjs && node tests/learning-unit.cjs && node tests/learning-sync-unit.cjs && node tests/story-unit.cjs && node tests/quest-model-unit.cjs && node tests/content-selection-unit.cjs && node tests/teacher-content-unit.cjs && node tests/content-plans-unit.cjs && node tests/child-profile-unit.cjs",
     "test:learning": "npm run build && node tests/learning.spec.cjs",
     "test:mobile": "npm run build && node tests/mobile.spec.cjs",
-    "dev:static": "vite --host 0.0.0.0"
+    "dev:static": "vite --host 0.0.0.0",
+    "test:content": "npm run build && node tests/content-integration.spec.cjs && node tests/teacher-vocabulary.spec.cjs && node tests/content-migration.spec.cjs",
+    "test:profile": "npm run build && node tests/child-profile.spec.cjs",
+    "test:header": "npm run build && node tests/header-layout.spec.cjs && node tests/ambience.spec.cjs"
   },
   "devDependencies": {
     "laravel-vite-plugin": "^2.0.0",

@@ -168,13 +168,13 @@ async function openStandardLibrary(page) {
 async function tapStandard(page, action, attrs = '') {
   await dismissCelebration(page);
   const standard = await openStandardLibrary(page);
-  assert.ok(standard, 'legacy word/sentence selection stays inside the standard library');
+  assert.ok(standard, 'legacy selection stays inside the standard library');
   await standard.locator(`[data-do="${action}"]${attrs}`).first().tap();
 }
 async function letter(page, value) {
   await catalog(page, 'letters');
   await tap(page, 'tab', `[data-key="caps"][data-value="${value === value.toLocaleUpperCase('tr-TR') ? 'upper' : 'lower'}"]`);
-  await tap(page, 'letter', `[data-letter="${value}"]`);
+  await tapStandard(page, 'letter', `[data-letter="${value}"]`);
 }
 async function match(page, value) {
   const target = value ?? await page.locator('.target').innerText();

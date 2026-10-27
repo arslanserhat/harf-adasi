@@ -16,8 +16,6 @@
   body > main { padding: 15px 13px 28px; min-width: 0; }
   body > footer { padding: 15px 16px; font-size: 12px; line-height: 1.6; }
   body > footer button { min-height: 44px; font-size: 12px; }
-  .home-shell .home-kicker-row { margin: 0 3px 13px; }
-  .home-shell .home-greeting { font-size: 13px; }
   .home-shell .home-island-hero { border-radius: 23px; }
   .home-shell .home-hero-copy { padding: 22px 22px 10px; }
   .home-shell .home-hero-copy > .home-eyebrow { margin-bottom: 12px; font-size: 9px; letter-spacing: 1px; }

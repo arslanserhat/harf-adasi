@@ -37,6 +37,10 @@ jobs:
           node tests/quest-model-unit.cjs
           node tests/learning-sync-unit.cjs
           node tests/story-unit.cjs
+          node tests/content-selection-unit.cjs
+          node tests/teacher-content-unit.cjs
+          node tests/content-plans-unit.cjs
+          node tests/child-profile-unit.cjs
           npm run build
           test ! -f dist/index.php
       - uses: actions/configure-pages@v5

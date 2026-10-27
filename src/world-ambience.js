@@ -4,7 +4,7 @@ import './world-ambience.css';
 // the coordinates of a letter/card a child is actively trying to select.
 const MAX_PARTICLES = 20;
 const REVEAL_TARGETS = '.home-game-card, .home-parent-tile, .home-explore-card, .home-section-heading, .learn-journey-card, .learn-preview-grid > div, .learn-panel, .island-continuation';
-const PET_HOSTS = '.home-kicker-row, .home-section-heading, body > footer, .learning[data-screen="task"] > .learn-nav';
+const PET_HOSTS = '.home-section-heading, body > footer, .learning[data-screen="task"] > .learn-nav';
 const PET_ASSETS = {
   lion: 'pet-lion.webp', rabbit: 'pet-rabbit.webp', fox: 'pet-fox.webp',
   squirrel: 'pet-squirrel.webp', turtle: 'pet-turtle.webp', bird: 'pirpir-flight.webp',
@@ -105,11 +105,11 @@ export function mountWorldAmbience({ root = document.body } = {}) {
     for (const host of hosts) {
       if (host.closest('.home-island-art, .home-island-hero, .story-scene-stage, .story-scene')) continue;
       if (petPerches.has(host) || [...host.children].some(child => child.classList.contains('world-pet-perch'))) continue;
-      const kind = host.matches('.home-kicker-row') ? 'home' : host.matches('body > footer') ? 'footer' : host.matches('.learn-nav') ? 'nav' : 'section';
+      const kind = host.matches('body > footer') ? 'footer' : host.matches('.learn-nav') ? 'nav' : 'section';
       const home = host.closest('.home-shell');
       if (kind === 'section' && !home) continue;
       const headingIndex = kind === 'section' ? [...home.querySelectorAll('.home-section-heading')].indexOf(host) : 0;
-      const species = kind === 'home' ? ['lion', 'bird'] : kind === 'footer' ? ['squirrel', 'turtle'] : kind === 'nav' ? ['bird'] : [headingIndex % 2 ? 'fox' : 'rabbit'];
+      const species = kind === 'footer' ? ['lion', 'squirrel', 'turtle', 'bird'] : kind === 'nav' ? ['bird'] : [headingIndex % 2 ? 'fox' : 'rabbit'];
       const perch = document.createElement('span');
       perch.className = `world-pet-perch world-pet-perch-${kind}`;
       perch.dataset.worldAmbienceOwned = 'true';

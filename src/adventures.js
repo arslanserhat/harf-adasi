@@ -1,3 +1,5 @@
+import { orderContentPool } from './content-selection.js';
+
 const ALPHABET = 'a b c ç d e f g ğ h ı i j k l m n o ö p r s ş t u ü v y z'.split(' ');
 const BUILD_PROMPT = 'Kartlara sırayla dokun, boşlukları doldur.';
 
@@ -84,6 +86,14 @@ function normalizeLetter(value) {
   return ALPHABET.includes(letter) ? letter : '';
 }
 
+export function getAdventureActivityKey(key) {
+  if (STORIES.some(story => story.key === key)) return `adventure:${key}`;
+  if (typeof key !== 'string' || !key.startsWith('harf-kesfi-')) return '';
+  const letters = [...key.slice('harf-kesfi-'.length)];
+  return letters.length && letters.every(letter => ALPHABET.includes(letter))
+    ? `adventure:letters-${letters.map(letter => letter.codePointAt(0).toString(36)).join('-')}` : '';
+}
+
 function matchStep(letter, known) {
   return {
     kind: 'match', text: letter, digit: false,
@@ -105,7 +115,7 @@ function buildStep(text, tokens, emoji = '', promptSpeech = text) {
  * An empty/invalid selection returns null so a caller can request a selection
  * instead of silently introducing a letter the child has not studied.
  */
-export function chooseAdventure(letters, recent = '') {
+export function chooseAdventure(letters, recent = '', selection) {
   const input = Array.isArray(letters) ? letters : typeof letters === 'string' ? [...letters] : [];
   const selected = new Set(input.map(normalizeLetter).filter(Boolean));
   const known = ALPHABET.filter(letter => selected.has(letter));
@@ -121,7 +131,9 @@ export function chooseAdventure(letters, recent = '') {
     const different = eligible.filter(story => story.focus !== last);
     const choices = different.length ? different : eligible;
     const seed = [...known.join('') + (last || previousKey)].reduce((sum, letter) => sum + letter.codePointAt(0), 0);
-    const story = previousIndex >= 0
+    const activityPool = eligible.map(story => getAdventureActivityKey(story.key));
+    const nextActivity = selection === undefined ? '' : orderContentPool('activities', activityPool, selection)[0];
+    const story = nextActivity ? eligible.find(story => getAdventureActivityKey(story.key) === nextActivity) : previousIndex >= 0
       ? eligible[(previousIndex + 1) % eligible.length]
       : choices[seed % choices.length];
     const steps = [
@@ -135,17 +147,23 @@ export function chooseAdventure(letters, recent = '') {
     return {
       key: story.key, title: story.title, story: story.story, goal: story.goal,
       ending: story.ending, emoji: story.emoji,
+      contentActivity: getAdventureActivityKey(story.key),
+      contentPools: { activities: activityPool, letters: known,
+        syllables: [...new Set(eligible.map(entry => entry.syllable))], words: [...new Set(eligible.map(entry => entry.word))] },
       steps: steps.map((step, index) => ({ ...step, title: titles[index], sub: subtitles[index], successText: story.success[index] })),
     };
   }
 
-  const first = known.find(letter => letter !== last) || known[0];
+  const first = selection === undefined ? known.find(letter => letter !== last) || known[0]
+    : orderContentPool('letters', known, selection)[0];
   const second = known.find(letter => letter !== first) || first;
   return {
     key: `harf-kesfi-${known.join('')}`, title: 'Üç küçük harf görevi',
     story: 'Alparslan üç küçük kart hazırlıyor. Bildiğin harfleri bulup kendi kartını tamamlayalım.',
     goal: 'Seçtiğin harflerle üç kart görevini tamamla.',
     ending: 'Alparslan ile bildiğin harflerden üç küçük kart hazırladın!', emoji: '⭐',
+    letterOnly: true, contentActivity: getAdventureActivityKey(`harf-kesfi-${known.join('')}`),
+    contentPools: { activities: [getAdventureActivityKey(`harf-kesfi-${known.join('')}`)], letters: known, syllables: [], words: [] },
     steps: [matchStep(first, known), buildStep(first, [first]), matchStep(second, known)].map((step, index) => ({
       ...step, successText: ['İlk harf kartını buldun! İki küçük görevimiz kaldı.', 'Harf kartını yaptın! Son kartı da birlikte bulalım.', 'Son harf kartı da hazır! Üç küçük görevi tamamladın.'][index],
     })),

@@ -1,4 +1,4 @@
-import { buildQuestPlan, recommendQuestKind, QUEST_KINDS } from './quest-model.js';
+import { buildQuestPlan, recommendQuestKind, getQuestContentExposures, QUEST_KINDS } from './quest-model.js';
 import { createQuestScene } from './quest-scenes.js';
 import { illustration } from './visuals.js';
 import { mountWritingGuard } from './writing.js';
@@ -35,6 +35,7 @@ function historyOf(source) {
 /** A quest records learning only after an actual answer or adult review. */
 export function createQuests({
   root, getLearningState, getLetters, getHistory = () => ({}), saveHistory = () => {},
+  getContentState = () => null, onContentExposure = () => {},
   onAttempt = () => {}, onComplete = () => {}, onHome = () => {}, onParent = () => {},
   speak = async () => false, stopSpeech = () => {}, isMuted = () => false,
   onToggleSound = () => {}, playEffect = () => {}, getLetterPaths = () => [],
@@ -50,10 +51,13 @@ export function createQuests({
   function signature() {
     const state = getLearningState();
     const list = state?.lists?.find(item => item.id === state.activeListId) || state?.lists?.[0];
-    return JSON.stringify([getLetters(), list?.id, list?.words || []]);
+    const base = [getLetters(), list?.id, list?.words || []];
+    // Preserve old empty-field signatures so an upgrade cannot discard ink.
+    if (list?.letters?.length || list?.syllables?.length) base.push(list?.letters || [], list?.syllables || []);
+    return JSON.stringify(base);
   }
   function stage() { return current?.plan.stages[current.index]; }
-  function requiresAudio(task) { return task.skill === 'listen' || task.skill === 'syllables' && task.mechanic === 'assemble' || current?.plan.kind === 'letters' && task.mechanic === 'find'; }
+  function requiresAudio(task) { return task.skill === 'listen' || task.itemType === 'syllable' && task.mechanic === 'find' || task.skill === 'syllables' && task.mechanic === 'assemble' || current?.plan.kind === 'letters' && task.mechanic === 'find'; }
   function metadata() { return QUEST_KINDS.find(item => item.id === current?.plan.kind) || {}; }
   function activeSnapshot() {
     if (!current || current.completed) return null;
@@ -111,6 +115,8 @@ export function createQuests({
     return saved.plan.stages.every(task => object(task) && typeof task.id === 'string' && typeof task.target === 'string'
       && ['find', 'assemble', 'deliver', 'write', 'route', 'collect', 'balance'].includes(task.mechanic)
       && (!task.skill || skills.has(task.skill))
+      && (!task.itemType || ['letter', 'word', 'syllable', 'number'].includes(task.itemType))
+      && (!task.unitText || typeof task.unitText === 'string' && /^[abcçdefgğhıijklmnoöprsştuüvyz]{1,24}$/u.test(task.unitText))
       && Array.isArray(task.options) && task.options.length <= 12 && task.options.every(option => object(option) && typeof option.value === 'string' && typeof option.text === 'string')
       && (!task.tokens || Array.isArray(task.tokens) && task.tokens.length <= 24 && task.tokens.every(token => typeof token === 'string' && token.length <= 80)));
   }
@@ -158,7 +164,11 @@ export function createQuests({
     const key = signature();
     const saved = options.fresh ? null : history.active;
     const resume = validSaved(saved, kind, key);
-    const plan = resume ? saved.plan : buildQuestPlan(kind, { learningState: getLearningState(), letters: getLetters(), history, now: Date.now() });
+    const plan = resume ? saved.plan : buildQuestPlan(kind, { learningState: getLearningState(), letters: getLetters(), history, selection: getContentState(), now: Date.now() });
+    if (resume && !object(plan.contentPools)) {
+      const refreshed = buildQuestPlan(kind, { learningState: getLearningState(), letters: getLetters(), history, selection: getContentState(), now: Date.now() });
+      plan.contentPools = refreshed.available && object(refreshed.contentPools) ? refreshed.contentPools : {};
+    }
     current = { plan, signature: key, index: resume ? saved.index : 0,
       answers: resume && Array.isArray(saved.answers) ? saved.answers.slice(0, 6) : [],
       ui: null, startedAt: resume ? Number(saved.startedAt) || Date.now() : Date.now(), completed: false, paused: false };
@@ -185,7 +195,7 @@ export function createQuests({
   }
   function attempt(correct, { writingReviewed = false } = {}) {
     const task = stage();
-    if (!task?.skill || !skills.has(task.skill) || !/^[abcçdefgğhıijklmnoöprsştuüvyz]{1,24}$/u.test(task.word || '')) return;
+    if (task?.itemType === 'syllable' || !task?.skill || !skills.has(task.skill) || !/^[abcçdefgğhıijklmnoöprsştuüvyz]{1,24}$/u.test(task.word || '')) return;
     const recorded = (getLearningState()?.events || []).filter(event => event.id?.startsWith(`${task.id}:`));
     const previousMistakes = Math.max(current.ui.reportedMistakes, recorded.reduce((sum, event) => sum + number(event.mistakes), 0));
     const previousHints = Math.max(current.ui.reportedHints, recorded.reduce((sum, event) => sum + number(event.hints), 0));
@@ -206,7 +216,7 @@ export function createQuests({
     if (!current?.ui || current.ui.correct) return;
     current.ui.correct = true; current.ui.reviewOpen = false;
     attempt(true, { writingReviewed });
-    current.answers[current.index] = { id: stage().id, correct: true, mistakes: current.ui.mistakes,
+    current.answers[current.index] = { id: stage().id, correct: true, itemType: stage().itemType || (current.plan.kind === 'letters' ? 'letter' : 'word'), unitText: stage().unitText || stage().word || stage().target, mistakes: current.ui.mistakes,
       hints: current.ui.hints, writingReviewed, completedAt: Date.now() };
     current.ui.feedback = stage().success || successText(); current.ui.tone = 'success';
     playEffect('correct');
@@ -231,7 +241,7 @@ export function createQuests({
     if (isMuted()) { feedback('Ses kapalı. Hoparlörü açabilir ya da örneği birlikte okuyabilirsin.', 'help'); return; }
     const epoch = ++speechEpoch;
     const plan = current.plan;
-    const text = task.skill === 'sentence' ? task.target : task.word || numericSpeech(task.quantity ?? Number(task.target));
+    const text = task.skill === 'sentence' ? task.target : task.unitText || task.word || numericSpeech(task.quantity ?? Number(task.target));
     if (!requiresAudio(task)) current.ui.hints++;
     root.querySelector('[data-quest="listen"]')?.setAttribute('aria-busy', 'true');
     const played = await speak(text);
@@ -266,7 +276,7 @@ export function createQuests({
   function model(task) {
     const question = questionModel(task);
     const text = question ? current.ui.modelShown ? task.model.replace('…', task.target) : task.model
-      : task.model || (task.skill === 'sentence' ? task.target : task.word || task.target);
+      : task.model || (task.skill === 'sentence' ? task.target : task.unitText || task.word || task.target);
     return `<div id="questModel" class="quest-model" ${question || current.ui.modelShown ? '' : 'hidden'}>${esc(text)}</div>`;
   }
   function assembly(task) {
@@ -300,6 +310,7 @@ export function createQuests({
     if (current.completed) { renderSummary(); return; }
     const task = stage();
     const ui = current.ui;
+    for (const exposure of getQuestContentExposures(current.plan, task)) onContentExposure({ ...exposure, at: Date.now() });
     const progress = { index: current.index, total: current.plan.stages.length, correct: ui.correct,
       phase: ui.correct ? 'success' : 'working', selected: ui.selected.map(id => ui.bank.find(item => item.id === id)?.text || ''),
       quantity: ui.quantity, completedStages: current.answers.filter(answer => answer?.correct).length,
@@ -362,7 +373,7 @@ export function createQuests({
     current.ui = initialUi(stage());
     persist(); render();
   }
-  function nextKind() { return recommendQuestKind({ learningState: getLearningState(), letters: getLetters(), history: getHistory(), excludeKind: current.plan.kind, now: Date.now() }); }
+  function nextKind() { return recommendQuestKind({ learningState: getLearningState(), letters: getLetters(), history: getHistory(), selection: getContentState(), excludeKind: current.plan.kind, now: Date.now() }); }
   function complete() {
     if (!current || current.completed || current.answers.length !== current.plan.stages.length
       || !current.plan.stages.every((task, index) => current.answers[index]?.correct === true && current.answers[index]?.id === task.id)) return;
@@ -371,7 +382,7 @@ export function createQuests({
     const history = historyOf(getHistory());
     const run = { id: current.plan.id, kind: current.plan.kind, completed: true, completedStages: current.plan.stages.length,
       totalStages: current.plan.stages.length, startedAt: current.startedAt, completedAt: Date.now(),
-      wordTexts: current.plan.wordTexts || [], results: clone(current.answers) };
+      wordTexts: current.plan.wordTexts || [], focusTexts: current.plan.focusTexts || current.plan.wordTexts || [], results: clone(current.answers) };
     saveHistory({ version: 1, active: null, runs: [...history.runs.filter(item => item.id !== run.id), run].slice(-100) });
     onComplete(run);
     playEffect('complete');
@@ -381,7 +392,7 @@ export function createQuests({
   function renderSummary() {
     const next = QUEST_KINDS.find(item => item.id === nextKind());
     const currentMeta = metadata();
-    root.innerHTML = `<section id="quest" class="quest-app" data-screen="summary" data-kind="${esc(current.plan.kind)}">${nav()}<div class="quest-summary"><span class="quest-summary-seal" aria-hidden="true">✓</span><span class="quest-eyebrow">Adada bir iz bıraktın</span><h1>${esc(current.plan.title)} tamamlandı!</h1><p>${esc(currentMeta.ending || 'Altı görev boyunca hazırladığın parçalar bu dünyada bir araya geldi.')}</p><div class="quest-summary-result"><b>6</b><span>görev tamamlandı</span><span>${(current.plan.wordTexts || []).map(esc).join(' · ')}</span></div><p>${current.plan.kind === 'numbers' ? 'Çiçekleri saydın, sepetleri düzelttin. Şimdi başka bir dünya seni bekliyor.' : 'Bu kelimeler başka görevlerde yeniden karşına çıkacak. Bugünkü başarı, sonraki günlerde hatırlama çalışmasıyla pekişecek.'}</p><div class="quest-summary-actions">${button('next-world', `${esc(next?.title || 'Sonraki dünya')} →`, '', 'quest-primary')}${button('home', 'Adama dön', '', 'quest-hint')}${button('parent', 'Birlikte gelişimimize bakalım', '', 'quest-hint')}</div></div></section>`;
+    root.innerHTML = `<section id="quest" class="quest-app" data-screen="summary" data-kind="${esc(current.plan.kind)}">${nav()}<div class="quest-summary"><span class="quest-summary-seal" aria-hidden="true">✓</span><span class="quest-eyebrow">Adada bir iz bıraktın</span><h1>${esc(current.plan.title)} tamamlandı!</h1><p>${esc(currentMeta.ending || 'Altı görev boyunca hazırladığın parçalar bu dünyada bir araya geldi.')}</p><div class="quest-summary-result"><b>6</b><span>görev tamamlandı</span><span>${(current.plan.focusTexts || current.plan.wordTexts || []).map(esc).join(' · ')}</span></div><p>${current.plan.kind === 'numbers' ? 'Çiçekleri saydın, sepetleri düzelttin. Şimdi başka bir dünya seni bekliyor.' : 'Bu kelimeler başka görevlerde yeniden karşına çıkacak. Bugünkü başarı, sonraki günlerde hatırlama çalışmasıyla pekişecek.'}</p><div class="quest-summary-actions">${button('next-world', `${esc(next?.title || 'Sonraki dünya')} →`, '', 'quest-primary')}${button('home', 'Adama dön', '', 'quest-hint')}${button('parent', 'Birlikte gelişimimize bakalım', '', 'quest-hint')}</div></div></section>`;
   }
   function click(event) {
     const control = event.target.closest('[data-quest]');

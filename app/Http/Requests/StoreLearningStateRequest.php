@@ -40,10 +40,14 @@ class StoreLearningStateRequest extends FormRequest
             'state.updatedAt' => ['required', 'integer', 'min:0', 'max:32503680000000'],
             'state.activeListId' => ['required', 'string', 'max:80'],
             'state.lists' => ['present', 'array', 'list', 'max:20'],
-            'state.lists.*' => ['array:id,title,words,updatedAt'],
+            'state.lists.*' => ['array:id,title,words,letters,syllables,updatedAt'],
             'state.lists.*.id' => ['required', 'string', 'max:80', 'distinct:strict'],
             'state.lists.*.title' => ['required', 'string', 'max:80'],
             'state.lists.*.updatedAt' => ['required', 'integer', 'min:0', 'max:32503680000000'],
+            'state.lists.*.letters' => ['sometimes', 'array', 'list', 'max:29'],
+            'state.lists.*.letters.*' => ['required', 'string', 'regex:/\A[abcçdefgğhıijklmnoöprsştuüvyz]\z/u'],
+            'state.lists.*.syllables' => ['sometimes', 'array', 'list', 'max:100'],
+            'state.lists.*.syllables.*' => ['required', 'string', 'regex:/\A[abcçdefgğhıijklmnoöprsştuüvyz]{1,6}\z/u'],
             'state.lists.*.words' => ['present', 'array', 'list', 'max:100'],
             'state.lists.*.words.*' => ['array:text,parts,meaning,sentence,emoji'],
             'state.lists.*.words.*.text' => ['required', 'string', 'regex:'.self::WORD],
@@ -114,6 +118,22 @@ class StoreLearningStateRequest extends FormRequest
                     continue;
                 }
                 $wordCount += count($list['words']);
+                foreach (['letters', 'syllables'] as $unitType) {
+                    $units = is_array($list[$unitType] ?? null) ? $list[$unitType] : [];
+                    $seenUnits = [];
+                    foreach ($units as $unitIndex => $unit) {
+                        if (! is_string($unit)) {
+                            continue;
+                        }
+                        if (in_array($unit, $seenUnits, true)) {
+                            $validator->errors()->add("state.lists.$index.$unitType.$unitIndex", 'Aynı öğretmen listesinde bir öğe yalnızca bir kez bulunabilir.');
+                        }
+                        $seenUnits[] = $unit;
+                        if ($unitType === 'syllables' && ! $this->validTeacherSyllable($unit)) {
+                            $validator->errors()->add("state.lists.$index.syllables.$unitIndex", 'Bağımsız hecede tek bir ünlü olmalı ve hece Türkçe harflerle yazılmalı.');
+                        }
+                    }
+                }
                 $texts = [];
                 foreach ($list['words'] as $wordIndex => $word) {
                     if (! is_array($word)) {
@@ -215,6 +235,16 @@ class StoreLearningStateRequest extends FormRequest
             }
         }
         return true;
+    }
+
+    private function validTeacherSyllable(string $text): bool
+    {
+        if (preg_match('/\A([bcçdfgğhjklmnprsştvyz]{0,3})([aeıioöuü])([bcçdfgğhjklmnprsştvyz]{0,2})\z/u', $text, $parts) !== 1) {
+            return false;
+        }
+        return mb_strlen($parts[1]) <= 1 || in_array($parts[1], [
+            'tr', 'pr', 'br', 'kr', 'gr', 'fr', 'pl', 'bl', 'kl', 'gl', 'fl', 'dr', 'sp', 'st', 'sk', 'str', 'spr', 'skr',
+        ], true);
     }
 
     private function validSummary(mixed $summary): bool

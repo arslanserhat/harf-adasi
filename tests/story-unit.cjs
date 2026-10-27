@@ -2,8 +2,8 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const source = fs.readFileSync(path.join(__dirname, '../src/story-scene.js'), 'utf8').replace("import './story-scene.css';", '');
-const api = import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
+const { modelURL } = require('./model-loader.cjs');
+const api = import(modelURL('story-scene.js'));
 
 test('all five story chapters and the ending follow bounded real task progression', async () => {
   const { getStoryBeat } = await api;

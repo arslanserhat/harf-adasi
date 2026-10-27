@@ -42,7 +42,10 @@ async function begin(app) {
 
 async function finishIntro(app) {
   if (await app.page.locator('#learning[data-screen="intro"]').count()) {
-    assert.match(await app.page.locator('#learning h1').innerText(), /Alparslan|Mektup|mektup/u, 'the connected lesson begins with its original story');
+    const episode = (await snapshot(app.page)).session.storyEpisode || 0;
+    const title = [/Kayıp Bahçe Mektubu/u, /Bahçe Pazarı/u, /Fener Şenliği/u][episode];
+    assert.match(await app.page.locator('#learning h1').innerText(), title, 'the connected lesson retains its saved episode without depending on a fixed child name');
+    await app.page.locator(`[data-story-episode="${episode}"]`).first().waitFor();
     await press(app, '[data-learning="begin-tasks"]');
   }
   await app.page.locator('#learning[data-screen="task"]').waitFor();

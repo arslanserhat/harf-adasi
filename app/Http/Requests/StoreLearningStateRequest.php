@@ -183,9 +183,15 @@ class StoreLearningStateRequest extends FormRequest
             }
             if (is_array($session) && is_array($session['results'] ?? null)) {
                 $tasks = is_array($session['tasks'] ?? null) ? $session['tasks'] : [];
-                $ids = array_column(array_filter($tasks, 'is_array'), 'id');
                 foreach ($session['results'] as $id => $result) {
-                    if (! in_array($id, $ids, true) || ! $this->validResult($result)) {
+                    $task = null;
+                    foreach ($tasks as $candidate) {
+                        if (is_array($candidate) && ($candidate['id'] ?? null) === $id) {
+                            $task = $candidate;
+                            break;
+                        }
+                    }
+                    if ($task === null || ! $this->validResult($result, $task)) {
                         $validator->errors()->add('state.session.results', 'Sonuç yalnızca bu oturumdaki bir göreve ait olabilir.');
                         break;
                     }
@@ -194,15 +200,15 @@ class StoreLearningStateRequest extends FormRequest
         }];
     }
 
-    private function validResult(mixed $result): bool
+    private function validResult(mixed $result, array $task): bool
     {
         if (! is_array($result) || array_diff(array_keys($result), [
             'correct', 'mistakes', 'hints', 'writingReviewed', 'independent',
-            'modelOpened', 'id', 'word', 'skill', 'at', 'inkPaths',
+            'modelOpened', 'reviewExposed', 'ui', 'id', 'word', 'skill', 'at', 'inkPaths',
         ]) !== []) {
             return false;
         }
-        foreach (['correct', 'writingReviewed', 'independent', 'modelOpened'] as $key) {
+        foreach (['correct', 'writingReviewed', 'independent', 'modelOpened', 'reviewExposed'] as $key) {
             if (array_key_exists($key, $result) && ! is_bool($result[$key])) {
                 return false;
             }
@@ -233,6 +239,62 @@ class StoreLearningStateRequest extends FormRequest
                     return false;
                 }
             }
+        }
+        if (array_key_exists('ui', $result) && ! $this->validTaskUi($result['ui'], $task, ($result['correct'] ?? false) === true)) {
+            return false;
+        }
+        return true;
+    }
+
+    private function validTaskUi(mixed $ui, array $task, bool $correct): bool
+    {
+        $keys = ['taskKey', 'selected', 'model', 'audioPlayed'];
+        if (! is_array($ui) || array_diff(array_keys($ui), $keys) !== [] || array_diff($keys, array_keys($ui)) !== []
+            || ! is_string($ui['taskKey']) || strlen($ui['taskKey']) > 8000
+            || ! is_array($ui['selected']) || ! array_is_list($ui['selected']) || count($ui['selected']) > 40
+            || ! is_bool($ui['model']) || ! is_bool($ui['audioPlayed'])) {
+            return false;
+        }
+        foreach (['id', 'word', 'kind', 'skill', 'target'] as $key) {
+            if (! is_string($task[$key] ?? null)) {
+                return false;
+            }
+        }
+        foreach (['tokens', 'options', 'parts'] as $key) {
+            if (! is_array($task[$key] ?? null)) {
+                return false;
+            }
+        }
+        try {
+            $scope = json_decode($ui['taskKey'], true, 16, JSON_THROW_ON_ERROR);
+        } catch (\JsonException) {
+            return false;
+        }
+        // Decode the browser's canonical key rather than relying on PHP and
+        // JavaScript to use the same Unicode/escaping options for JSON strings.
+        if ($scope !== [$task['id'], $task['word'], $task['kind'], $task['skill'], $task['target'],
+            $task['tokens'], $task['options'], $task['parts'], $task['support'] ?? null]) {
+            return false;
+        }
+        $tokens = $task['tokens'] !== [] ? $task['tokens'] : match ($task['kind']) {
+            'sentence' => preg_split('/\s+/u', $task['target']),
+            'syllables' => $task['parts'],
+            default => mb_str_split($task['word']),
+        };
+        $assembly = ! in_array($task['kind'], ['listen', 'meaning', 'write'], true);
+        if (count($ui['selected']) > count($tokens) || (! $assembly && $ui['selected'] !== [])
+            || ($assembly && ! $correct && count($ui['selected']) === count($tokens))) {
+            return false;
+        }
+        $bank = $task['kind'] === 'build' && mb_strlen($task['word']) === 1 && $task['options'] !== [] ? $task['options'] : $tokens;
+        $ids = [];
+        foreach ($ui['selected'] as $index => $tile) {
+            if (! is_array($tile) || count($tile) !== 2 || ! is_int($tile['id'] ?? null) || $tile['id'] < 0
+                || in_array($tile['id'], $ids, true) || ! is_string($tile['text'] ?? null)
+                || ($bank[$tile['id']] ?? null) !== $tile['text'] || ($tokens[$index] ?? null) !== $tile['text']) {
+                return false;
+            }
+            $ids[] = $tile['id'];
         }
         return true;
     }

@@ -1,0 +1,38 @@
+.film-stage { position:relative; isolation:isolate; width:100%; aspect-ratio:1000 / 563; overflow:hidden; background:#a6d4c0; border-radius:23px; contain:layout paint; box-shadow:inset 0 0 0 1px rgb(70 94 48 / 12%); }
+.film-stage .film-stage-background,.film-stage .film-stage-art { position:absolute; inset:0; display:block; width:100%; height:100%; max-width:none; margin:0; pointer-events:none; user-select:none; }
+.film-stage .film-stage-background { object-fit:cover; object-position:center; }
+.film-stage .film-stage-art { overflow:visible; }
+.film-stage .film-actor,.film-stage [data-film-joint],.film-stage .film-wheel-rotor,.film-stage .film-gate-panel,.film-stage .film-plant-stem,.film-stage .film-flower-head,.film-stage .film-wind-lines,.film-stage .film-wheel-splash,.film-stage .film-loose-leaf,.film-stage [data-film-prop="leaves"],.film-stage [data-film-prop="watering-can"] { transform-box:view-box; transform-origin:0 0; }
+.film-stage .film-lion [data-film-joint="head"] { transform-origin:0 -116px; }
+.film-stage .film-lion [data-film-joint="torso"] { transform-origin:0 -45px; }
+.film-stage .film-lion [data-film-joint="left-arm"] { transform-origin:-35px -102px; }
+.film-stage .film-lion [data-film-joint="right-arm"] { transform-origin:34px -101px; }
+.film-stage .film-lion [data-film-joint="left-leg"] { transform-origin:-21px -48px; }
+.film-stage .film-lion [data-film-joint="right-leg"] { transform-origin:16px -47px; }
+.film-stage .film-lion [data-film-joint="tail"] { transform-origin:-30px -59px; }
+.film-stage .film-lion [data-film-joint="scarf"] { transform-origin:1px -103px; }
+.film-stage .film-lion [data-film-joint="left-ear"] { transform-origin:-37px -181px; }
+.film-stage .film-lion [data-film-joint="right-ear"] { transform-origin:36px -181px; }
+.film-stage .film-lion [data-film-joint="eyes"] { transform-origin:0 -157px; }
+.film-stage .film-lion [data-film-joint="mouth"] { transform-origin:1px -128px; }
+.film-stage .film-bird [data-film-joint="head"] { transform-origin:7px -38px; }
+.film-stage .film-bird [data-film-joint="left-wing"] { transform-origin:-3px -31px; }
+.film-stage .film-bird [data-film-joint="right-wing"] { transform-origin:-17px -35px; }
+.film-stage .film-bird [data-film-joint="tail"] { transform-origin:-19px -25px; }
+.film-stage .film-bird [data-film-joint="eyes"] { transform-origin:23px -49px; }
+.film-stage .film-bird [data-film-joint="mouth"] { transform-origin:31px -37px; }
+.film-stage .film-gate-handle { transform-box:view-box; transform-origin:60px -4px; }
+.film-stage .film-lion-mouth { opacity:0; }
+.film-stage .film-lion[data-film-speaking="true"] .film-lion-mouth { opacity:1; }
+.film-stage .film-lion[data-film-speaking="true"] .film-mouth-smile { opacity:0; }
+.film-stage .film-bird[data-film-pose="flying"] .film-bird-feet,.film-stage .film-bird[data-film-pose="flying"] .film-bird-shadow { opacity:0; }
+.film-stage .film-lion[data-film-pose="examining"] .film-lion-brow-left,.film-stage .film-lion[data-film-pose="pulling"] .film-lion-brow-left { transform:translateY(3px) rotate(-5deg); transform-origin:-20px -174px; }
+.film-stage .film-lion[data-film-pose="examining"] .film-lion-pupils { transform:translateY(-3px); }
+.film-stage .film-lion[data-film-pose="watering"] .film-lion-pupils,.film-stage .film-lion[data-film-pose="gathering"] .film-lion-pupils { transform:translate(-2px,3px); }
+.film-stage .film-lion[data-film-pose="delighted"] .film-lion-brow { transform:translateY(-4px); }
+.film-stage[data-film-ribbon="coral"] { --film-ribbon:#eb8770; --film-ribbon-dark:#bf6654; }
+.film-stage[data-film-ribbon="gold"] { --film-ribbon:#efca52; --film-ribbon-dark:#b99832; }
+/* Playback belongs to the controller; task/choice screens freeze all actors. */
+.film-stage[data-film-paused="true"] *,.film-stage[data-film-reduced-motion="true"] * { animation-play-state:paused !important; }
+@media(max-width:600px) { .film-stage { border-radius:15px; } }
+@media(prefers-reduced-motion:reduce) { .film-stage * { animation:none !important; transition:none !important; } }

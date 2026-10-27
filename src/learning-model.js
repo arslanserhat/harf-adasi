@@ -152,6 +152,30 @@ function applyEvidence(previous, event) {
   return progress;
 }
 
+// UI belongs to the exact saved task input. A reused id or edited teacher task
+// must never restore stale tokens, a visible answer, or audio eligibility.
+export function learningTaskKey(task) {
+  return JSON.stringify([task.id, task.word, task.kind, task.skill, task.target,
+    task.tokens, task.options, task.parts, task.support]);
+}
+
+function normalizeTaskUi(value, task, correct) {
+  if (!record(value) || value.taskKey !== learningTaskKey(task) || !Array.isArray(value.selected)) return null;
+  const assembly = !['listen', 'meaning', 'write'].includes(task.kind);
+  const tokens = task.tokens.length ? task.tokens : task.kind === 'sentence' ? task.target.split(/\s+/)
+    : task.kind === 'syllables' ? task.parts : [...task.word];
+  const bank = task.kind === 'build' && task.word.length === 1 && task.options.length ? task.options : tokens;
+  if (value.selected.length > tokens.length || !assembly && value.selected.length
+    || assembly && !correct && value.selected.length === tokens.length) return null;
+  const ids = new Set(), selected = [];
+  for (const tile of value.selected) {
+    if (!record(tile) || !Number.isInteger(tile.id) || tile.id < 0 || ids.has(tile.id)
+      || bank[tile.id] !== tile.text || tokens[selected.length] !== tile.text) return null;
+    ids.add(tile.id); selected.push({ id: tile.id, text: bank[tile.id] });
+  }
+  return { taskKey: value.taskKey, selected, model: value.model === true, audioPlayed: value.audioPlayed === true };
+}
+
 function normalizeSession(value, now) {
   if (!record(value) || !identifier(value.id) || !Array.isArray(value.tasks)) return null;
   const tasks = value.tasks.slice(0, 12).map(task => {
@@ -172,14 +196,17 @@ function normalizeSession(value, now) {
     if (!record(result)) continue;
     results[task.id] = {
       correct: result.correct === true, mistakes: integer(result.mistakes, 100), hints: integer(result.hints, 100),
-      writingReviewed: result.writingReviewed === true, independent: result.independent !== false,
+      writingReviewed: result.writingReviewed === true, independent: result.independent !== false && result.modelOpened !== true,
       modelOpened: result.modelOpened === true,
+      reviewExposed: result.reviewExposed === true,
       inkPaths: (Array.isArray(result.inkPaths) ? result.inkPaths : []).slice(0, 12).filter(validInkPath),
       ...(identifier(result.id) ? { id: result.id } : {}),
       ...(WORD.test(normalizeWord(result.word)) ? { word: normalizeWord(result.word) } : {}),
       ...(SKILLS.includes(result.skill) ? { skill: result.skill } : {}),
       ...(result.at !== undefined ? { at: Math.min(stamp(result.at), stamp(now) + 300000) } : {}),
     };
+    const ui = normalizeTaskUi(result.ui, task, results[task.id].correct);
+    if (ui) results[task.id].ui = ui;
   }
   return { id: value.id, createdAt: stamp(value.createdAt), wordTexts: unique(tasks.map(task => task.word)).slice(0, 3),
     tasks, index: Math.min(tasks.length, integer(value.index, 12)), results, paused: value.paused === true,

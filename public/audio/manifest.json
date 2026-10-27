@@ -146,6 +146,13 @@
       "rate": "+1%",
       "spoken": "Bahçeye ulaştık. Şimdi buradaki sipariş kartlarını hazırlayıp yerlerine ulaştıralım."
     },
+    "ben tek başıma çekemedim. her yaprağa dokun. sepetimiz hepsini taşıyabilir.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+2%",
+      "pitch": "+12Hz",
+      "speaker": "bird",
+      "spoken": "Ben tek başıma çekemedim. Her yaprağa dokun. Sepetimiz hepsini taşıyabilir."
+    },
     "bir daha bakalım. yukarıdaki işarete dikkat et.": {
       "voice": "tr-TR-EmelNeural",
       "rate": "-1%",
@@ -160,6 +167,13 @@
       "voice": "tr-TR-EmelNeural",
       "rate": "-1%",
       "spoken": "Olur böyle! Bir daha deneyelim. Acelemiz yok."
+    },
+    "bir damla... bir damla daha... aa! bahçeye su gelmiyor!": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+2%",
+      "pitch": "+12Hz",
+      "speaker": "bird",
+      "spoken": "Bir damla... Bir damla daha... Aa! Bahçeye su gelmiyor!"
     },
     "bir davet kartını daha hazırladın. pırpır onu şenlik çantasına yerleştirdi.": {
       "voice": "tr-TR-EmelNeural",
@@ -201,10 +215,31 @@
       "rate": "+1%",
       "spoken": "Bir siparişi hazırlarken kelimenin ne anlattığını da düşünelim."
     },
+    "bir sonraki ada macerasında görüşürüz!": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+2%",
+      "pitch": "+12Hz",
+      "speaker": "bird",
+      "spoken": "Bir sonraki ada macerasında görüşürüz!"
+    },
     "bir yol işareti daha tamamlandı. alparslan tabelayı şenlik yoluna taşıyor.": {
       "voice": "tr-TR-EmelNeural",
       "rate": "+1%",
       "spoken": "Bir yol işareti daha tamamlandı. Alparslan tabelayı şenlik yoluna taşıyor."
+    },
+    "birlikte bakalım. la başta, le sonda. birleşince lale oluyor.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-5%",
+      "pitch": "-5Hz",
+      "speaker": "lion",
+      "spoken": "Birlikte bakalım. La başta, le sonda. Birleşince lale oluyor."
+    },
+    "birlikte düşünelim. su çarkı neden durmuştu?": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-5%",
+      "pitch": "-5Hz",
+      "speaker": "lion",
+      "spoken": "Birlikte düşünelim. Su çarkı neden durmuştu?"
     },
     "birlikte kontrol edelim.": {
       "voice": "tr-TR-EmelNeural",
@@ -240,6 +275,13 @@
       "voice": "tr-TR-EmelNeural",
       "rate": "+1%",
       "spoken": "Bir bakalım! Bu kelime hangi resmi anlatıyor?"
+    },
+    "bu küçücük soğandan bir lale büyüyecek. ona güzel bir yer seçelim.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-5%",
+      "pitch": "-5Hz",
+      "speaker": "lion",
+      "spoken": "Bu küçücük soğandan bir lale büyüyecek. Ona güzel bir yer seçelim."
     },
     "bu sepetin etiketi henüz hazır değil. parçaları sırayla yerleştirelim.": {
       "voice": "tr-TR-EmelNeural",
@@ -306,6 +348,27 @@
       "rate": "+1%",
       "spoken": "Etiket bitince onu teslimat çantamda taşıyacağım."
     },
+    "etiket yerini buldu. şimdi suyu seçtiğimiz bahçeye gönderelim.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-5%",
+      "pitch": "-5Hz",
+      "speaker": "lion",
+      "spoken": "Etiket yerini buldu. Şimdi suyu seçtiğimiz bahçeye gönderelim."
+    },
+    "etiketimiz hazır. şimdi kapağı açıyorum. haydi, yaprakları sepete toplayalım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-5%",
+      "pitch": "-5Hz",
+      "speaker": "lion",
+      "spoken": "Etiketimiz hazır. Şimdi kapağı açıyorum. Haydi, yaprakları sepete toplayalım."
+    },
+    "etiketimiz çantada kaldı. çiçeğimizin adını hatırlıyor musun? harflerini sırayla yerleştir.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+2%",
+      "pitch": "+12Hz",
+      "speaker": "bird",
+      "spoken": "Etiketimiz çantada kaldı. Çiçeğimizin adını hatırlıyor musun? Harflerini sırayla yerleştir."
+    },
     "fener yolunun bir bölümü daha hazır. pırpır köprünün öbür ucundan sana sesleniyor.": {
       "voice": "tr-TR-EmelNeural",
       "rate": "+1%",
@@ -326,10 +389,24 @@
       "rate": "+1%",
       "spoken": "Fenerleri köprüden birlikte geçirelim. Önce eksik geçidi tamamlamamız gerekiyor."
     },
+    "günler geçti. minik aslan ile pırpır çiçeklerini suladı. bir sabah, küçük bir tomurcuk açıldı.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-3%",
+      "pitch": "+0Hz",
+      "speaker": "narrator",
+      "spoken": "Günler geçti. Minik Aslan ile Pırpır çiçeklerini suladı. Bir sabah, küçük bir tomurcuk açıldı."
+    },
     "güzel, şimdi sıradaki parçayı seç.": {
       "voice": "tr-TR-EmelNeural",
       "rate": "+2%",
       "spoken": "Güzel! Şimdi sıradaki parçayı seç."
+    },
+    "harf adasında yeni bir gün başladı. minik aslan ile pırpır, bahçeye bir çiçek soğanı götürüyordu.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-3%",
+      "pitch": "+0Hz",
+      "speaker": "narrator",
+      "spoken": "Harf Adası’nda yeni bir gün başladı. Minik Aslan ile Pırpır, bahçeye bir çiçek soğanı götürüyordu."
     },
     "harika! başardın.": {
       "voice": "tr-TR-EmelNeural",
@@ -366,6 +443,13 @@
       "rate": "+3%",
       "spoken": "Hazırsan, birlikte devam edelim!"
     },
+    "henüz tamamlanmadı. harflerin sırasına bir daha bakalım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+2%",
+      "pitch": "+12Hz",
+      "speaker": "bird",
+      "spoken": "Henüz tamamlanmadı. Harflerin sırasına bir daha bakalım."
+    },
     "herkesin yolu bulması için davetleri ve işaretleri hazırlayabiliriz.": {
       "voice": "tr-TR-EmelNeural",
       "rate": "+1%",
@@ -380,6 +464,20 @@
       "voice": "tr-TR-EmelNeural",
       "rate": "+1%",
       "spoken": "İşte bahçe! Hazırladığımız kartları doğru yerlere ulaştıralım."
+    },
+    "işte bizim lalemiz! bahçemiz için bir kurdele rengi seçelim.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+2%",
+      "pitch": "+12Hz",
+      "speaker": "bird",
+      "spoken": "İşte bizim lalemiz! Bahçemiz için bir kurdele rengi seçelim."
+    },
+    "kapağı açmadan önce çiçeğimizin etiketini hazırlayalım. heceleri birlikte okuyalım: la, le. lale.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-5%",
+      "pitch": "-5Hz",
+      "speaker": "lion",
+      "spoken": "Kapağı açmadan önce çiçeğimizin etiketini hazırlayalım. Heceleri birlikte okuyalım: la, le. Lale."
     },
     "kartlara sırayla dokun, boşlukları doldur.": {
       "voice": "tr-TR-EmelNeural",
@@ -426,6 +524,20 @@
       "rate": "-2%",
       "spoken": "Biraz dinlenelim mi? Küçük bir mola verelim."
     },
+    "kısa bir cümleyi bir büyüğünle birlikte okuyalım: lale al.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-3%",
+      "pitch": "+0Hz",
+      "speaker": "narrator",
+      "spoken": "Kısa bir cümleyi bir büyüğünle birlikte okuyalım: Lale al."
+    },
+    "kıyıdaki izi takip ettim. su, küçük kapağın arkasında birikmiş.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-5%",
+      "pitch": "-5Hz",
+      "speaker": "lion",
+      "spoken": "Kıyıdaki izi takip ettim. Su, küçük kapağın arkasında birikmiş."
+    },
     "merhaba! birlikte oynayalım.": {
       "voice": "tr-TR-EmelNeural",
       "rate": "+4%",
@@ -455,6 +567,13 @@
       "voice": "tr-TR-EmelNeural",
       "rate": "+1%",
       "spoken": "Parçalar birleşince yol tabelamız hazır olacak."
+    },
+    "parçaların sırası değişmiş. örneğe yeniden bakalım.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+2%",
+      "pitch": "+12Hz",
+      "speaker": "bird",
+      "spoken": "Parçaların sırası değişmiş. Örneğe yeniden bakalım."
     },
     "pazar köprüsünde bir geçiş daha hazır. pırpır sepeti karşı kıyıya taşıyor.": {
       "voice": "tr-TR-EmelNeural",
@@ -495,6 +614,20 @@
       "voice": "tr-TR-EmelNeural",
       "rate": "+1%",
       "spoken": "Rüzgâr mektubun kartlarını uçurdu! Bahçedeki arkadaşımıza nasıl haber vereceğiz?"
+    },
+    "rüzgâr yaprakları kanala taşımıştı. yapraklar suyun yolunu kapattı.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+2%",
+      "pitch": "+12Hz",
+      "speaker": "bird",
+      "spoken": "Rüzgâr yaprakları kanala taşımıştı. Yapraklar suyun yolunu kapattı."
+    },
+    "rüzgâr çıkınca kanala ne dolmuştu? o anı düşünelim.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-5%",
+      "pitch": "-5Hz",
+      "speaker": "lion",
+      "spoken": "Rüzgâr çıkınca kanala ne dolmuştu? O anı düşünelim."
     },
     "rüzgâr, bahçenin mektup kartlarını dağıtmış. alparslan ile kartları hazırlayalım, köprüden geçelim ve bahçeye bir cevap götürelim.": {
       "voice": "tr-TR-EmelNeural",
@@ -551,10 +684,52 @@
       "rate": "+1%",
       "spoken": "Sipariş kartlarından birini ayırdın. Pırpır onu pazar sepetine koydu."
     },
+    "soldaki bahçe mi, sağdaki bahçe mi? hangisini seçersen oraya gideceğiz.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+2%",
+      "pitch": "+12Hz",
+      "speaker": "bird",
+      "spoken": "Soldaki bahçe mi, sağdaki bahçe mi? Hangisini seçersen oraya gideceğiz."
+    },
+    "son yaprak da sepete girdi. suyun önü açıldı.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-3%",
+      "pitch": "+0Hz",
+      "speaker": "narrator",
+      "spoken": "Son yaprak da sepete girdi. Suyun önü açıldı."
+    },
+    "su yeniden aktı. çark döndü. bahçeye giden küçük kanal dolmaya başladı.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-3%",
+      "pitch": "+0Hz",
+      "speaker": "narrator",
+      "spoken": "Su yeniden aktı. Çark döndü. Bahçeye giden küçük kanal dolmaya başladı."
+    },
+    "suyun yolunu birlikte açtık. küçük çiçeğimiz de yerini buldu.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-5%",
+      "pitch": "-5Hz",
+      "speaker": "lion",
+      "spoken": "Suyun yolunu birlikte açtık. Küçük çiçeğimiz de yerini buldu."
+    },
+    "suyun yolunu izleyelim. pırpır yukarıdan uçabilir. ben de kıyıdan yürüyebilirim.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-5%",
+      "pitch": "-5Hz",
+      "speaker": "lion",
+      "spoken": "Suyun yolunu izleyelim. Pırpır yukarıdan uçabilir. Ben de kıyıdan yürüyebilirim."
+    },
     "tabelayı görünce arkadaşlarımız hangi yoldan gideceklerini anlayacak.": {
       "voice": "tr-TR-EmelNeural",
       "rate": "+1%",
       "spoken": "Tabelayı görünce arkadaşlarımız hangi yoldan gideceklerini anlayacak."
+    },
+    "tam o sırada rüzgâr çıktı. kuru yapraklar su kanalına doldu. çark yavaşladı ve durdu.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-3%",
+      "pitch": "+0Hz",
+      "speaker": "narrator",
+      "spoken": "Tam o sırada rüzgâr çıktı. Kuru yapraklar su kanalına doldu. Çark yavaşladı ve durdu."
     },
     "tane": {
       "voice": "tr-TR-EmelNeural",
@@ -609,10 +784,24 @@
       "rate": "+0%",
       "spoken": "Bir bakalım. Aynısı hangisi?"
     },
+    "yukarıdan bakınca gördüm! yapraklar küçük kapağın arkasında birikmiş.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+2%",
+      "pitch": "+12Hz",
+      "speaker": "bird",
+      "spoken": "Yukarıdan bakınca gördüm! Yapraklar küçük kapağın arkasında birikmiş."
+    },
     "çizgiyi tamamladın! hazır olunca devam et.": {
       "voice": "tr-TR-EmelNeural",
       "rate": "+5%",
       "spoken": "Çizgiyi tamamladın! Çok güzel! Hazırsan, devam edelim."
+    },
+    "çiçeğimizin adı lale. la ve le hecelerinden oluşuyor. şimdi birlikte kurabiliriz.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-5%",
+      "pitch": "-5Hz",
+      "speaker": "lion",
+      "spoken": "Çiçeğimizin adı lale. La ve le hecelerinden oluşuyor. Şimdi birlikte kurabiliriz."
     },
     "çıkartman seni bekliyor.": {
       "voice": "tr-TR-EmelNeural",
@@ -623,6 +812,20 @@
       "voice": "tr-TR-EmelNeural",
       "rate": "+1%",
       "spoken": "Önce siparişin sesini dinleyelim. Doğru kartı sonra bulabiliriz."
+    },
+    "örneğe bakabilirsin. önce la, sonra le. iki parçayı ahşap etikete yerleştir.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "+2%",
+      "pitch": "+12Hz",
+      "speaker": "bird",
+      "spoken": "Örneğe bakabilirsin. Önce la, sonra le. İki parçayı ahşap etikete yerleştir."
+    },
+    "örneğimiz lale. harflere bakıp yazabilirsin. bu kez yardım alarak çalışıyoruz.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-5%",
+      "pitch": "-5Hz",
+      "speaker": "lion",
+      "spoken": "Örneğimiz lale. Harflere bakıp yazabilirsin. Bu kez yardım alarak çalışıyoruz."
     },
     "şenlik bahçesine geldik. hazırladığımız kartlarla fenerlerin ve davetlerin yerlerini tamamlayalım.": {
       "voice": "tr-TR-EmelNeural",
@@ -654,6 +857,13 @@
       "rate": "+1%",
       "spoken": "Şenliğin yol tabelası burada hazırlanacak. Parçaları birleştirmeye başlayalım."
     },
+    "şimdi aynı kelimeyi aşağıya kendin yaz. bitirince bir büyüğünle birlikte kontrol et.": {
+      "voice": "tr-TR-EmelNeural",
+      "rate": "-5%",
+      "pitch": "-5Hz",
+      "speaker": "lion",
+      "spoken": "Şimdi aynı kelimeyi aşağıya kendin yaz. Bitirince bir büyüğünle birlikte kontrol et."
+    },
     "şimdi paketi mama kabına koy.": {
       "voice": "tr-TR-EmelNeural",
       "rate": "+3%",
@@ -671,7 +881,8 @@
     "words": 80,
     "sentences": 17,
     "stories": 10,
-    "scripted_learning_entries": 77
+    "scripted_learning_entries": 77,
+    "story_watermill_v1_entries": 30
   },
   "phrases": {
     "0": "voice-17fab18009548a628b57.mp3",
@@ -841,12 +1052,14 @@
     "balon": "voice-96c5e56323754871139d.mp3",
     "balık": "voice-f3b025e495a1019c2b0a.mp3",
     "be harfini bul.": "voice-1549654385c620a8db44.mp3",
+    "ben tek başıma çekemedim. her yaprağa dokun. sepetimiz hepsini taşıyabilir.": "story-watermill-v1/s4-leaves.mp3",
     "beş": "voice-b980f2d2418055c47c38.mp3",
     "biber": "voice-c3c97f8b14f854b4a13d.mp3",
     "bir": "voice-c9da47f8254d969512ac.mp3",
     "bir daha bakalım. yukarıdaki işarete dikkat et.": "voice-daec7cf63b3334ed7a44.mp3",
     "bir daha deneyelim.": "voice-f8640826477397f94d08.mp3",
     "bir daha deneyelim. acelemiz yok.": "voice-2141f47f74d8eedd71ea.mp3",
+    "bir damla... bir damla daha... aa! bahçeye su gelmiyor!": "story-watermill-v1/s2-empty.mp3",
     "bir davet kartını daha hazırladın. pırpır onu şenlik çantasına yerleştirdi.": "voice-732856596a47c0431dba.mp3",
     "bir dost seç.": "voice-64001485844ff1393905.mp3",
     "bir etiket daha hazır. alparslan yol işaretini yerine taktı.": "voice-3eaffb3b9217bf73b11b.mp3",
@@ -855,7 +1068,10 @@
     "bir sepetin kartını daha hazırladın. pazarın teslimat köşesi düzenleniyor.": "voice-b623c18312ce5d30f02f.mp3",
     "bir sipariş kartı daha yerine ulaştı. bahçedeki arkadaşımız sana el sallıyor.": "voice-332331dd2e1043336d7d.mp3",
     "bir siparişi hazırlarken kelimenin ne anlattığını da düşünelim.": "voice-8bbc6a93bb23a3770640.mp3",
+    "bir sonraki ada macerasında görüşürüz!": "story-watermill-v1/s6-goodbye.mp3",
     "bir yol işareti daha tamamlandı. alparslan tabelayı şenlik yoluna taşıyor.": "voice-98ffb5b95ba161c7b859.mp3",
+    "birlikte bakalım. la başta, le sonda. birleşince lale oluyor.": "story-watermill-v1/s3-help.mp3",
+    "birlikte düşünelim. su çarkı neden durmuştu?": "story-watermill-v1/s4-cause.mp3",
     "birlikte kontrol edelim.": "voice-d1bcb711a8e20f5d2d24.mp3",
     "birlikte kontrol ettiniz. hazırsan devam edebilirsin.": "voice-6cac7456f3be8627dd71.mp3",
     "birlikte yavaşça ilerleyebiliriz. istersen önce bir ipucuna bakalım.": "voice-7115f4660e353c3bc1f8.mp3",
@@ -864,6 +1080,7 @@
     "bu etiketin parçaları karışmış. birlikte sıraya koyalım.": "voice-6ae49b5922ac2d4300b0.mp3",
     "bu güzel buluşmadan arkadaşımıza bir mesaj gönderelim. bildiğimiz kartlarla haberimizi hazırlayalım.": "voice-11629418ee81bd181613.mp3",
     "bu kelime hangi resmi anlatıyor?": "voice-904a9f0f3aa81cad72cf.mp3",
+    "bu küçücük soğandan bir lale büyüyecek. ona güzel bir yer seçelim.": "story-watermill-v1/s1-promise.mp3",
     "bu sepetin etiketi henüz hazır değil. parçaları sırayla yerleştirelim.": "voice-4191b08feab6965fe93e.mp3",
     "bugün bahçede pazar var! sipariş kartlarını birlikte ayırabilir miyiz?": "voice-8880ae94e5c292e6b87b.mp3",
     "bugünkü mektup yolculuğunu tamamladın. hazırladığın kartlar bahçeye ulaştı. bir sonraki buluşmada bazılarını yeniden hatırlayacağız.": "voice-72f89cae8f59989534cf.mp3",
@@ -923,6 +1140,9 @@
     "er": "voice-ccc156bc6c80c8363879.mp3",
     "et": "voice-96642de11cd5636ff8f0.mp3",
     "etiket bitince onu teslimat çantamda taşıyacağım.": "voice-efbd9c882831d68cec55.mp3",
+    "etiket yerini buldu. şimdi suyu seçtiğimiz bahçeye gönderelim.": "story-watermill-v1/s5-water.mp3",
+    "etiketimiz hazır. şimdi kapağı açıyorum. haydi, yaprakları sepete toplayalım.": "story-watermill-v1/s4-open.mp3",
+    "etiketimiz çantada kaldı. çiçeğimizin adını hatırlıyor musun? harflerini sırayla yerleştir.": "story-watermill-v1/s5-recall.mp3",
     "etti": "voice-638bb7656cef0121b223.mp3",
     "ev": "voice-c6450fd36b4941d45ed6.mp3",
     "f": "voice-f35140448414cac6d295.mp3",
@@ -943,10 +1163,12 @@
     "göz": "voice-a1ea222d6f9b5aff7b9b.mp3",
     "güneş": "voice-41ff38c13c47059f4e56.mp3",
     "güneş doğdu.": "voice-0d9a906997aef6c126b8.mp3",
+    "günler geçti. minik aslan ile pırpır çiçeklerini suladı. bir sabah, küçük bir tomurcuk açıldı.": "story-watermill-v1/s6-days.mp3",
     "güzel, şimdi sıradaki parçayı seç.": "voice-68363117a1a0a1b9796b.mp3",
     "h": "voice-a3ec8873e489edd4fd55.mp3",
     "h harfi": "voice-385bbb06412b606b0083.mp3",
     "h harfini bul.": "voice-8ee81e4e022d0da68bbf.mp3",
+    "harf adasında yeni bir gün başladı. minik aslan ile pırpır, bahçeye bir çiçek soğanı götürüyordu.": "story-watermill-v1/s1-morning.mp3",
     "harika! başardın.": "voice-4cdbf580a387d7b605bc.mp3",
     "harika! doğru cevap.": "voice-ff08a693896cbe02383f.mp3",
     "harika, doğru cevap!": "voice-ff08a693896cbe02383f.mp3",
@@ -956,6 +1178,7 @@
     "hazır olduğunda başlayabilirsin.": "voice-d3e26eaf057d065e430f.mp3",
     "hazırsan devam edebilirsin.": "voice-7978922d6500f6a38ba3.mp3",
     "he harfini bul.": "voice-8ee81e4e022d0da68bbf.mp3",
+    "henüz tamamlanmadı. harflerin sırasına bir daha bakalım.": "story-watermill-v1/s5-recall-retry.mp3",
     "herkesin yolu bulması için davetleri ve işaretleri hazırlayabiliriz.": "voice-4024cb2b1666a8c87316.mp3",
     "i": "voice-5f119e67b0b4564751cc.mp3",
     "i harfi": "voice-56f362e66f01916b2649.mp3",
@@ -972,6 +1195,7 @@
     "ir": "voice-73a0bb2bef000e3b0cad.mp3",
     "it": "voice-3214dd4efea9537aa3f3.mp3",
     "işte bahçe! hazırladığımız kartları doğru yerlere ulaştıralım.": "voice-434912021dca7eb646cb.mp3",
+    "işte bizim lalemiz! bahçemiz için bir kurdele rengi seçelim.": "story-watermill-v1/s6-ribbon.mp3",
     "j": "voice-d1cc1784b74574f6944b.mp3",
     "j harfi": "voice-cd978322964ca60806ab.mp3",
     "j harfini bul.": "voice-4ecf78c8727a116903db.mp3",
@@ -982,6 +1206,7 @@
     "k harfini bul.": "voice-323c6c796459cec880f6.mp3",
     "ka": "voice-08f18708b8b2d1f2ccf3.mp3",
     "kalem": "voice-a1ad2667525592af870e.mp3",
+    "kapağı açmadan önce çiçeğimizin etiketini hazırlayalım. heceleri birlikte okuyalım: la, le. lale.": "story-watermill-v1/s3-label.mp3",
     "kaplan": "voice-8c973a7532896c52c69b.mp3",
     "kapı": "voice-b1ecb8f73a0f9e548ed0.mp3",
     "kar": "voice-697f917547122f4545d4.mp3",
@@ -1021,6 +1246,8 @@
     "kırk sekiz": "voice-39b8056e13c19488b35d.mp3",
     "kırk yedi": "voice-a44d285d8c8cc5b8adee.mp3",
     "kırk üç": "voice-1b41fba9f9cb3935c077.mp3",
+    "kısa bir cümleyi bir büyüğünle birlikte okuyalım: lale al.": "story-watermill-v1/s5-read.mp3",
+    "kıyıdaki izi takip ettim. su, küçük kapağın arkasında birikmiş.": "story-watermill-v1/s3-lion.mp3",
     "l": "voice-199c568539eb82a4e708.mp3",
     "l harfi": "voice-166838936a880dd1bdda.mp3",
     "l harfini bul.": "voice-7be3d9e2b3ba67e22100.mp3",
@@ -1092,6 +1319,7 @@
     "p harfini bul.": "voice-7a767e384834a1f43bc4.mp3",
     "paketi dinle ve bul.": "voice-67c4685fc2996d7f2bbe.mp3",
     "parçalar birleşince yol tabelamız hazır olacak.": "voice-c04a94dd80c0fcfcb0e2.mp3",
+    "parçaların sırası değişmiş. örneğe yeniden bakalım.": "story-watermill-v1/s3-retry.mp3",
     "pazar köprüsünde bir geçiş daha hazır. pırpır sepeti karşı kıyıya taşıyor.": "voice-ee12af3722f168fe9ffc.mp3",
     "pazardaki arkadaşımız bize yardım etti. ona bir teşekkür kartı hazırlayalım mı?": "voice-f058ea6b2ece1e51e5aa.mp3",
     "pazardaki sepetlere etiket gerekiyor. kartların parçalarını birleştirip etiketleri hazırlayalım.": "voice-1ef2c298b3a0e7aec9b5.mp3",
@@ -1110,6 +1338,8 @@
     "ri": "voice-b8e496b14c52a6d4d20c.mp3",
     "ru": "voice-e17555affded389a41e2.mp3",
     "rüzgâr mektubun kartlarını uçurdu! bahçedeki arkadaşımıza nasıl haber vereceğiz?": "voice-6cf37c483687c11a8b00.mp3",
+    "rüzgâr yaprakları kanala taşımıştı. yapraklar suyun yolunu kapattı.": "story-watermill-v1/s4-cause-help.mp3",
+    "rüzgâr çıkınca kanala ne dolmuştu? o anı düşünelim.": "story-watermill-v1/s4-cause-retry.mp3",
     "rüzgâr, bahçenin mektup kartlarını dağıtmış. alparslan ile kartları hazırlayalım, köprüden geçelim ve bahçeye bir cevap götürelim.": "voice-18faf6d0103730099e10.mp3",
     "s": "voice-34ef0f6a96d90773e527.mp3",
     "s harfi": "voice-d339df82bc8da782f868.mp3",
@@ -1141,7 +1371,12 @@
     "sepetler pazar yerine ulaştı. şimdi kartları kullanıp teslimatı tamamlayalım.": "voice-3dfcf23b35a567fddbc7.mp3",
     "si": "voice-0d1e29875d22004a4e10.mp3",
     "sipariş kartlarından birini ayırdın. pırpır onu pazar sepetine koydu.": "voice-a4cf6ae5253955fb0cb1.mp3",
+    "soldaki bahçe mi, sağdaki bahçe mi? hangisini seçersen oraya gideceğiz.": "story-watermill-v1/s1-garden.mp3",
+    "son yaprak da sepete girdi. suyun önü açıldı.": "story-watermill-v1/s4-clear.mp3",
     "su": "voice-0894d0a4ab49f39c0051.mp3",
+    "su yeniden aktı. çark döndü. bahçeye giden küçük kanal dolmaya başladı.": "story-watermill-v1/s5-wheel.mp3",
+    "suyun yolunu birlikte açtık. küçük çiçeğimiz de yerini buldu.": "story-watermill-v1/s6-together.mp3",
+    "suyun yolunu izleyelim. pırpır yukarıdan uçabilir. ben de kıyıdan yürüyebilirim.": "story-watermill-v1/s2-plan.mp3",
     "süt": "voice-ac8707a2c8f0d0cb7c99.mp3",
     "sıfır": "voice-17fab18009548a628b57.mp3",
     "t": "voice-3bad2002d5b4b26ff17a.mp3",
@@ -1149,6 +1384,7 @@
     "t harfini bul.": "voice-1afb5448db971fae446a.mp3",
     "ta": "voice-89a33b1ee1ee76231a1c.mp3",
     "tabelayı görünce arkadaşlarımız hangi yoldan gideceklerini anlayacak.": "voice-ca1d38d1517ebb392ed5.mp3",
+    "tam o sırada rüzgâr çıktı. kuru yapraklar su kanalına doldu. çark yavaşladı ve durdu.": "story-watermill-v1/s2-wind.mp3",
     "tane": "voice-7f42f2a06da94042744c.mp3",
     "tavuk": "voice-6a76117faba4e6f07c09.mp3",
     "te": "voice-3bad2002d5b4b26ff17a.mp3",
@@ -1203,6 +1439,7 @@
     "yirmi yedi": "voice-f1b21dc864b9a648de11.mp3",
     "yirmi üç": "voice-569777f95fdd9a5a52e9.mp3",
     "yukarıdaki işaretin aynısını bul.": "voice-01c857377678be4987e5.mp3",
+    "yukarıdan bakınca gördüm! yapraklar küçük kapağın arkasında birikmiş.": "story-watermill-v1/s3-bird.mp3",
     "yumurta": "voice-d21dad7b259a185c1e55.mp3",
     "yumuşak ge harfini bul.": "voice-15e0a315d95f6e76a9ac.mp3",
     "yüz": "voice-9fa14bc3f560f36c9496.mp3",
@@ -1221,6 +1458,7 @@
     "çilek": "voice-5c1749e2a715bbea83f5.mp3",
     "çizgiyi tamamladın! hazır olunca devam et.": "voice-44b3a02b5c0fa4838a21.mp3",
     "çiçek": "voice-5c562ad4456198920755.mp3",
+    "çiçeğimizin adı lale. la ve le hecelerinden oluşuyor. şimdi birlikte kurabiliriz.": "story-watermill-v1/s5-recall-help.mp3",
     "çorap": "voice-9cef8bc46d1e17553ed3.mp3",
     "çıkartman seni bekliyor.": "voice-564220ac81849d15a89e.mp3",
     "ö": "voice-1238755a1c1eb009ed15.mp3",
@@ -1228,6 +1466,8 @@
     "ö harfini bul.": "voice-547b101e8a2b08f1810a.mp3",
     "önce siparişin sesini dinleyelim. doğru kartı sonra bulabiliriz.": "voice-3e27af24d603098a0ee0.mp3",
     "ördek": "voice-559f0e0e1f138e3f4033.mp3",
+    "örneğe bakabilirsin. önce la, sonra le. iki parçayı ahşap etikete yerleştir.": "story-watermill-v1/s3-guided.mp3",
+    "örneğimiz lale. harflere bakıp yazabilirsin. bu kez yardım alarak çalışıyoruz.": "story-watermill-v1/s5-write-help.mp3",
     "ü": "voice-8f69766dc9b978e166d2.mp3",
     "ü harfi": "voice-0c46cb1181286e2bd0a6.mp3",
     "ü harfini bul.": "voice-07523c674a830a6746d5.mp3",
@@ -1251,6 +1491,7 @@
     "şenlikten bir haber gönderelim. arkadaşımız hazırlıkları merak ediyor.": "voice-dd504cab9a1875d2d73f.mp3",
     "şenliğin davet kartları hazır ve fenerler yerlerini buldu. alparslan ile pırpır bu yolculukta sana eşlik etti. sonraki buluşmada bazı kartları yeniden hatırlayacağız.": "voice-acfd049b7657ed7a2d96.mp3",
     "şenliğin yol tabelası burada hazırlanacak. parçaları birleştirmeye başlayalım.": "voice-e1cbcc424340e6352211.mp3",
+    "şimdi aynı kelimeyi aşağıya kendin yaz. bitirince bir büyüğünle birlikte kontrol et.": "story-watermill-v1/s5-write.mp3",
     "şimdi paketi mama kabına koy.": "voice-594f297e69eb3435fd22.mp3",
     "şimdi sıra sende.": "voice-154a823584623179d70e.mp3"
   },

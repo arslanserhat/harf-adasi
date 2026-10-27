@@ -3,6 +3,7 @@ import { mountWritingGuard, releaseWritingGuard } from './writing.js';
 import {
   ALPHABET, SKILLS, normalizeLearningState, parseWordList, splitSyllables,
   getEligibleWords, getTeacherContent, planSession, recordAttempt, summarizeLearning,
+  learningTaskKey,
 } from './learning-model.js';
 import { parseTeacherLetters, parseTeacherSyllables } from './teacher-content.js';
 import { renderStoryScene, mountStoryScene, getStoryBeat, STORY_TITLE } from './story-scene.js';
@@ -250,6 +251,12 @@ export function createLearning({
     if (!taskUi || taskUi.result.correct) return;
     saveDraft({ hints: taskUi.result.hints + 1, independent: false });
   }
+  function saveTaskUi() {
+    if (!taskUi) return;
+    saveDraft({ ui: { taskKey: learningTaskKey(taskUi.task),
+      selected: taskUi.selected.map(({ id, text }) => ({ id, text })),
+      model: taskUi.model, audioPlayed: taskUi.audioPlayed } });
+  }
   function finishTask({ writingReviewed = false } = {}) {
     if (!taskUi || taskUi.result.correct) return;
     const state = snapshot();
@@ -338,6 +345,7 @@ export function createLearning({
     }
     const button = root.querySelector('[data-learning="show-model"]');
     if (button) button.textContent = taskUi?.model ? 'Örneği kapat' : 'Örneği göster';
+    saveTaskUi();
   }
   function instructions(task) {
     if (task.word.length === 1 && task.kind === 'write') return 'Daha önce çalıştığın harfi dinle ve yaz. Bir büyüğünle birlikte kontrol et.';
@@ -362,7 +370,7 @@ export function createLearning({
       html += `<div class="learn-whole-word" id="learningModel" ${taskUi.model ? '' : 'hidden'}>${escape(task.kind === 'sentence' ? task.target : task.word)}</div>`;
     }
     if (task.kind === 'write') {
-      html += `<div class="learn-notebook pad"><span class="pad-label">SENİN YAZI ALANIN</span><svg id="learningPad" viewBox="0 0 640 300" role="img" aria-label="${escape(task.word)} serbest yazma alanı"><path class="guide" d="M20 75H620M20 145H620M20 280H620"/><path class="baseline" d="M20 220H620"/><g id="learningInk"></g></svg></div>
+      html += `<div class="learn-notebook pad"><span class="pad-label">SENİN YAZI ALANIN</span><svg id="learningPad" viewBox="0 0 640 300" role="img" aria-label="Serbest yazma alanı"><path class="guide" d="M20 75H620M20 145H620M20 280H620"/><path class="baseline" d="M20 220H620"/><g id="learningInk"></g></svg></div>
         <div class="learn-writing-controls">${control('clear', 'Yeniden yaz', '', 'quiet')}${control('review', 'Yazdım, birlikte bakalım', '', 'primary')}</div>
         <p class="learn-writing-note">El yazısı otomatik tanınmaz. Yazını bir büyüğünle birlikte kontrol et.</p>
         <div id="learningReview" class="learn-review" hidden><strong>Birlikte kontrol edelim</strong><p>Yazılan kelime ${escape(task.word)} mi? Harflerini ve sırasını birlikte inceleyin.</p>${control('approve', 'Birlikte kontrol ettik', '', 'primary')}${control('retry-writing', 'Yeniden deneyeceğiz', '', 'quiet')}</div>`;
@@ -389,20 +397,21 @@ export function createLearning({
     const tokens = task.tokens?.length ? task.tokens : task.kind === 'sentence' ? task.target.split(/\s+/) : task.kind === 'syllables' ? task.parts : [...task.word];
     const letterChoice = task.kind === 'build' && task.word.length === 1;
     const bankTokens = letterChoice && task.options?.length ? task.options : tokens;
+    const savedUi = result.ui;
     taskUi = {
-      task, result, model: initialModel, selected: [], expectedTokens: [...tokens], letterChoice,
+      task, result, model: savedUi ? savedUi.model : initialModel, selected: savedUi?.selected.map(tile => ({ ...tile })) || [], expectedTokens: [...tokens], letterChoice,
       bank: shuffle((bankTokens || []).map((text, id) => ({ id, text }))),
-      inkLength: 0, audioPlayed: false,
+      inkLength: 0, audioPlayed: savedUi?.audioPlayed || false,
     };
     const trivialChoice = task.kind === 'listen' && task.options.length < 2;
-    if ((initialModel || trivialChoice) && !result.correct && !result.modelOpened) {
+    if ((taskUi.model || trivialChoice) && !result.correct && !result.modelOpened) {
       saveDraft({ hints: result.hints + 1, independent: false, modelOpened: true });
       state = snapshot();
     }
     const controls = `<div class="learn-scene-task"><div class="learn-mission-title"><span>${escape(TITLES[task.kind] || 'Birlikte keşfedelim')}</span><small>${escape(instructions(task))}</small></div>${taskBody(task, state)}<div id="learningFeedback" class="learn-feedback" role="status" aria-live="polite">${result.correct ? 'Bu adım kaydedildi. Hazır olduğunda devam et.' : 'Hazır olduğunda başlayabilirsin.'}</div><div class="learn-next-row">${control('next', state.session.index + 1 === state.session.tasks.length ? 'Mektubu gönder →' : 'Yola devam →', `id="learningNext" ${result.correct ? '' : 'disabled'}`, 'primary')}</div></div>`;
     root.innerHTML = `<section id="learning" class="learning learning-task${task.kind === 'write' ? ' learning-writing lesson' : ' learn-world-frame'}" data-screen="task" data-kind="${escape(task.kind)}" data-word="${escape(task.word)}" data-task-id="${escape(task.id)}">
       ${nav(taskTools())}
-      <div class="learn-task-header"><span class="learn-eyebrow">${task.kind === 'recall' ? 'Hatırlama postası' : 'Alparslan ile ada macerası'}</span><h1>${escape(TITLES[task.kind] || 'Birlikte keşfedelim')}</h1><p>${escape(['listen', 'recall'].includes(task.kind) ? (task.reason || instructions(task)).replace(/\p{L}+/gu, token => token.toLocaleLowerCase('tr-TR') === task.word ? 'bu kelime' : token) : task.reason || instructions(task))}</p></div>
+      <div class="learn-task-header"><span class="learn-eyebrow">${task.kind === 'recall' ? 'Hatırlama postası' : 'Alparslan ile ada macerası'}</span><h1>${escape(TITLES[task.kind] || 'Birlikte keşfedelim')}</h1><p>${escape(['listen', 'recall', 'write'].includes(task.kind) ? (task.reason || instructions(task)).replace(/\p{L}+/gu, token => token.toLocaleLowerCase('tr-TR') === task.word ? 'bu kelime' : token) : task.reason || instructions(task))}</p></div>
       <div class="learn-session-track" aria-label="${state.session.index + 1}. görev, toplam ${state.session.tasks.length}">${state.session.tasks.map((_, index) => `<span class="${index < state.session.index ? 'past' : index === state.session.index ? 'current' : ''}"></span>`).join('')}<small>${state.session.index + 1} / ${state.session.tasks.length}</small></div>
       ${task.kind === 'write' ? `<div class="learn-workspace exercise">${controls}</div>` : sceneMarkup(result.correct ? 'success' : 'task', state.session, controls)}
       ${task.kind === 'build' || task.kind === 'write' ? `<div class="learn-letter-help">${control('letter-help', 'Bir harfi birlikte çalışalım', '', 'quiet')}</div>` : ''}
@@ -410,6 +419,7 @@ export function createLearning({
     noteTaskExposure(task, state);
     if (!['listen', 'meaning', 'write'].includes(task.kind)) {
       if (result.correct) {
+        taskUi.selected = [];
         for (const token of tokens) {
           const tile = taskUi.bank.find(item => item.text === token && !taskUi.selected.some(used => used.id === item.id));
           if (tile) taskUi.selected.push(tile);
@@ -474,6 +484,7 @@ export function createLearning({
     const down = event => {
       if (!taskUi || taskUi.result.correct || pointerId !== null || (event.pointerType === 'mouse' && event.button !== 0)) return;
       event.preventDefault();
+      if (taskUi.result.reviewExposed && taskUi.result.independent !== false) countHint();
       pointerId = event.pointerId; last = null; coordinates = [];
       path = document.createElementNS(namespace, 'path'); path.setAttribute('class', 'learn-ink'); ink.appendChild(path);
       try { svg.setPointerCapture(pointerId); } catch { /* Touch fallback is guarded too. */ }
@@ -519,6 +530,7 @@ export function createLearning({
     root.querySelector('[data-learning="listen"]')?.setAttribute('aria-busy', 'true');
     if (current.task.kind === 'listen') {
       current.audioPlayed = false;
+      saveTaskUi();
       root.querySelectorAll('[data-learning="choice"]').forEach(button => { button.disabled = true; });
       feedback('Siparişi dinleyelim. Ardından kartını seçebilirsin.');
     }
@@ -530,7 +542,7 @@ export function createLearning({
     if (success !== true) {
       countHint();
       feedback('Bu kelimenin Türkçe sesi bu cihazda çalınamadı. Bir büyüğün kelimeyi okuyabilir; örneği de açabilirsin.', 'help');
-    } else { current.audioPlayed = true; feedback('Dinledin. Hazır olduğunda kartını seçebilirsin.'); }
+    } else { current.audioPlayed = true; saveTaskUi(); feedback('Dinledin. Hazır olduğunda kartını seçebilirsin.'); }
   }
   async function next() {
     const state = snapshot();
@@ -746,6 +758,7 @@ export function createLearning({
       speechEpoch++; stopSpeech();
       root.querySelector('[data-learning="listen"]')?.setAttribute('aria-busy', 'false');
       countHint(); taskUi.model = true; showModel(); taskUi.audioPlayed = true;
+      saveTaskUi();
       root.querySelectorAll('[data-learning="choice"]').forEach(item => { item.disabled = false; });
       feedback('Bir büyüğün kelimeyi okuyabilir. Birlikte okuduktan sonra kartını seç. Bu deneme destekli kaydedilecek.', 'help');
     }
@@ -768,20 +781,23 @@ export function createLearning({
       if (tile.text !== expected) { wrong(); observeLetter(taskUi.selected.length, expected, false); return; }
       const origin = button.getBoundingClientRect();
       observeLetter(taskUi.selected.length, expected, true);
-      taskUi.selected.push(tile); renderTokens();
+      taskUi.selected.push(tile); saveTaskUi(); renderTokens();
       flyPiece(origin, root.querySelectorAll('.learn-slot')[taskUi.selected.length - 1], tile.text);
       if (taskUi.selected.length === taskUi.expectedTokens.length) finishTask();
       else feedback('Parçanı yerleştirdin. Sıradaki parçayı seçebilirsin.');
     } else if ((action === 'undo' || action === 'restart') && taskUi && !taskUi.result.correct) {
       if (action === 'undo') taskUi.selected.pop(); else { taskUi.selected = []; taskUi.bank = shuffle(taskUi.bank); }
+      saveTaskUi();
       renderTokens(); feedback('Hazır olduğunda yeniden deneyebilirsin.');
     } else if (action === 'clear' && taskUi && !taskUi.result.correct) {
+      if (taskUi.result.reviewExposed && taskUi.result.independent !== false) countHint();
       const ink = root.querySelector('#learningInk'); if (ink) ink.innerHTML = ''; taskUi.inkLength = 0;
       saveDraft({ inkPaths: [] });
       const review = root.querySelector('#learningReview'); if (review) review.hidden = true;
       feedback('Yazı alanın hazır.');
     } else if (action === 'review' && taskUi && !taskUi.result.correct) {
       if (taskUi.inkLength < 15) { feedback('Önce yazı alanına yazmayı dene.', 'help'); return; }
+      saveDraft({ reviewExposed: true });
       const review = root.querySelector('#learningReview'); review.hidden = false; review.querySelector('button')?.focus();
     } else if (action === 'approve' && taskUi && !taskUi.result.correct && taskUi.inkLength >= 15 && !root.querySelector('#learningReview')?.hidden) {
       root.querySelector('#learningReview').hidden = true; finishTask({ writingReviewed: true });

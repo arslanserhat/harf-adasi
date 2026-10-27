@@ -1,3 +1,24 @@
+## 27 Ekim 2026 — sürüm 5.6.0
+
+- 215/215 JS ve gerçek DOM kontrolü geçti. Film modeli, gerçek denetleyici,
+  sahne iptali/mola/azaltılmış hareket, eski sesin geç bitmesi, odak dönüşü,
+  tekrar olay üretmeme ve reset kapsamda.
+- Yerel PHP 8.4.21, yeni SQLite :memory: ile 33/33 test ve 310 assertion geçti.
+  Üretim ortamı veya veri kopyası kullanılmadı. Yeni migration yoktur.
+- Statik ve Laravel üretim derlemeleri geçti; 30/30 yeni MP3 ve manifest eşleşmesi
+  doğrulandı. Önceden mevcut ses dosyaları değişmedi.
+- Gerçek yerel tarayıcıda altı sahneli öğrenme turu tamamlandı: sağ bahçe/aslan
+  yolu/mercan kurdele; gerçek kalem hareketi, kontrol sonrası silme, boş alanın
+  mola dönüşü, yetişkin onayı, kısa cümle ve bitiş. Yenilemede ad ve seçili ilk l
+  geri geldi. Ayarlar dönüşünde yarım la korunup le ile tamamlandı.
+- 390×844 ve 844×390 ekran ölçümlerinde yatay taşma yok; sahne oranı ~1.776.
+  Bunlar fiziksel dokunmatik cihaz testi değildir. Ses klipleri teknik olarak
+  doğrulandı; uzman tarafından duyularak onaylanmış fonem kaydı iddiası yoktur.
+- Öğretmen içeriği kapalıyken izleme/olay üretmeme sınırı gerçek DOM testinde
+  doğrulandı. Tüm eski macera kombinasyonları her cihazda elle oynanmadı.
+
+Aşağıdaki kayıtlar önceki sürümlerin tarihsel doğrulamasıdır.
+
 # 5.5.1 — profil açılışı, sakin görev alanları ve doğru devam
 
 27 Ekim 2026, kullanıcı bilgisayarındaki Windows ortamı. **176/176** mevcut

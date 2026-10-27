@@ -313,6 +313,87 @@ class LearningStateTest extends TestCase
         $this->getJson('/api/learning')->assertJsonPath('revision', 1);
     }
 
+    public function test_partial_assembly_ui_and_review_exposure_round_trip_without_awarding_success(): void
+    {
+        $state = $this->partialAssemblySnapshot();
+        $this->saveState($state)->assertCreated();
+        $this->getJson('/api/learning')->assertOk()
+            ->assertJsonPath('state.session.results.assembly-task.ui', $state['session']['results']['assembly-task']['ui'])
+            ->assertJsonPath('state.session.results.assembly-task.reviewExposed', false)
+            ->assertJsonPath('state.session.results.assembly-task.correct', false)
+            ->assertJsonPath('state.session.index', 0)
+            ->assertJsonPath('state.events', []);
+
+        $state['session']['tasks'][0]['kind'] = 'write';
+        $state['session']['tasks'][0]['skill'] = 'write';
+        $result = &$state['session']['results']['assembly-task'];
+        $result['ui']['taskKey'] = '["assembly-task","nane","write","write","nane",["n","a","n","e"],[],["na","ne"],1]';
+        $result['ui']['selected'] = [];
+        $result['reviewExposed'] = true;
+        $this->saveState($state, 1)->assertOk();
+        $this->getJson('/api/learning')->assertJsonPath('state.session.results.assembly-task.reviewExposed', true)
+            ->assertJsonPath('state.session.results.assembly-task.correct', false);
+    }
+
+    public function test_resume_ui_rejects_mismatched_tasks_invalid_tiles_and_unbounded_or_extra_fields(): void
+    {
+        $state = $this->partialAssemblySnapshot();
+        $validUi = $state['session']['results']['assembly-task']['ui'];
+        $invalidUis = [
+            [...$validUi, 'taskKey' => str_replace('assembly-task', 'other-task', $validUi['taskKey'])],
+            [...$validUi, 'taskKey' => str_replace('nane', 'anne', $validUi['taskKey'])],
+            [...$validUi, 'taskKey' => 'not JSON'],
+            [...$validUi, 'taskKey' => str_repeat('x', 8001)],
+            [...$validUi, 'selected' => [['id' => 0, 'text' => 'n'], ['id' => 0, 'text' => 'n']]],
+            [...$validUi, 'selected' => [['id' => 1, 'text' => 'a']]],
+            [...$validUi, 'selected' => [['id' => 99, 'text' => 'n']]],
+            [...$validUi, 'selected' => [['id' => '0', 'text' => 'n']]],
+            [...$validUi, 'selected' => [['id' => 0, 'text' => '<script>']]],
+            [...$validUi, 'selected' => [['id' => 0, 'text' => 'n', 'correct' => true]]],
+            [...$validUi, 'selected' => [
+                ['id' => 0, 'text' => 'n'], ['id' => 1, 'text' => 'a'], ['id' => 2, 'text' => 'n'], ['id' => 3, 'text' => 'e'],
+            ]],
+            [...$validUi, 'selected' => array_fill(0, 41, ['id' => 0, 'text' => 'n'])],
+            [...$validUi, 'model' => 'true'],
+            [...$validUi, 'audioPlayed' => 1],
+            [...$validUi, 'independent' => true],
+            'unexpected',
+        ];
+        foreach ($invalidUis as $ui) {
+            $state['session']['results']['assembly-task']['ui'] = $ui;
+            $this->saveState($state)->assertUnprocessable()->assertJsonValidationErrors('state.session.results');
+        }
+        $state['session']['results']['assembly-task']['ui'] = $validUi;
+        $state['session']['results']['assembly-task']['reviewExposed'] = 'true';
+        $this->saveState($state)->assertUnprocessable()->assertJsonValidationErrors('state.session.results');
+        $this->assertDatabaseCount('learning_states', 0);
+    }
+
+    private function partialAssemblySnapshot(): array
+    {
+        $state = $this->snapshot();
+        $state['session'] = [
+            'id' => 'assembly-session', 'createdAt' => 1792960000000, 'wordTexts' => ['nane'],
+            'tasks' => [[
+                'id' => 'assembly-task', 'word' => 'nane', 'skill' => 'build', 'kind' => 'build',
+                'target' => 'nane', 'tokens' => ['n', 'a', 'n', 'e'], 'options' => [],
+                'support' => 1, 'reason' => 'Harfleri sırala.', 'parts' => ['na', 'ne'],
+                'meaning' => '', 'sentence' => '', 'emoji' => '',
+            ]],
+            'index' => 0, 'paused' => true, 'storySeen' => true,
+            'results' => ['assembly-task' => [
+                'correct' => false, 'mistakes' => 0, 'hints' => 1, 'writingReviewed' => false,
+                'independent' => false, 'modelOpened' => true, 'reviewExposed' => false,
+                'ui' => [
+                    'taskKey' => '["assembly-task","nane","build","build","nane",["n","a","n","e"],[],["na","ne"],1]',
+                    'selected' => [['id' => 0, 'text' => 'n'], ['id' => 1, 'text' => 'a']],
+                    'model' => true, 'audioPlayed' => false,
+                ],
+            ]],
+        ];
+        return $state;
+    }
+
     public function test_invalid_syllables_duplicate_words_and_html_are_rejected(): void
     {
         $state = $this->snapshot();

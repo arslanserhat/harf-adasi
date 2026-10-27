@@ -164,6 +164,41 @@ test('session progress, intro, adult review draft and bounded writing are resuma
   assert.deepEqual(restored.session.results[id].inkPaths, ['M10 20 L30 40', 'M0 0 L640 300']);
 });
 
+test('task UI restores only validated partial tile identities for the exact task input', async () => {
+  const { createLearningState, planSession, normalizeLearningState } = await api;
+  const state = createLearningState(NOW);
+  state.session = planSession(state, LETTERS, NOW, { entryKind: 'build', focusText: 'nane' });
+  const task = state.session.tasks[0];
+  // This key is intentionally a hand-written task fixture, not the production
+  // key builder: changed inputs and forged tiles must invalidate saved UI.
+  const taskKey = JSON.stringify([task.id, 'nane', 'build', 'build', 'nane', ['n', 'a', 'n', 'e'], [], ['na', 'ne'], 2]);
+  const ui = { taskKey, selected: [{ id: 0, text: 'n' }, { id: 1, text: 'a' }], model: true, audioPlayed: false };
+  state.session.results[task.id] = { correct: false, hints: 1, independent: false, ui };
+  let restored = normalizeLearningState(JSON.parse(JSON.stringify(state)), NOW);
+  assert.deepEqual(restored.session.results[task.id].ui, ui);
+  assert.deepEqual(normalizeLearningState(restored, NOW), restored, 'UI normalization is idempotent');
+  assert.equal(restored.events.length, 0, 'restoration never awards task completion');
+  assert.equal(restored.session.results[task.id].correct, false);
+  for (const invalid of [
+    { ...ui, taskKey: taskKey.replace('nane', 'anne') },
+    { ...ui, selected: [{ id: 0, text: '<script>' }] },
+    { ...ui, selected: [{ id: 0, text: 'n' }, { id: 0, text: 'n' }] },
+    { ...ui, selected: [{ id: 1, text: 'a' }] },
+    { ...ui, selected: [{ id: 90, text: 'n' }] },
+    { ...ui, selected: [{ id: '0', text: 'n' }] },
+    { ...ui, selected: [{ id: 0, text: 'n' }, { id: 1, text: 'a' }, { id: 2, text: 'n' }, { id: 3, text: 'e' }] },
+  ]) {
+    state.session.results[task.id].ui = invalid;
+    restored = normalizeLearningState(state, NOW);
+    assert.equal(restored.session.results[task.id].ui, undefined, 'mismatched, invalid or uncompleted full selections are discarded');
+    assert.equal(restored.events.length, 0);
+    assert.equal(restored.session.results[task.id].correct, false);
+  }
+  state.session.results[task.id].ui = ui;
+  state.session.tasks[0].tokens = ['na', 'ne'];
+  assert.equal(normalizeLearningState(state, NOW).session.results[task.id].ui, undefined, 'changed teacher task input invalidates stale UI');
+});
+
 test('merging a retry deduplicates events and preserves local list edits and session', async () => {
   const { createLearningState, recordAttempt, planSession, mergeLearningStates } = await api;
   let remote = recordAttempt(createLearningState(NOW), attempt(), NOW);

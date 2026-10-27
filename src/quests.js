@@ -152,6 +152,8 @@ export function createQuests({
   function destroy() {
     if (current && !current.completed) persist();
     stopStage();
+    const pause = root.querySelector('.quest-pause');
+    if (pause?.open) pause.close();
     viewportCleanup?.();
     document.body.classList.remove('quest-playing');
     if (bound) root.removeEventListener('click', click);
@@ -257,8 +259,10 @@ export function createQuests({
       return `<div class="quest-scene-objects" role="group" aria-label="Sahnedeki nesneler">${ui.optionOrder.map(index => task.options[index]).filter(Boolean).map((option, index) => {
         const image = option.image || option.emoji;
         const text = option.text || '';
+        // Older saved picture choices have no separate text alternative.
+        const label = option.accessibleLabel || (image && (!text || text === 'Resimli paket') ? option.value : text) || 'Sahnedeki nesne';
         const disabled = ui.correct || requiresAudio(task) && !ui.audioPlayed;
-        return button('choice', `${image ? `<span class="quest-object-art" aria-hidden="true">${illustration(image)}</span>` : ''}<span class="quest-object-label">${esc(text)}</span>`, `data-value="${esc(option.value)}" style="--object-index:${index}" ${disabled ? 'disabled' : ''} aria-label="${esc(text || 'Sahnedeki nesne')}"`, `quest-scene-object quest-scene-object-${task.mechanic}${ui.correct && option.value === task.target ? ' is-correct' : ''}`);
+        return button('choice', `${image ? `<span class="quest-object-art" aria-hidden="true">${illustration(image)}</span>` : ''}<span class="quest-object-label">${esc(text)}</span>`, `data-value="${esc(option.value)}" style="--object-index:${index}" ${disabled ? 'disabled' : ''} aria-label="${esc(label)}"`, `quest-scene-object quest-scene-object-${task.mechanic}${ui.correct && option.value === task.target ? ' is-correct' : ''}`);
       }).join('')}</div>`;
     }
     if (task.mechanic === 'collect') {
@@ -304,7 +308,8 @@ export function createQuests({
     if (!current) return;
     stopStage();
     if (!current.plan.available || !current.plan.stages?.length) {
-      root.innerHTML = `<section id="quest" class="quest-app" data-screen="unavailable" data-kind="${esc(current.plan.kind)}">${nav()}<div class="quest-unavailable"><h1>${esc(current.plan.title)}</h1><p>${esc(current.plan.reason || 'Bu dünya için öğretmenin kelimelerini birlikte hazırlayalım.')}</p>${button('parent', 'Öğretmenimin listesini düzenle', '', 'quest-primary')}${button('home', 'Adama dön', '', 'quest-hint')}</div></section>`;
+      root.innerHTML = `<section id="quest" class="quest-app" data-screen="unavailable" data-kind="${esc(current.plan.kind)}">${nav()}<div class="quest-unavailable"><h1>${esc(current.plan.title)}</h1><p>${esc(current.plan.reason || 'Bu dünya için öğretmenin kelimelerini birlikte hazırlayalım.')}</p>${button('parent', 'Öğretmenimin listesini düzenle', '', 'quest-primary')}${button('home', 'Adama dön', '', 'quest-hint')}</div>${current.paused ? pauseMarkup() : ''}</section>`;
+      if (current.paused) mountPause();
       return;
     }
     if (current.completed) { renderSummary(); return; }
@@ -317,6 +322,7 @@ export function createQuests({
       feedback: ui.feedback, tone: ui.tone, paused: current.paused, objectsMarkup: objectButtons(task) };
     root.innerHTML = `<section id="quest" class="quest-app${task.mechanic === 'write' ? ' quest-writing' : ''}" data-screen="task" data-kind="${esc(current.plan.kind)}" data-mechanic="${esc(task.mechanic)}" data-stage-id="${esc(task.id)}">${nav()}<header class="quest-header"><span>${esc(current.plan.title)}</span><h1>${esc(current.plan.goal)}</h1></header><div class="quest-track" aria-label="${current.index + 1}. görev, toplam ${current.plan.stages.length}">${current.plan.stages.map((_, index) => `<span class="${index < current.index ? 'past' : index === current.index ? 'current' : ''}"></span>`).join('')}</div>${createQuestScene(current.plan, task, progress, controls(task))}${current.paused ? pauseMarkup() : ''}</section>`;
     if (task.mechanic === 'write') mountNotebook();
+    if (current.paused) mountPause();
   }
   function mountNotebook() {
     const svg = root.querySelector('#questPad'), ink = root.querySelector('#questInk');
@@ -364,7 +370,28 @@ export function createQuests({
     };
   }
   function pauseMarkup() {
-    return `<div class="quest-pause" role="dialog" aria-modal="true" aria-labelledby="questPauseTitle"><div><h2 id="questPauseTitle">Küçük bir mola</h2><p>Dünyan ve hazırladıkların burada bekliyor.</p>${button('resume', 'Maceraya dön', '', 'quest-primary')}${button('home', 'Adama dön', '', 'quest-hint')}</div></div>`;
+    return `<dialog class="quest-pause" role="dialog" aria-modal="true" aria-labelledby="questPauseTitle" aria-describedby="questPauseDescription"><div><h2 id="questPauseTitle">Küçük bir mola</h2><p id="questPauseDescription">Dünyan ve hazırladıkların burada bekliyor.</p>${button('resume', 'Maceraya dön', '', 'quest-primary')}${button('home', 'Adama dön', '', 'quest-hint')}</div></dialog>`;
+  }
+  function resume() {
+    if (!current?.paused) return;
+    current.paused = false;
+    render();
+    root.querySelector('[data-quest="pause"]')?.focus({ preventScroll: true });
+  }
+  function mountPause() {
+    const dialog = root.querySelector('.quest-pause');
+    if (!dialog) return;
+    dialog.addEventListener('cancel', event => { event.preventDefault(); resume(); });
+    dialog.addEventListener('keydown', event => {
+      if (event.key === 'Escape') { event.preventDefault(); resume(); return; }
+      if (event.key !== 'Tab') return;
+      const controls = [...dialog.querySelectorAll('button:not(:disabled)')];
+      const first = controls[0], last = controls.at(-1);
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    });
+    dialog.showModal();
+    dialog.querySelector('[data-quest="resume"]')?.focus({ preventScroll: true });
   }
   function next() {
     if (!current?.ui.correct || current.paused) return;
@@ -392,18 +419,20 @@ export function createQuests({
   function renderSummary() {
     const next = QUEST_KINDS.find(item => item.id === nextKind());
     const currentMeta = metadata();
-    root.innerHTML = `<section id="quest" class="quest-app" data-screen="summary" data-kind="${esc(current.plan.kind)}">${nav()}<div class="quest-summary"><span class="quest-summary-seal" aria-hidden="true">✓</span><span class="quest-eyebrow">Adada bir iz bıraktın</span><h1>${esc(current.plan.title)} tamamlandı!</h1><p>${esc(currentMeta.ending || 'Altı görev boyunca hazırladığın parçalar bu dünyada bir araya geldi.')}</p><div class="quest-summary-result"><b>6</b><span>görev tamamlandı</span><span>${(current.plan.focusTexts || current.plan.wordTexts || []).map(esc).join(' · ')}</span></div><p>${current.plan.kind === 'numbers' ? 'Çiçekleri saydın, sepetleri düzelttin. Şimdi başka bir dünya seni bekliyor.' : 'Bu kelimeler başka görevlerde yeniden karşına çıkacak. Bugünkü başarı, sonraki günlerde hatırlama çalışmasıyla pekişecek.'}</p><div class="quest-summary-actions">${button('next-world', `${esc(next?.title || 'Sonraki dünya')} →`, '', 'quest-primary')}${button('home', 'Adama dön', '', 'quest-hint')}${button('parent', 'Birlikte gelişimimize bakalım', '', 'quest-hint')}</div></div></section>`;
+    root.innerHTML = `<section id="quest" class="quest-app" data-screen="summary" data-kind="${esc(current.plan.kind)}">${nav()}<div class="quest-summary"><span class="quest-summary-seal" aria-hidden="true">✓</span><span class="quest-eyebrow">Adada bir iz bıraktın</span><h1>${esc(current.plan.title)} tamamlandı!</h1><p>${esc(currentMeta.ending || 'Altı görev boyunca hazırladığın parçalar bu dünyada bir araya geldi.')}</p><div class="quest-summary-result"><b>6</b><span>görev tamamlandı</span><span>${(current.plan.focusTexts || current.plan.wordTexts || []).map(esc).join(' · ')}</span></div><p>${current.plan.kind === 'numbers' ? 'Çiçekleri saydın, sepetleri düzelttin. Şimdi başka bir dünya seni bekliyor.' : 'Bu kelimeler başka görevlerde yeniden karşına çıkacak. Bugünkü başarı, sonraki günlerde hatırlama çalışmasıyla pekişecek.'}</p><div class="quest-summary-actions">${button('next-world', `${esc(next?.title || 'Sonraki dünya')} →`, '', 'quest-primary')}${button('home', 'Adama dön', '', 'quest-hint')}${button('parent', 'Birlikte gelişimimize bakalım', '', 'quest-hint')}</div></div>${current.paused ? pauseMarkup() : ''}</section>`;
+    if (current.paused) mountPause();
   }
   function click(event) {
     const control = event.target.closest('[data-quest]');
     if (!control || control.disabled || !root.contains(control) || !current) return;
     const action = control.dataset.quest;
+    if (current.paused && !control.closest('.quest-pause')) return;
     if (!['choice', 'tile', 'collect', 'check-count', 'approve', 'hint'].includes(action)) playEffect('tap');
     if (action === 'home') { destroy(); onHome(); return; }
     if (action === 'parent') { destroy(); onParent(); return; }
     if (action === 'sound') { onToggleSound(); render(); return; }
     if (action === 'pause') { current.paused = true; stopSpeech(); render(); return; }
-    if (action === 'resume') { current.paused = false; render(); return; }
+    if (action === 'resume') { resume(); return; }
     if (action === 'next-world' && current.completed) { start(nextKind(), { fresh: true }); return; }
     if (current.completed || current.paused) return;
     const task = stage(), ui = current.ui;
@@ -437,6 +466,9 @@ export function createQuests({
     } else if (action === 'check-count') {
       if (ui.quantity === Number(task.target)) finish(); else wrong();
     } else if (action === 'clear') {
+      // Finish the old surface before clearing its saved state; its cleanup
+      // captures live strokes and must not copy them back during render.
+      stopStage();
       ui.inkPaths = []; ui.inkLength = 0; ui.reviewOpen = false;
       persist(); render();
     } else if (action === 'review') {

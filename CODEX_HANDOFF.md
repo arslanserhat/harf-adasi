@@ -1,5 +1,34 @@
 # Harf Adası — güncel devir notu
 
+## 27 Ekim 2026 — 5.6.0, özgün etkileşimli çizgi film
+
+Yeni bölüm **Minik Aslan ve Suskun Değirmen** ana sayfadaki film kartından açılır.
+Altı sahne, 30 sabit Türkçe ses kaydı, eklemli SVG karakterler ve ayrı çark/kapak/
+yaprak/etiket/lale nesneleri vardır. Bahçe, araştırma yolu ve kurdele seçimi saklanır.
+
+Öğrenme modu için aktif öğretmen listesinde lale ve seçili harflerde l/a/e gerekir;
+uygun değilse açıkça izleme modu sunulur. Film bitişi öğrenme olayı değildir.
+Gerçek hece (yardımlı), hatırlama ve yetişkin kontrollü yazma kontrol noktaları
+mevcut öğrenme kaydına kararlı kimliklerle eklenir. Yeni film kaydı yerel
+harf-adasi-story-film-v1 anahtarındadır; yeni sunucu veritabanı veya migration yoktur.
+
+Quest yazı silme, gerçek mola ve resimli seçeneklerin erişilebilir adları düzeltildi.
+Uyarlanan görevde UI/örnek/ses durumları ve kontrol sonrası yeniden yazma yardımı
+korunur; PHP StoreLearningStateRequest bu opsiyonel alanları doğrular. JS ve PHP
+birlikte yayınlanmalıdır. Eski version=1 kayıtları kabul edilir.
+
+Doğrulama: 215 JavaScript/gerçek DOM testi; 33 PHP testi/310 assertion; statik ve
+Laravel build başarılı. Yerel gerçek tarayıcıda film altı sahne boyunca tamamlandı;
+yenilemede ad ve yarım kelime, ayarlar/mola dönüşü, gerçek çizim/silme/yetişkin
+onayı, gizli cevap ve final seçimleri kontrol edildi. 390×844 ile 844×390 görünüm
+ölçümlerinde yatay taşma olmadı, sahne oranı korundu. Bu fiziksel iPad/Safari veya
+çocuklarla öğrenme etkililiği doğrulaması değildir.
+
+Uzman onaylı fonem kaydı ve açık öğretmen heceleri için ayrı gecikmeli hatırlama
+raporu halen geliştirme gerektirir. Harf adı fonem değildir; tamamlama ustalık
+kanıtı değildir. Son yayın/HTTPS kontrolü ayrıca kaydedilmelidir.
+
+
 ## 27 Ekim 2026 — 5.5.1, ilk profil ve serbest çalışma devamı
 
 Teknik sürüm **5.5.1**; çocuk ekranında sürüm etiketi yoktur. Ana Laravel

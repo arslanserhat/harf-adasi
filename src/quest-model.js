@@ -48,7 +48,8 @@ function choices(values, target) {
   for (const source of values) {
     const option = typeof source === 'string' ? { value: source, text: source } : source;
     if (!option || typeof option.value !== 'string' || seen.has(option.value)) continue;
-    result.push({ value: option.value, text: String(option.text ?? ''), ...(option.image ? { image: String(option.image) } : {}) });
+    result.push({ value: option.value, text: String(option.text ?? ''), ...(option.image ? { image: String(option.image) } : {}),
+      ...(option.accessibleLabel ? { accessibleLabel: String(option.accessibleLabel) } : {}) });
     seen.add(option.value);
   }
   const correct = result.find(option => option.value === target);
@@ -77,7 +78,8 @@ function semanticPool(words) {
 }
 function meaningChoices(word, pool) {
   return choices([word, ...pool].map(entry => ({ value: entry.text,
-    text: entry.meaning || 'Resimli paket', ...(entry.emoji ? { image: entry.emoji } : {}) })), word.text);
+    text: entry.meaning || 'Resimli paket', accessibleLabel: entry.meaning || entry.text,
+    ...(entry.emoji ? { image: entry.emoji } : {}) })), word.text);
 }
 
 function reviewReady(state, value, domain, selection, now, runs) {

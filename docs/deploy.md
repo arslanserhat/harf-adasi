@@ -4,7 +4,24 @@ Bu kurulum yalnızca Harf Adası içindir. Ayrı Compose proje adı, ayrı `harf
 
 ## Erişim durumu
 
-Önceki bulut ortamındaki SSH kısıtı kullanıcının mevcut bilgisayarında geçerli değildir. Bu bilgisayardan ayrı Harf Adası Laravel yayını yapılmış ve canlı etkileşimli tur doğrulanmıştır. Sunucuya özgü adres, port, sertifika yenilemesi ve yedekleme ayrıntıları özel operasyon notlarında tutulur. Dockerfile ve betiklerin bulunması tek başına yeni bir yayın kanıtı değildir; aşağıdaki canlı doğrulamalar her güncellemede tekrarlanır. Sunucuya ait özel erişim bilgileri depoda tutulmaz.
+**27 Ekim 2026 güncel ortam:** Bu görev şu anda yönetilen Linux `/workspace`
+executor'ında çalışıyor; kullanıcının bilgisayarındaki eski başarılı SSH
+oturumu buraya bağlı değildir. `94.138.209.208:22` hedefli SSH denemesi,
+tanımlı `proxy:8088` TCP aracısında Connection refused / errno 111 ile hedefe
+ulaşmadan durdu (çıkış 255). Mevcut araçlarda bağlı yerel SSH/VNC veya TCP
+erişim yapılandırmasını değiştirme yolu bulunmuyor. Bu, VPS'nin portunun
+kapalı olduğunu göstermez; yeni şifre/anahtar istemek de ağ engelini çözmez.
+Son uygulama `5054953` Pages'te doğrulandı; VPS'de bu sürüm doğrulanmadı.
+Alan adı/SSL durumu ve somut DNS yanıtları `CODEX_HANDOFF.md` ve `docs/QA.md`
+başındadır. Sunucu ayarları değiştirilmedi.
+
+**Tarihsel kayıt:** Önceki bir kullanıcı bilgisayarı oturumundan ayrı Harf
+Adası Laravel yayını yapılmış ve canlı etkileşimli tur doğrulanmıştı. Sunucuya
+özgü adres, port, sertifika yenilemesi ve yedekleme ayrıntıları özel operasyon
+notlarında tutulur. Bu eski oturum ve özel notlar güncel executor'da erişilebilir
+varsayılmaz. Dockerfile ve betiklerin bulunması tek başına yeni bir yayın
+kanıtı değildir; aşağıdaki canlı doğrulamalar her güncellemede tekrarlanır.
+Sunucuya ait özel erişim bilgileri depoda tutulmaz.
 
 ## Gereksinimler ve ilk kurulum
 

@@ -28,8 +28,9 @@ Ortak havuz testleri 29 harfin, altı bağımsız hecenin, sekiz kelimenin ve
 11 sayının birden fazla planda kapsanmasını; cümle/hazır etkinlik çeşitliliğini,
 havuz bitiminde yeni döngüyü, tek/boş havuzu, Türkçe karakterleri, ekleme/silmeyi
 ve yenilemeden devamı doğrular. Zorlanılan/vadesi gelen bir hedefe ayrılan
-tekrar diğer hedefleri dışlamaz. Öğrenilmemiş harf seviyesine uygun olmayan
-öğeler gösterilmez. Sekiz kelime, test verisidir; kelime listesi kapasitesi
+tekrar diğer hedefleri dışlamaz. Otomatik görev hedefleri işlenen harf
+seviyesiyle sınırlandırılır; manuel standart kütüphane ayrıca korunur.
+Sekiz kelime, test verisidir; kelime listesi kapasitesi
 100'dür. Bağımsız öğretmen harf/hece listeleri kelime listesi olmadan işler.
 
 Tarayıcı testleri gerçek düzenleyiciden veri girer ve gerçek dokunma/çizim

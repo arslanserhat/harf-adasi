@@ -54,9 +54,12 @@ gerçek iOS tarayıcı arayüzü ve insan ses dinleme kontrolü yapılmadı.
 **VPS / alan adı / SSL ayrı ve tamamlanmadı.** İstenen hedefler
 `harfadasi.com.tr` ve `www.harfadasi.com.tr`, VPS `94.138.209.208`.
 Kullanıcının çalışan `https://94.138.209.208:8446/` yayınına dokunulmadı.
-Mevcut SSH kimliği olmasına rağmen çalışma ortamının tanımlı TCP proxy'si
-bağlantıyı reddediyor; SSH hedef sunucuya ulaşmadan çıkış 255 veriyor. Bu,
-VPS'nin SSH portu bozuk demek değildir. Bu oturumda TCP erişim ayarı yazma
+Mevcut SSH kimliği olmasına rağmen şu anki yönetilen Linux `/workspace`
+executor'ının tanımlı TCP proxy'si `proxy:8088`, errno 111 / Connection refused
+veriyor; `94.138.209.208:22` hedefli SSH, sunucuya ulaşmadan çıkış 255 veriyor.
+Bu, VPS'nin SSH portu bozuk demek değildir. Eski kayıttaki başarılı kullanıcı
+bilgisayarı oturumu bu executor'a bağlı değil; mevcut araçlarda o yerel SSH/VNC
+oturumunu kontrol etme yolu yok. Bu oturumda TCP erişim ayarı yazma
 aracı yoktur. Son Google/Cloudflare DNS sorgularında (08:11 UTC) iki A kaydı
 ve alan adı NS sorgusu NXDOMAIN döndü; İHS tescil/NS etkinliği ve yayılımı
 doğrulanmalı. Mevcut IP HTTPS kontrolünde proxy aracılı TLS adı uyuşmazlığı

@@ -1,5 +1,18 @@
 # Harf Adası — güncel devir notu
 
+## 27 Ekim 2026 — 5.6.1, görünüm uyumu
+
+Film giriş kartı ana sayfanın diğer kartlarıyla aynı yüzeyi kullanır: üstte
+21px (küçük ekranda 15–17px) boşluk, 1px kenarlık, 20/18px köşe, küçük görsel
+ve yumuşak gölge. Tüm kart tek düğmedir; içindeki Filmi aç metni ayrı bir
+etkileşim değildir. Film birincil düğmeleri sitenin mercan rengine bağlandı;
+kapak, sahne ve mola çerçeveleri inceltildi. Oyun ve kayıt akışları korunur.
+
+24 film modeli/gerçek DOM/sahne kontrolü ile iki üretim derlemesi geçti.
+Gerçek tarayıcıda masaüstü, 320/390/768px düzen ölçümleri; kartın açılması,
+47.5px ana düğme ve native mola kontrolü doğrulandı. Fiziksel cihaz iddiası yoktur.
+
+
 ## 27 Ekim 2026 — 5.6.0, özgün etkileşimli çizgi film
 
 Yeni bölüm **Minik Aslan ve Suskun Değirmen** ana sayfadaki film kartından açılır.

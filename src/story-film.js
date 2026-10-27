@@ -12,7 +12,7 @@ const basePath = () => typeof document !== 'undefined' && document.querySelector
 
 export function renderStoryFilmCard({ assetBase = basePath() } = {}) {
   const base = String(assetBase || '/').replace(/\/?$/, '/');
-  return `<button type="button" class="story-film-card" data-do="story-film"><span class="story-film-card-picture"><img src="${esc(base)}art/story-watermill-v1.png" alt="" loading="lazy"><span class="story-film-card-play" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="m12 7 14 9-14 9Z"/></svg></span></span><span class="story-film-card-copy"><span class="story-film-card-kicker">Birlikte oynayacağımız bir film</span><strong>${FILM_TITLE}</strong><span>Rüzgâr çıktı, çark sustu. Minik Aslan ve Pırpır’la suyun izini sür.</span><span class="story-film-card-cta">Macera başlasın</span></span></button>`;
+  return `<button type="button" class="story-film-card" data-do="story-film"><span class="story-film-card-picture"><img src="${esc(base)}art/story-watermill-v1.png" alt="" loading="lazy"><span class="story-film-card-play" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="m12 7 14 9-14 9Z"/></svg></span></span><span class="story-film-card-copy"><span class="story-film-card-kicker">Birlikte oynayacağımız bir film</span><strong>${FILM_TITLE}</strong><span>Rüzgâr çıktı, çark sustu. Minik Aslan ve Pırpır’la suyun izini sür.</span></span><span class="story-film-card-cta">Filmi aç<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span></button>`;
 }
 
 export function createStoryFilm({ root, getLetters = () => [], getLearningState = () => ({}), speak = async () => false,
